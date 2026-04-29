@@ -53,10 +53,10 @@ const Index = () => {
           <HeroStats stats={dash?.heroStats} />
         </div>
         <ContributionGraph stats={dash?.heroStats} />
-        <div className="rounded-[2.5rem] border border-slate-200 dark:border-white/10 bg-white dark:bg-[#161618] p-6 md:px-8 md:py-7 backdrop-blur-none dark:backdrop-blur-3xl shadow-lg dark:shadow-[0_20px_50px_rgba(0,0,0,0.5),inset_0_1px_1px_rgba(255,255,255,0.1)] ring-0 dark:ring-1 dark:ring-white/5 relative overflow-hidden premium-border space-y-6 mt-4 card-hover group/platform">
+        <div className="rounded-[2.5rem] border border-slate-200 dark:border-white/10 bg-white dark:bg-[#161618] px-6 pt-3 pb-6 md:px-8 md:pt-4 md:pb-7 backdrop-blur-none dark:backdrop-blur-3xl shadow-lg dark:shadow-[0_20px_50px_rgba(0,0,0,0.5),inset_0_1px_1px_rgba(255,255,255,0.1)] ring-0 dark:ring-1 dark:ring-white/5 relative overflow-hidden premium-border space-y-6 mt-4 card-hover group/platform">
           <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-transparent opacity-50 pointer-events-none group-hover/platform:opacity-70 transition-opacity" />
           
-          <div className="relative z-10 flex items-center gap-4 mb-6">
+          <div className="relative z-10 flex items-center gap-4 mb-4">
             <div className="p-3 rounded-2xl bg-primary/10 border border-primary/20 shadow-inner">
               <Activity className="h-6 w-6 text-primary" />
             </div>

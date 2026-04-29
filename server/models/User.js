@@ -16,4 +16,5 @@ const userSchema = new mongoose.Schema({
   friends: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }]
 }, { timestamps: true });
 
-export default mongoose.model("User", userSchema);
+const User = mongoose.model("User", userSchema, "users");
+export default User;

@@ -14,8 +14,8 @@ export type FriendUser = {
 };
 
 export async function fetchFriends() {
-  const res = await api.get("/friends");
-  let data = res.data.friends as FriendUser[];
+  const res = await api.get("/users/friends");
+  let data = res.data as FriendUser[];
   
   data = data.map((u) => {
     const pop = populateUserData(u);
@@ -28,7 +28,7 @@ export async function fetchFriends() {
 }
 
 export async function searchUsers(query: string) {
-  const res = await api.get(`/users/search?q=${encodeURIComponent(query)}`);
+  const res = await api.get(`/users/search?query=${encodeURIComponent(query)}`);
   let data = res.data as FriendUser[];
   
   data = data.map((u) => {
@@ -40,7 +40,7 @@ export async function searchUsers(query: string) {
 }
 
 export async function addFriend(friendId: string) {
-  const res = await api.post("/friends/add", { friendId });
+  const res = await api.post("/users/add-friend", { friendId });
   return res.data;
 }
 

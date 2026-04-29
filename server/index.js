@@ -163,19 +163,90 @@ app.get("/api/user/profile", auth, async (req, res) => {
 });
 
 
-// 🔥 SEARCH USERS (FIXED + IMPORTANT)
+// 🔥 SEARCH USERS
 app.get("/api/users/search", auth, async (req, res) => {
   try {
     const query = req.query.query || "";
-
     const users = await User.find({
       username: { $regex: query, $options: "i" },
       _id: { $ne: req.user.userId }
-    }).select("username email profileImage");
-
+    }).select("username email profileImage platformStats problemsSolved streak");
     res.json(users);
   } catch (err) {
-    console.error("Search Error:", err);
+    res.status(500).json({ message: err.message });
+  }
+});
+
+// 🔥 LEADERBOARD
+app.get("/api/users/leaderboard", async (req, res) => {
+  try {
+    console.log("Leaderboard: Fetching all users...");
+    const users = await User.find({}); // Find all users
+    
+    console.log(`Leaderboard: Found ${users.length} users in database.`);
+    
+    // Sort manually if needed, but for now just send them all
+    const sortedUsers = users.sort((a, b) => (b.problemsSolved || 0) - (a.problemsSolved || 0));
+    
+    res.json(sortedUsers);
+  } catch (err) {
+    console.error("Leaderboard Error:", err);
+    res.status(500).json({ message: err.message });
+  }
+});
+
+// 🔥 ADD FRIEND
+app.post("/api/users/add-friend", auth, async (req, res) => {
+  try {
+    const { friendId } = req.body;
+    console.log(`Add Friend Request: ${req.user.userId} adding ${friendId}`);
+    
+    const user = await User.findById(req.user.userId);
+    if (!user) {
+      console.error("User not found during add-friend");
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    // Initialize friends array if it doesn't exist
+    if (!user.friends) user.friends = [];
+
+    // Compare using string conversion to avoid ObjectId vs String issues
+    const isAlreadyFriend = user.friends.some(f => f.toString() === friendId);
+
+    if (!isAlreadyFriend) {
+      user.friends.push(friendId);
+      await user.save();
+      console.log("Friend added successfully");
+      res.json({ message: "Friend added successfully" });
+    } else {
+      console.log("Already friends");
+      res.status(400).json({ message: "Already friends" });
+    }
+  } catch (err) {
+    console.error("Add Friend Error:", err);
+    res.status(500).json({ message: err.message });
+  }
+});
+
+// 🔥 GET FRIENDS
+app.get("/api/users/friends", auth, async (req, res) => {
+  try {
+    const user = await User.findById(req.user.userId).populate("friends", "username email profileImage problemsSolved streak platformStats");
+    res.json(user.friends);
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+});
+
+// 🔥 GET USER STATS BY USERNAME
+app.get("/api/user-stats/:username", async (req, res) => {
+  try {
+    const user = await User.findOne({ username: req.params.username }).select("username problemsSolved streak platformStats profileImage");
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+    res.json(user);
+  } catch (err) {
     res.status(500).json({ message: err.message });
   }
 });

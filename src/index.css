@@ -96,11 +96,12 @@
   }
   
   body {
-    @apply bg-background text-foreground antialiased;
+    @apply bg-background text-foreground antialiased overflow-x-hidden w-full;
     background-color: var(--bg);
     color: var(--text);
     font-family: 'Inter', sans-serif;
     font-weight: 450;
+    -webkit-tap-highlight-color: transparent;
   }
   h1, h2, h3, h4, h5, h6 {
     font-family: var(--font-heading);
@@ -189,6 +190,14 @@
     background: linear-gradient(90deg, transparent, rgba(255,255,255,0.05), transparent);
     background-size: 200% 100%;
     animation: shimmer 2s infinite linear;
+  }
+
+  /* Prevent hover effects on touch devices to avoid "stuck" states */
+  @media (hover: none) {
+    .card-hover:hover {
+      transform: none !important;
+      @apply shadow-lg;
+    }
   }
 }
 

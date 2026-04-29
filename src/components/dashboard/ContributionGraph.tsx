@@ -22,10 +22,10 @@ export function ContributionGraph({ stats: externalStats }: { stats?: any }) {
   };
 
   return (
-    <div className="rounded-[2.5rem] border border-slate-200 dark:border-white/10 bg-white dark:bg-[#161618] p-6 md:px-8 md:py-7 backdrop-blur-none dark:backdrop-blur-3xl shadow-lg dark:shadow-[0_20px_50px_rgba(0,0,0,0.5),inset_0_1px_1px_rgba(255,255,255,0.1)] ring-0 dark:ring-1 dark:ring-white/5 premium-border relative overflow-hidden group/contributions mt-6 card-hover">
+    <div className="rounded-[2.5rem] border border-slate-200 dark:border-white/10 bg-white dark:bg-[#161618] px-6 pt-3 pb-6 md:px-8 md:pt-4 md:pb-7 backdrop-blur-none dark:backdrop-blur-3xl shadow-lg dark:shadow-[0_20px_50px_rgba(0,0,0,0.5),inset_0_1px_1px_rgba(255,255,255,0.1)] ring-0 dark:ring-1 dark:ring-white/5 premium-border relative overflow-hidden group/contributions mt-6 card-hover">
       
       {/* Top Header */}
-      <div className="relative z-10 flex items-center justify-between mb-8 px-2">
+      <div className="relative z-10 flex items-center justify-between mb-6 px-2">
         <div className="flex flex-col gap-1.5">
           <div className="flex items-center gap-2">
             <div className="h-2 w-2 rounded-full bg-primary shadow-[0_0_8px_hsla(var(--primary),0.5)] animate-pulse" />

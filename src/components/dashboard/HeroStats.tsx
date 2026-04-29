@@ -119,13 +119,13 @@ export function HeroStats({ stats: externalStats }: { stats?: HeroStatsData }) {
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
-      className="rounded-[2.5rem] border border-slate-200 dark:border-white/10 bg-white dark:bg-[#161618] p-6 md:px-8 md:py-7 backdrop-blur-none dark:backdrop-blur-3xl shadow-lg dark:shadow-[0_20px_50px_rgba(0,0,0,0.5),inset_0_1px_1px_rgba(255,255,255,0.1)] ring-0 dark:ring-1 dark:ring-white/5 relative overflow-hidden premium-border space-y-8 card-hover"
+      className="rounded-[2.5rem] border border-slate-200 dark:border-white/10 bg-white dark:bg-[#161618] px-6 pt-3 pb-6 md:px-8 md:pt-4 md:pb-7 backdrop-blur-none dark:backdrop-blur-3xl shadow-lg dark:shadow-[0_20px_50px_rgba(0,0,0,0.5),inset_0_1px_1px_rgba(255,255,255,0.1)] ring-0 dark:ring-1 dark:ring-white/5 relative overflow-hidden premium-border space-y-8 card-hover"
     >
       {/* Background Glow */}
       <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-transparent opacity-50 dark:opacity-50 pointer-events-none" />
 
       {/* Upper Section: Performance Overview */}
-      <div className="relative z-10 flex items-center gap-4 mb-8">
+      <div className="relative z-10 flex items-center gap-4 mb-6">
         <div className="p-3 rounded-2xl bg-primary/10 border border-primary/20 shadow-inner">
           <Activity className="h-6 w-6 text-primary" />
         </div>
@@ -221,7 +221,7 @@ export function HeroStats({ stats: externalStats }: { stats?: HeroStatsData }) {
         {currentBadges.length > 0 ? (
           <div className="flex flex-col gap-6">
             {/* 3 Badges Centered */}
-            <div className="flex items-center justify-center gap-4 md:gap-8 relative z-10 py-2">
+            <div className="flex items-center justify-center gap-2 sm:gap-4 md:gap-8 relative z-10 py-2">
               {currentBadges.slice(0, 3).map((badge: Badge, i: number) => {
                 let Icon = Award;
                 let colorClass = "text-primary";
@@ -247,8 +247,8 @@ export function HeroStats({ stats: externalStats }: { stats?: HeroStatsData }) {
 
                 // Middle badge is slightly larger
                 const isCenter = i === 1;
-                const sizeClass = isCenter ? "w-36 h-40" : "w-32 h-36";
-                const iconSize = isCenter ? "h-16 w-16" : "h-14 w-14";
+                const sizeClass = isCenter ? "w-28 h-32 sm:w-36 sm:h-40" : "w-24 h-28 sm:w-32 sm:h-36";
+                const iconSize = isCenter ? "h-12 w-12 sm:h-16 sm:w-16" : "h-10 w-10 sm:h-14 sm:w-14";
 
                 return (
                   <motion.div 

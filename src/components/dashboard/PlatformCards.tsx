@@ -33,12 +33,12 @@ function PlatformCard({
       initial={{ opacity: 0, y: 24 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay, duration: 0.5 }}
-      className={`group relative rounded-3xl border border-slate-200 dark:border-transparent bg-white dark:bg-[#1A1A1E] dark:bg-gradient-to-br dark:${gradientColor} p-6 backdrop-blur-none dark:backdrop-blur-md overflow-hidden card-hover`}
+      className={`group relative rounded-3xl border border-slate-200 dark:border-transparent bg-white dark:bg-[#1A1A1E] dark:bg-gradient-to-br dark:${gradientColor} px-6 pt-3 pb-6 backdrop-blur-none dark:backdrop-blur-md overflow-hidden card-hover`}
     >
       <div className="absolute inset-0 bg-gradient-to-br from-foreground/[0.03] to-transparent pointer-events-none" />
       
       <div className="relative">
-        <div className="flex items-center justify-between mb-8">
+        <div className="flex items-center justify-between mb-6">
           <div className="flex items-center gap-3">
             <div className={`h-10 w-10 rounded-xl bg-[#F8FAFC] dark:bg-slate-900/50 border border-[#E2E8F0] dark:border-transparent flex items-center justify-center shadow-sm`}>
               <Icon className={`h-5 w-5 ${colorClass}`} />

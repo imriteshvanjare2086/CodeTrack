@@ -150,21 +150,21 @@ export function Navbar() {
       <div className="flex items-center gap-2">
         <button 
           onClick={toggleTheme}
-          className="relative rounded-xl p-2 text-muted-foreground hover:text-foreground hover:bg-muted/40 transition-all duration-200"
+          className="relative rounded-xl p-2.5 sm:p-2 text-muted-foreground hover:text-foreground hover:bg-muted/40 transition-all duration-200"
         >
           {!mounted ? (
-            <div className="h-4 w-4" />
+            <div className="h-4 w-4 sm:h-4 sm:w-4" />
           ) : (
-            darkMode ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />
+            darkMode ? <Sun className="h-4 w-4 sm:h-4 sm:w-4" /> : <Moon className="h-4 w-4 sm:h-4 sm:w-4" />
           )}
         </button>
         <div className="relative">
           <button 
             onClick={() => { setShowNotifications(!showNotifications); setShowDropdown(false); }}
-            className="relative rounded-xl p-2 text-muted-foreground hover:text-foreground hover:bg-muted/40 transition-all duration-200"
+            className="relative rounded-xl p-2.5 sm:p-2 text-muted-foreground hover:text-foreground hover:bg-muted/40 transition-all duration-200"
           >
-            <Bell className="h-4 w-4" />
-            <span className="absolute top-1.5 right-1.5 h-2 w-2 rounded-full bg-primary animate-pulse" />
+            <Bell className="h-4 w-4 sm:h-4 sm:w-4" />
+            <span className="absolute top-2 right-2 h-2 w-2 rounded-full bg-primary animate-pulse" />
           </button>
           {showNotifications && (
             <div className="absolute right-0 mt-2 w-64 rounded-xl border border-border/60 bg-card/90 backdrop-blur-xl shadow-lg p-3 z-50">
@@ -182,7 +182,7 @@ export function Navbar() {
           <div 
             id="tour-profile"
             onClick={() => { setShowDropdown(!showDropdown); setShowNotifications(false); }}
-            className="h-8 w-8 rounded-xl bg-gradient-to-br from-primary/30 to-primary/10 border border-primary/20 flex items-center justify-center text-xs font-bold text-primary font-mono cursor-pointer hover:bg-primary/20 transition-all overflow-hidden"
+            className="h-9 w-9 sm:h-8 sm:w-8 rounded-xl bg-gradient-to-br from-primary/30 to-primary/10 border border-primary/20 flex items-center justify-center text-xs font-bold text-primary font-mono cursor-pointer hover:bg-primary/20 transition-all overflow-hidden"
           >
             {profilePhoto ? (
               <img src={profilePhoto} alt="User" className="h-full w-full object-cover" />

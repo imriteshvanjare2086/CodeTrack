@@ -48,20 +48,32 @@ export function populateUserData(u: any) {
 }
 
 export async function getLeaderboard() {
-  const res = await api.get("/leaderboard");
+  const res = await api.get("/users/leaderboard");
   let data = res.data as UserProfile[];
   
   // Inject consistent dummy data based on names
   data = data.map((u) => populateUserData(u) as UserProfile);
 
-  // Sort organically
-  data.sort((a, b) => b.problemsSolved - a.problemsSolved);
-
   return data;
 }
 
 export async function fetchUserProfile(userId: string) {
-  const res = await api.get(`/users/${userId}`);
+  const res = await api.get(`/user/profile`); // Simplified for now
   return res.data as UserProfile;
+}
+
+export async function searchUsers(query: string) {
+  const res = await api.get(`/users/search?query=${query}`);
+  return res.data.map(populateUserData) as UserProfile[];
+}
+
+export async function addFriend(friendId: string) {
+  const res = await api.post("/users/add-friend", { friendId });
+  return res.data;
+}
+
+export async function fetchFriends() {
+  const res = await api.get("/users/friends");
+  return res.data.map(populateUserData) as UserProfile[];
 }
 

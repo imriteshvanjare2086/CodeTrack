@@ -56,7 +56,7 @@ export default function Friends() {
   const { data: searchResults, isFetching: isSearching } = useQuery({
     queryKey: ["users-search", search],
     queryFn: () => searchUsers(search),
-    enabled: search.length >= 2,
+    enabled: search.length >= 1,
     staleTime: 500,
   });
 
@@ -350,20 +350,20 @@ function UserCard({
           
           <div className="min-w-0 flex-1">
             <Link to={`/dashboard/${user._id}`} className="block group/link">
-              <h4 className="truncate font-heading text-base font-black text-foreground group-hover:text-primary transition-colors tracking-tight">
+              <h4 className="truncate font-heading text-sm sm:text-base font-black text-foreground group-hover:text-primary transition-colors tracking-tight">
                 {user.username}
               </h4>
             </Link>
-            <p className="truncate font-mono text-[10px] text-muted-foreground/60 uppercase tracking-tighter font-black">{user.email}</p>
+            <p className="truncate font-mono text-[9px] sm:text-[10px] text-muted-foreground/60 uppercase tracking-tighter font-black">{user.email}</p>
           </div>
 
           {!isFriend && (
             <button
               onClick={onAdd}
               disabled={isAdding}
-              className="h-11 w-11 shrink-0 rounded-2xl bg-primary/10 border border-primary/20 flex items-center justify-center text-primary hover:bg-primary hover:text-white transition-all duration-300 shadow-lg shadow-primary/10 hover:shadow-primary/30 active:scale-90"
+              className="h-10 w-10 sm:h-11 sm:w-11 shrink-0 rounded-2xl bg-primary/10 border border-primary/20 flex items-center justify-center text-primary hover:bg-primary hover:text-white transition-all duration-300 shadow-lg shadow-primary/10 hover:shadow-primary/30 active:scale-90"
             >
-              {isAdding ? <Loader2 className="h-5 w-5 animate-spin" /> : <UserPlus className="h-5 w-5" />}
+              {isAdding ? <Loader2 className="h-4 w-4 sm:h-5 sm:w-5 animate-spin" /> : <UserPlus className="h-4 w-4 sm:h-5 sm:w-5" />}
             </button>
           )}
           {isFriend && (

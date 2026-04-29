@@ -114,7 +114,7 @@ export default function BattleArena() {
     const p2Wins = val2 > val1;
 
     return (
-      <div className="flex flex-col justify-center items-center p-5 rounded-2xl bg-slate-50 dark:bg-white/5 border border-slate-100 dark:border-white/10 relative overflow-hidden transition-transform hover:scale-[1.02]">
+      <div className="flex flex-col justify-center items-center p-3 sm:p-5 rounded-2xl bg-slate-50 dark:bg-white/5 border border-slate-100 dark:border-white/10 relative overflow-hidden transition-transform hover:scale-[1.02]">
         <div className="text-center font-heading font-semibold text-xs text-slate-500 dark:text-slate-400 uppercase tracking-widest mb-4">
           {label}
         </div>
@@ -132,7 +132,7 @@ export default function BattleArena() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 dark:bg-[#0A0A0B] text-slate-900 dark:text-white p-8 overflow-x-hidden w-full max-w-full relative">
+    <div className="min-h-screen bg-slate-50 dark:bg-[#0A0A0B] text-slate-900 dark:text-white p-4 sm:p-8 overflow-x-hidden w-full max-w-full relative">
       {/* Background decorations */}
       <div className="absolute top-1/4 left-0 w-96 h-96 bg-yellow-500/10 rounded-full blur-[120px] pointer-events-none" />
       <div className="absolute bottom-1/4 right-0 w-96 h-96 bg-blue-500/10 rounded-full blur-[120px] pointer-events-none" />
@@ -140,12 +140,12 @@ export default function BattleArena() {
       {/* Exit Button */}
       <button
         onClick={() => navigate('/')}
-        className="absolute top-6 left-6 z-50 flex items-center gap-2 text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white transition-colors group"
+        className="absolute top-4 left-4 sm:top-6 sm:left-6 z-50 flex items-center gap-2 text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white transition-colors group"
       >
-        <div className="p-2 rounded-full bg-white dark:bg-white/5 border border-slate-200 dark:border-white/10 shadow-sm dark:shadow-none group-hover:bg-slate-50 dark:group-hover:bg-white/10 transition-colors">
-          <ArrowLeft className="w-5 h-5" />
+        <div className="p-1.5 sm:p-2 rounded-full bg-white dark:bg-white/5 border border-slate-200 dark:border-white/10 shadow-sm dark:shadow-none group-hover:bg-slate-50 dark:group-hover:bg-white/10 transition-colors">
+          <ArrowLeft className="w-4 h-4 sm:w-5 sm:h-5" />
         </div>
-        <span className="font-mono text-sm uppercase tracking-widest font-bold">Exit Arena</span>
+        <span className="font-mono text-[10px] sm:text-sm uppercase tracking-widest font-bold">Exit Arena</span>
       </button>
 
       <div className="max-w-5xl mx-auto relative z-10 pt-10">
@@ -162,7 +162,7 @@ export default function BattleArena() {
             initial={{ y: 20, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
             transition={{ delay: 0.1 }}
-            className="text-5xl md:text-6xl font-black font-heading tracking-tighter mb-4"
+            className="text-3xl sm:text-5xl md:text-6xl font-black font-heading tracking-tighter mb-4 px-2"
           >
             Code Battle <span className="text-transparent bg-clip-text bg-gradient-to-r from-orange-400 to-red-500">Arena</span>
           </motion.h1>
@@ -308,13 +308,13 @@ export default function BattleArena() {
               </div>
 
               {/* Comparison Table */}
-              <div className="bg-white dark:bg-[#1A1A1E] border border-slate-200 dark:border-white/10 rounded-3xl p-8 shadow-xl dark:shadow-[0_20px_50px_rgba(0,0,0,0.5),inset_0_1px_1px_rgba(255,255,255,0.1)] relative overflow-hidden">
+              <div className="bg-white dark:bg-[#1A1A1E] border border-slate-200 dark:border-white/10 rounded-3xl px-8 pt-3 pb-8 shadow-xl dark:shadow-[0_20px_50px_rgba(0,0,0,0.5),inset_0_1px_1px_rgba(255,255,255,0.1)] relative overflow-hidden">
                 <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full max-w-md h-px bg-gradient-to-r from-transparent via-slate-300 dark:via-white/30 to-transparent" />
 
-                <div className="flex justify-between items-center mb-8 px-4">
-                  <div className="text-center font-heading font-black text-2xl text-orange-500 dark:text-orange-400 drop-shadow-[0_0_10px_rgba(249,115,22,0.5)]">{stats1.username}</div>
-                  <div className="text-center font-mono text-xs text-slate-500 uppercase tracking-widest font-bold flex items-center justify-center bg-slate-100 dark:bg-white/10 px-3 py-1 rounded-full">VS</div>
-                  <div className="text-center font-heading font-black text-2xl text-blue-500 dark:text-blue-400 drop-shadow-[0_0_10px_rgba(59,130,246,0.5)]">{stats2.username}</div>
+                <div className="flex flex-col sm:flex-row justify-between items-center gap-4 mb-6 px-2 sm:px-4">
+                  <div className="text-center font-heading font-black text-xl sm:text-2xl text-orange-500 dark:text-orange-400 drop-shadow-[0_0_10px_rgba(249,115,22,0.5)]">{stats1.username}</div>
+                  <div className="text-center font-mono text-[10px] text-slate-500 uppercase tracking-widest font-bold flex items-center justify-center bg-slate-100 dark:bg-white/10 px-3 py-1 rounded-full">VS</div>
+                  <div className="text-center font-heading font-black text-xl sm:text-2xl text-blue-500 dark:text-blue-400 drop-shadow-[0_0_10px_rgba(59,130,246,0.5)]">{stats2.username}</div>
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">

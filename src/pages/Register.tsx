@@ -33,10 +33,10 @@ export default function Register() {
   }
 
   return (
-    <div className="min-h-screen bg-[#050505] text-gray-100 flex items-center justify-center p-6">
+    <div className="min-h-screen bg-[#050505] text-gray-100 flex items-center justify-center p-4 sm:p-6">
       <form
         onSubmit={onSubmit}
-        className="w-full max-w-md rounded-2xl border border-white/10 bg-[#0a0a0a] shadow-2xl p-8 space-y-5"
+        className="w-full max-w-md rounded-2xl border border-white/10 bg-[#0a0a0a] shadow-2xl p-6 sm:p-8 space-y-5"
       >
         <div>
           <h1 className="text-2xl font-heading font-bold text-white tracking-tight">Create Account</h1>
