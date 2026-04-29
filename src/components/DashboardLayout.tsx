@@ -44,9 +44,9 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
               animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
               exit={{ opacity: 0, y: -10, filter: "blur(4px)" }}
               transition={{ duration: 0.4, ease: [0.23, 1, 0.32, 1] }}
-              className="min-h-0 flex-1 overflow-auto p-3 sm:p-4 md:p-6 pb-24 md:pb-6"
+              className="min-h-0 flex-1 overflow-auto p-2 sm:p-4 md:p-6 pb-24 md:pb-6"
             >
-              <div className="max-w-7xl mx-auto">
+              <div className="w-full max-w-7xl mx-auto px-1 sm:px-0">
                 {children}
               </div>
             </motion.main>

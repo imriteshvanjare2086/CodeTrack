@@ -22,29 +22,29 @@ export function ContributionGraph({ stats: externalStats }: { stats?: any }) {
   };
 
   return (
-    <div className="rounded-[2.5rem] border border-slate-200 dark:border-white/10 bg-white dark:bg-[#161618] px-6 pt-3 pb-6 md:px-8 md:pt-4 md:pb-7 backdrop-blur-none dark:backdrop-blur-3xl shadow-lg dark:shadow-[0_20px_50px_rgba(0,0,0,0.5),inset_0_1px_1px_rgba(255,255,255,0.1)] ring-0 dark:ring-1 dark:ring-white/5 premium-border relative overflow-hidden group/contributions mt-6 card-hover">
+    <div className="rounded-2xl sm:rounded-[2.5rem] border border-slate-200 dark:border-white/10 bg-white dark:bg-[#161618] px-3 pt-2 pb-4 sm:px-6 sm:pt-3 sm:pb-6 md:px-8 md:pt-4 md:pb-7 backdrop-blur-none dark:backdrop-blur-3xl shadow-lg dark:shadow-[0_20px_50px_rgba(0,0,0,0.5),inset_0_1px_1px_rgba(255,255,255,0.1)] ring-0 dark:ring-1 dark:ring-white/5 premium-border relative overflow-hidden group/contributions mt-4 sm:mt-6 card-hover">
       
       {/* Top Header */}
-      <div className="relative z-10 flex items-center justify-between mb-6 px-2">
-        <div className="flex flex-col gap-1.5">
-          <div className="flex items-center gap-2">
-            <div className="h-2 w-2 rounded-full bg-primary shadow-[0_0_8px_hsla(var(--primary),0.5)] animate-pulse" />
-            <h4 className="text-xs font-black text-muted-foreground uppercase tracking-[0.3em] font-mono leading-none">
+      <div className="relative z-10 flex items-center justify-between mb-4 sm:mb-6 px-1 sm:px-2">
+        <div className="flex flex-col gap-1 sm:gap-1.5">
+          <div className="flex items-center gap-1.5 sm:gap-2">
+            <div className="h-1.5 w-1.5 sm:h-2 sm:w-2 rounded-full bg-primary shadow-[0_0_8px_hsla(var(--primary),0.5)] animate-pulse" />
+            <h4 className="text-[8px] sm:text-xs font-black text-muted-foreground uppercase tracking-[0.2em] sm:tracking-[0.3em] font-mono leading-none">
               Activity Matrix
             </h4>
           </div>
           <div className="flex items-center gap-2">
-            <h3 className="text-2xl font-black tracking-tight text-foreground">
+            <h3 className="text-lg sm:text-2xl font-black tracking-tight text-foreground">
               {stats?.totalSubmissions !== undefined ? stats.totalSubmissions.toLocaleString() : "0"} Submissions
             </h3>
-            <span className="text-xs text-[#64748B] dark:text-muted-foreground font-mono">in the past year</span>
+            <span className="hidden sm:inline text-xs text-[#64748B] dark:text-muted-foreground font-mono">in the past year</span>
           </div>
         </div>
         
         <div className="flex flex-col items-end">
-          <span className="text-[10px] text-foreground/80 font-mono uppercase tracking-widest font-black">Total Active</span>
-          <span className="text-sm font-black text-primary tabular-nums tracking-tight italic">
-            {stats?.activeDays || 0} Days streak
+          <span className="text-[8px] sm:text-[10px] text-foreground/80 font-mono uppercase tracking-widest font-black">Active</span>
+          <span className="text-xs sm:text-sm font-black text-primary tabular-nums tracking-tight italic">
+            {stats?.activeDays || 0} Days
           </span>
         </div>
       </div>
@@ -55,7 +55,7 @@ export function ContributionGraph({ stats: externalStats }: { stats?: any }) {
           <div
             style={{
               display: "flex",
-              gap: "28px", // Slightly more spacing for that premium look
+              gap: "12px", // Reduced from 28px
             }}
           >
             {MONTH_LABELS.map((month) => (
@@ -68,11 +68,11 @@ export function ContributionGraph({ stats: externalStats }: { stats?: any }) {
                 <div
                   style={{
                     display: "grid",
-                    gridTemplateColumns: "repeat(4, 15px)", 
-                    gridTemplateRows: "repeat(7, 15px)",
-                    gap: "5px"
+                    gridTemplateColumns: "repeat(4, 10px)", // Reduced from 15px
+                    gridTemplateRows: "repeat(7, 10px)",    // Reduced from 15px
+                    gap: "3px" // Reduced from 5px
                   }}
-                  className="rounded-xl"
+                  className="rounded-lg"
                 >
                   {Array.from({ length: 4 * 7 }).map((_, i) => {
                     // Generate dummy level weighted towards 0 and 1, with occasional higher levels
@@ -86,7 +86,7 @@ export function ContributionGraph({ stats: externalStats }: { stats?: any }) {
                     return (
                       <div
                         key={i}
-                        className={`${getDayColor(level)} w-[15px] h-[15px] rounded-[4px] border border-foreground/5 transition-all duration-300 cursor-pointer hover:border-primary/50 hover:shadow-[0_0_10px_hsla(var(--primary),0.2)] hover:scale-110 active:scale-95`}
+                        className={`${getDayColor(level)} w-[10px] h-[10px] rounded-[2px] border border-foreground/5 transition-all duration-300 cursor-pointer hover:border-primary/50 hover:shadow-[0_0_10px_hsla(var(--primary),0.2)] hover:scale-110 active:scale-95`}
                         title={level > 0 ? `${Math.floor(Math.random() * 8) + 1} submissions on this day` : "No activity recorded"}
                       />
                     );

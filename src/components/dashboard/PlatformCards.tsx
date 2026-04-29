@@ -4,9 +4,9 @@ import { Star, TrendingUp, Award, Hash } from "lucide-react";
 
 function StatBox({ label, value, color }: { label: string; value: string | number; color: string }) {
   return (
-    <div className="flex flex-col items-center justify-center p-3 rounded-xl bg-[#F8FAFC] dark:bg-slate-900/40 border border-[#E2E8F0] dark:border-white/5 backdrop-blur-none dark:backdrop-blur-sm card-hover">
-      <span className={`text-2xl font-black font-heading ${color}`}>{value}</span>
-      <span className="text-[10px] text-[#64748B] dark:text-muted-foreground uppercase tracking-widest font-mono font-bold mt-1">{label}</span>
+    <div className="flex flex-col items-center justify-center p-2 sm:p-3 rounded-lg sm:rounded-xl bg-[#F8FAFC] dark:bg-slate-900/40 border border-[#E2E8F0] dark:border-white/5 backdrop-blur-none dark:backdrop-blur-sm card-hover">
+      <span className={`text-lg sm:text-2xl font-black font-heading ${color}`}>{value}</span>
+      <span className="text-[8px] sm:text-[10px] text-[#64748B] dark:text-muted-foreground uppercase tracking-widest font-mono font-bold mt-0.5 sm:mt-1">{label}</span>
     </div>
   );
 }
@@ -33,26 +33,26 @@ function PlatformCard({
       initial={{ opacity: 0, y: 24 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay, duration: 0.5 }}
-      className={`group relative rounded-3xl border border-slate-200 dark:border-transparent bg-white dark:bg-[#1A1A1E] dark:bg-gradient-to-br dark:${gradientColor} px-6 pt-3 pb-6 backdrop-blur-none dark:backdrop-blur-md overflow-hidden card-hover`}
+      className={`group relative rounded-2xl sm:rounded-3xl border border-slate-200 dark:border-transparent bg-white dark:bg-[#1A1A1E] dark:bg-gradient-to-br dark:${gradientColor} px-3 pt-2 pb-4 sm:px-6 sm:pt-3 sm:pb-6 backdrop-blur-none dark:backdrop-blur-md overflow-hidden card-hover`}
     >
       <div className="absolute inset-0 bg-gradient-to-br from-foreground/[0.03] to-transparent pointer-events-none" />
       
       <div className="relative">
-        <div className="flex items-center justify-between mb-6">
-          <div className="flex items-center gap-3">
-            <div className={`h-10 w-10 rounded-xl bg-[#F8FAFC] dark:bg-slate-900/50 border border-[#E2E8F0] dark:border-transparent flex items-center justify-center shadow-sm`}>
-              <Icon className={`h-5 w-5 ${colorClass}`} />
+        <div className="flex items-center justify-between mb-3 sm:mb-6">
+          <div className="flex items-center gap-2 sm:gap-3">
+            <div className={`h-8 w-8 sm:h-10 sm:w-10 rounded-lg sm:rounded-xl bg-[#F8FAFC] dark:bg-slate-900/50 border border-[#E2E8F0] dark:border-transparent flex items-center justify-center shadow-sm`}>
+              <Icon className={`h-4 w-4 sm:h-5 sm:w-5 ${colorClass}`} />
             </div>
-            <h3 className="text-base font-heading font-bold text-[#1E293B] dark:text-foreground">{name}</h3>
+            <h3 className="text-sm sm:text-base font-heading font-bold text-[#1E293B] dark:text-foreground">{name}</h3>
           </div>
-          <div className={`px-2 py-1 rounded-full bg-emerald-50 dark:bg-slate-900/30 border border-emerald-100 dark:border-transparent text-[10px] font-mono ${colorClass} font-bold`}>
+          <div className={`px-1.5 py-0.5 rounded-full bg-emerald-50 dark:bg-slate-900/30 border border-emerald-100 dark:border-transparent text-[8px] sm:text-[10px] font-mono ${colorClass} font-bold`}>
             ACTIVE
           </div>
         </div>
 
-        <div className="mb-8 text-center">
-          <p className="text-[11px] text-[#64748B] dark:text-muted-foreground uppercase tracking-[0.2em] font-mono font-black mb-1">Total Problems Solved</p>
-          <p className={`text-6xl font-black font-heading ${colorClass} tracking-tighter`}>
+        <div className="mb-4 sm:mb-8 text-center">
+          <p className="text-[9px] sm:text-[11px] text-[#64748B] dark:text-muted-foreground uppercase tracking-[0.1em] sm:tracking-[0.2em] font-mono font-black mb-0.5 sm:mb-1">Solved</p>
+          <p className={`text-3xl sm:text-6xl font-black font-heading ${colorClass} tracking-tighter`}>
             {stats.solved}
           </p>
         </div>
@@ -110,7 +110,7 @@ export function PlatformCards({ stats }: { stats?: any }) {
   ];
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+    <div className="grid grid-cols-2 lg:grid-cols-3 gap-2 sm:gap-4">
       {platforms.map((p) => (
         <PlatformCard key={p.name} {...p} />
       ))}

@@ -100,7 +100,7 @@ export function Navbar() {
   };
 
   return (
-    <header className="sticky top-0 z-30 flex h-14 items-center justify-between border-b border-border/40 bg-background/60 backdrop-blur-2xl px-4">
+    <header className="sticky top-0 z-30 flex h-12 sm:h-14 items-center justify-between border-b border-border/40 bg-background/60 backdrop-blur-2xl px-2 sm:px-4">
       <div className="flex items-center gap-3">
         <SidebarTrigger className="text-muted-foreground hover:text-foreground transition-colors" />
         
@@ -150,7 +150,7 @@ export function Navbar() {
       <div className="flex items-center gap-2">
         <button 
           onClick={toggleTheme}
-          className="relative rounded-xl p-2.5 sm:p-2 text-muted-foreground hover:text-foreground hover:bg-muted/40 transition-all duration-200"
+          className="relative rounded-xl p-2 sm:p-2 text-muted-foreground hover:text-foreground hover:bg-muted/40 transition-all duration-200"
         >
           {!mounted ? (
             <div className="h-4 w-4 sm:h-4 sm:w-4" />
@@ -161,7 +161,7 @@ export function Navbar() {
         <div className="relative">
           <button 
             onClick={() => { setShowNotifications(!showNotifications); setShowDropdown(false); }}
-            className="relative rounded-xl p-2.5 sm:p-2 text-muted-foreground hover:text-foreground hover:bg-muted/40 transition-all duration-200"
+            className="relative rounded-xl p-2 sm:p-2 text-muted-foreground hover:text-foreground hover:bg-muted/40 transition-all duration-200"
           >
             <Bell className="h-4 w-4 sm:h-4 sm:w-4" />
             <span className="absolute top-2 right-2 h-2 w-2 rounded-full bg-primary animate-pulse" />

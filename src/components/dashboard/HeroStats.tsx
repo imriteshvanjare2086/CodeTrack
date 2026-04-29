@@ -125,12 +125,12 @@ export function HeroStats({ stats: externalStats }: { stats?: HeroStatsData }) {
       <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-transparent opacity-50 dark:opacity-50 pointer-events-none" />
 
       {/* Upper Section: Performance Overview */}
-      <div className="relative z-10 flex items-center gap-4 mb-6">
-        <div className="p-3 rounded-2xl bg-primary/10 border border-primary/20 shadow-inner">
-          <Activity className="h-6 w-6 text-primary" />
+      <div className="relative z-10 flex items-center gap-3 sm:gap-4 mb-4 sm:mb-6">
+        <div className="p-2 sm:p-3 rounded-2xl bg-primary/10 border border-primary/20 shadow-inner">
+          <Activity className="h-5 w-5 sm:h-6 sm:w-6 text-primary" />
         </div>
         <div>
-          <h3 className="text-2xl font-heading font-black text-foreground tracking-tight">Performance Overview</h3>
+          <h3 className="text-lg sm:text-2xl font-heading font-black text-foreground tracking-tight">Performance Overview</h3>
           <p className="text-sm text-muted-foreground font-mono mt-0.5 flex items-center gap-2">
             <span className="flex h-1.5 w-1.5 rounded-full bg-muted-foreground/30" />
             Quick summary of your overall progress
@@ -138,7 +138,7 @@ export function HeroStats({ stats: externalStats }: { stats?: HeroStatsData }) {
         </div>
       </div>
 
-      <div className="relative z-10 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-5">
+      <div className="relative z-10 grid grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-4 md:gap-5">
         {cards.map((card, i) => (
           <motion.div
             key={card.label}
@@ -154,12 +154,12 @@ export function HeroStats({ stats: externalStats }: { stats?: HeroStatsData }) {
             <div className="absolute inset-0 bg-gradient-to-br from-foreground/[0.03] to-transparent pointer-events-none" />
             
             <div className="relative z-10">
-              <div className="flex items-start justify-between mb-6">
-                <div className="flex items-center gap-3">
-                  <div className={`h-10 w-10 shrink-0 rounded-xl bg-white dark:bg-slate-900/50 border border-slate-200 dark:border-transparent flex items-center justify-center shadow-sm`}>
-                    <card.icon className={`h-5 w-5 ${card.color}`} />
+              <div className="flex items-start justify-between mb-2 sm:mb-6">
+                <div className="flex items-center gap-2 sm:gap-3">
+                  <div className={`h-8 w-8 sm:h-10 sm:w-10 shrink-0 rounded-lg sm:rounded-xl bg-white dark:bg-slate-900/50 border border-slate-200 dark:border-transparent flex items-center justify-center shadow-sm`}>
+                    <card.icon className={`h-4 w-4 sm:h-5 sm:w-5 ${card.color}`} />
                   </div>
-                  <h3 className="text-sm font-heading font-bold text-foreground leading-tight">{card.label}</h3>
+                  <h3 className="text-[10px] sm:text-sm font-heading font-bold text-foreground leading-tight">{card.label}</h3>
                 </div>
                 {card.label === "Current Streak" && stats.currentStreak > 0 && (
                   <div className={`shrink-0 px-2 py-1 rounded-full bg-emerald-50 dark:bg-background/30 border border-emerald-100 dark:border-transparent text-[9px] font-mono ${card.color} font-bold uppercase flex items-center gap-1.5 ml-2`}>
@@ -170,12 +170,12 @@ export function HeroStats({ stats: externalStats }: { stats?: HeroStatsData }) {
               </div>
               
               <div className="text-center mt-2">
-                <p className="text-[10px] text-[#475569] dark:text-muted-foreground uppercase tracking-[0.2em] font-mono font-black mb-1.5">
-                  {card.label === "Total Problems" ? "Problems Solved" : 
-                   card.label === "Current Streak" ? "Active Days" : 
-                   card.label === "Level" ? "Current Rank" : "Maximum Days"}
+                <p className="text-[8px] sm:text-[10px] text-[#475569] dark:text-muted-foreground uppercase tracking-[0.1em] sm:tracking-[0.2em] font-mono font-black mb-1">
+                  {card.label === "Total Problems" ? "Solved" : 
+                   card.label === "Current Streak" ? "Active" : 
+                   card.label === "Level" ? "Rank" : "Max"}
                 </p>
-                <h4 className={`text-3xl md:text-4xl font-black font-heading tracking-tighter ${card.color}`}>
+                <h4 className={`text-xl sm:text-3xl md:text-4xl font-black font-heading tracking-tighter ${card.color}`}>
                   {card.isNumeric ? (
                     <AnimatedCounter value={Number(card.value)} suffix={card.suffix} />
                   ) : (
@@ -193,12 +193,12 @@ export function HeroStats({ stats: externalStats }: { stats?: HeroStatsData }) {
         
         {/* Achievements Section Header */}
         <div className="relative z-10 flex items-center gap-4 mb-4">
-          <div className="p-2.5 rounded-xl bg-primary/10 border border-primary/20 shadow-inner">
-            <Award className="h-5 w-5 text-primary" />
+          <div className="p-2 sm:p-2.5 rounded-xl bg-primary/10 border border-primary/20 shadow-inner">
+            <Award className="h-4 w-4 sm:h-5 sm:w-5 text-primary" />
           </div>
           <div>
-            <h3 className="text-xl font-heading font-black text-foreground tracking-tight">Achievements</h3>
-            <p className="text-xs text-muted-foreground font-mono mt-0.5 flex items-center gap-2">
+            <h3 className="text-lg sm:text-xl font-heading font-black text-foreground tracking-tight">Achievements</h3>
+            <p className="text-[10px] sm:text-xs text-muted-foreground font-mono mt-0.5 flex items-center gap-2">
               <span className="flex h-1 w-1 rounded-full bg-muted-foreground/30" />
               Your earned badges and milestones
             </p>
@@ -207,8 +207,8 @@ export function HeroStats({ stats: externalStats }: { stats?: HeroStatsData }) {
         
         <div className="flex items-start justify-between mb-4">
           <div className="flex flex-col">
-            <span className="text-sm font-bold text-[#64748B] dark:text-muted-foreground uppercase tracking-wider">Badges</span>
-            <span className="text-3xl font-heading font-black text-foreground tracking-tighter">{currentBadges.length}</span>
+            <span className="text-[10px] sm:text-sm font-bold text-[#64748B] dark:text-muted-foreground uppercase tracking-wider">Badges</span>
+            <span className="text-xl sm:text-3xl font-heading font-black text-foreground tracking-tighter">{currentBadges.length}</span>
           </div>
           <button 
             onClick={() => setIsViewAllOpen(true)}
@@ -247,8 +247,8 @@ export function HeroStats({ stats: externalStats }: { stats?: HeroStatsData }) {
 
                 // Middle badge is slightly larger
                 const isCenter = i === 1;
-                const sizeClass = isCenter ? "w-28 h-32 sm:w-36 sm:h-40" : "w-24 h-28 sm:w-32 sm:h-36";
-                const iconSize = isCenter ? "h-12 w-12 sm:h-16 sm:w-16" : "h-10 w-10 sm:h-14 sm:w-14";
+                const sizeClass = isCenter ? "w-20 h-24 sm:w-36 sm:h-40" : "w-16 h-20 sm:w-32 sm:h-36";
+                const iconSize = isCenter ? "h-8 w-8 sm:h-16 sm:w-16" : "h-6 w-6 sm:h-14 sm:w-14";
 
                 return (
                   <motion.div 

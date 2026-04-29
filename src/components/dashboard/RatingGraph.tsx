@@ -26,9 +26,9 @@ export function RatingGraph({ userId }: { userId?: string }) {
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: 0.65 }}
-      className="rounded-2xl border border-border/60 bg-card/60 backdrop-blur-xl p-5 h-full card-hover"
+      className="rounded-2xl border border-border/60 bg-card/60 backdrop-blur-xl p-3 sm:p-5 h-full card-hover"
     >
-      <div className="flex items-center justify-between mb-5">
+      <div className="flex items-center justify-between mb-3 sm:mb-5">
         <div className="flex items-center gap-2.5">
           <div className="p-1.5 rounded-lg bg-secondary">
             <TrendingUp className="h-4 w-4 text-foreground" />
@@ -59,7 +59,7 @@ export function RatingGraph({ userId }: { userId?: string }) {
           ))}
         </div>
       </div>
-      <div className="h-[220px]">
+      <div className="h-[180px] sm:h-[220px]">
         <ResponsiveContainer width="100%" height="100%">
           <AreaChart data={data}>
             <defs>

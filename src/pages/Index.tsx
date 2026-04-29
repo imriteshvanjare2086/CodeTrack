@@ -44,7 +44,7 @@ const Index = () => {
 
   return (
     <DashboardLayout>
-      <div className="max-w-6xl mx-auto space-y-5">
+      <div className="w-full mx-auto space-y-3 sm:space-y-5">
         <PageHeader
           title={isOwnDashboard ? "Dashboard" : `${dash?.profile?.username}'s Dashboard`}
           description={isOwnDashboard ? "Track your competitive programming journey" : `Viewing ${dash?.profile?.username}'s coding profile and history`}
@@ -53,15 +53,15 @@ const Index = () => {
           <HeroStats stats={dash?.heroStats} />
         </div>
         <ContributionGraph stats={dash?.heroStats} />
-        <div className="rounded-[2.5rem] border border-slate-200 dark:border-white/10 bg-white dark:bg-[#161618] px-6 pt-3 pb-6 md:px-8 md:pt-4 md:pb-7 backdrop-blur-none dark:backdrop-blur-3xl shadow-lg dark:shadow-[0_20px_50px_rgba(0,0,0,0.5),inset_0_1px_1px_rgba(255,255,255,0.1)] ring-0 dark:ring-1 dark:ring-white/5 relative overflow-hidden premium-border space-y-6 mt-4 card-hover group/platform">
+        <div className="rounded-2xl sm:rounded-[2.5rem] border border-slate-200 dark:border-white/10 bg-white dark:bg-[#161618] px-3 pt-2 pb-4 sm:px-6 sm:pt-3 sm:pb-6 md:px-8 md:pt-4 md:pb-7 backdrop-blur-none dark:backdrop-blur-3xl shadow-lg dark:shadow-[0_20px_50px_rgba(0,0,0,0.5),inset_0_1px_1px_rgba(255,255,255,0.1)] ring-0 dark:ring-1 dark:ring-white/5 relative overflow-hidden premium-border space-y-4 sm:space-y-6 mt-3 sm:mt-4 card-hover group/platform">
           <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-transparent opacity-50 pointer-events-none group-hover/platform:opacity-70 transition-opacity" />
           
-          <div className="relative z-10 flex items-center gap-4 mb-4">
-            <div className="p-3 rounded-2xl bg-primary/10 border border-primary/20 shadow-inner">
-              <Activity className="h-6 w-6 text-primary" />
+          <div className="relative z-10 flex items-center gap-3 sm:gap-4 mb-3 sm:mb-4">
+            <div className="p-2 sm:p-3 rounded-2xl bg-primary/10 border border-primary/20 shadow-inner">
+              <Activity className="h-5 w-5 sm:h-6 sm:w-6 text-primary" />
             </div>
             <div>
-              <h3 className="text-2xl font-heading font-black text-foreground tracking-tight">Platform Performance</h3>
+              <h3 className="text-lg sm:text-2xl font-heading font-black text-foreground tracking-tight">Platform Performance</h3>
               <p className="text-sm text-muted-foreground font-mono mt-0.5 flex items-center gap-2">
                 <span className="flex h-1.5 w-1.5 rounded-full bg-muted-foreground/30" />
                 Detailed breakdown across coding platforms
@@ -69,7 +69,7 @@ const Index = () => {
             </div>
           </div>
           
-          <div className="relative z-10 space-y-6">
+          <div className="relative z-10 space-y-4 sm:space-y-6">
             <div id="tour-platforms">
               <PlatformCards stats={dash?.profile?.platformStats} />
             </div>
