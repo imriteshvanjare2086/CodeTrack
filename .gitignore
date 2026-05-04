@@ -7,10 +7,25 @@ yarn-error.log*
 pnpm-debug.log*
 lerna-debug.log*
 
+# Dependencies and Build
 node_modules
 dist
 dist-ssr
 *.local
+*.tsbuildinfo
+
+# Secrets and Environment Variables
+.env
+.env.local
+.env.*.local
+server/.env
+codecraft-dashboard-joy/.env
+codecraft-dashboard-joy/server/.env
+
+# Temporary Reports
+eslint_report.json
+lint_report.json
+ts_errors.txt
 
 # Editor directories and files
 .vscode/*
