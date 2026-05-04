@@ -20,7 +20,7 @@ export default function Problems() {
       const matchesDifficulty = difficulty === "all" || prob.difficulty === difficulty;
       return matchesSearch && matchesPlatform && matchesDifficulty;
     });
-  }, [searchTerm, platform, difficulty]);
+  }, [searchTerm, platform, difficulty, typedProblemsData]);
 
   return (
     <DashboardLayout>

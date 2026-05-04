@@ -56,7 +56,7 @@ export default function Friends() {
   const { data: searchResults, isFetching: isSearching } = useQuery({
     queryKey: ["users-search", search],
     queryFn: () => searchUsers(search),
-    enabled: search.length >= 2,
+    enabled: search.length >= 1,
     staleTime: 500,
   });
 
@@ -207,36 +207,37 @@ function EmptyCircle() {
 function FriendsLeaderboard({ users }: { users: FriendUser[] }) {
   const getRankIcon = (rank: number) => {
     switch (rank) {
-      case 1: return <Trophy className="h-5 w-5 text-yellow-500" />;
-      case 2: return <Medal className="h-5 w-5 text-slate-300" />;
-      case 3: return <Medal className="h-5 w-5 text-amber-600" />;
-      default: return <span className="text-muted-foreground font-mono text-xs">{rank}</span>;
+      case 1: return <Trophy className="h-5 w-5 text-yellow-400 drop-shadow-[0_0_8px_rgba(250,204,21,0.5)]" />;
+      case 2: return <Medal className="h-5 w-5 text-slate-300 drop-shadow-[0_0_8px_rgba(203,213,225,0.5)]" />;
+      case 3: return <Medal className="h-5 w-5 text-amber-600 drop-shadow-[0_0_8px_rgba(180,83,9,0.5)]" />;
+      default: return <span className="text-muted-foreground font-mono text-xs font-black">{rank}</span>;
     }
   };
 
   const getRankStyle = (rank: number) => {
     switch (rank) {
-      case 1: return "bg-yellow-500/5 border-yellow-500/10";
-      case 2: return "bg-slate-300/5 border-slate-300/10";
-      case 3: return "bg-amber-600/5 border-amber-600/10";
-      default: return "";
+      case 1: return "bg-yellow-400/5 hover:bg-yellow-400/10 border-yellow-400/20";
+      case 2: return "bg-slate-300/5 hover:bg-slate-300/10 border-slate-300/20";
+      case 3: return "bg-amber-600/5 hover:bg-amber-600/10 border-amber-600/20";
+      default: return "hover:bg-muted/30";
     }
   };
 
   return (
     <motion.div 
-      initial={{ opacity: 0, y: 10 }}
-      animate={{ opacity: 1, y: 0 }}
-      className="rounded-2xl border border-border/40 bg-card/60 backdrop-blur-sm overflow-hidden"
+      initial={{ opacity: 0, scale: 0.98 }}
+      animate={{ opacity: 1, scale: 1 }}
+      className="rounded-[2rem] border border-foreground/10 bg-card/30 backdrop-blur-3xl overflow-hidden shadow-2xl premium-border"
     >
-      <Table>
-        <TableHeader className="bg-muted/30">
-          <TableRow className="hover:bg-transparent border-border/40">
-            <TableHead className="w-[80px] text-center">Rank</TableHead>
-            <TableHead>User</TableHead>
-            <TableHead className="text-right">Solved</TableHead>
-            <TableHead className="text-right">Streak</TableHead>
-            <TableHead className="text-right hidden sm:table-cell">Platforms</TableHead>
+      <div className="w-full overflow-x-auto pb-4">
+        <Table className="min-w-[500px] lg:min-w-full">
+        <TableHeader className="bg-muted/10">
+          <TableRow className="hover:bg-transparent border-foreground/5 uppercase tracking-[0.2em] font-mono text-[9px]">
+            <TableHead className="w-[80px] text-center font-black">Rank</TableHead>
+            <TableHead className="font-black">Coder</TableHead>
+            <TableHead className="text-right font-black">Solved</TableHead>
+            <TableHead className="text-right font-black">Streak</TableHead>
+            <TableHead className="text-right hidden sm:table-cell font-black pr-6">Activity</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -244,56 +245,61 @@ function FriendsLeaderboard({ users }: { users: FriendUser[] }) {
             <TableRow 
               key={user._id} 
               className={cn(
-                "border-border/20 transition-colors duration-200 hover:bg-muted/20",
+                "group border-foreground/5 transition-all duration-500",
                 getRankStyle(index + 1),
                 user.isMe && "bg-primary/5 hover:bg-primary/10 border-l-2 border-l-primary"
               )}
             >
-              <TableCell className="text-center font-bold">
-                <div className="flex items-center justify-center">
+              <TableCell className="text-center">
+                <div className="flex items-center justify-center transition-transform duration-500 group-hover:scale-110">
                   {getRankIcon(index + 1)}
                 </div>
               </TableCell>
               <TableCell>
                 <div className="flex items-center gap-3">
-                  <Link to={`/dashboard/${user._id}`} className="flex items-center gap-3 hover:opacity-80 transition-opacity">
-                    <Avatar className="h-9 w-9 rounded-xl border border-border/40">
-                      {user.profileImage && <AvatarImage src={user.profileImage} />}
-                      <AvatarFallback className="bg-primary/10 text-primary uppercase font-bold text-[10px]">
+                  <Link to={`/dashboard/${user._id}`} className="flex items-center gap-3 hover:opacity-80 transition-opacity py-1">
+                    <Avatar className="h-10 w-10 rounded-xl border border-foreground/5 shadow-lg transition-transform duration-500 group-hover:scale-105">
+                      {user.profileImage && <AvatarImage src={user.profileImage} className="object-cover" />}
+                      <AvatarFallback className="bg-gradient-to-br from-primary/20 to-primary/5 text-primary uppercase font-black text-[10px]">
                         {initials(user.username)}
                       </AvatarFallback>
                     </Avatar>
-                    <div className="flex flex-col">
-                      <span className="font-bold text-sm flex items-center gap-1.5">
+                    <div className="flex flex-col gap-0.5">
+                      <span className="font-black text-sm text-foreground group-hover:text-primary transition-colors flex items-center gap-2">
                         {user.username}
-                        {user.isMe && <Badge variant="secondary" className="text-[8px] py-0 px-1 bg-primary/10 text-primary border-primary/20">YOU</Badge>}
+                        {user.isMe && <Badge className="text-[8px] h-4 py-0 px-1.5 bg-primary/10 text-primary border-primary/20 font-black tracking-widest uppercase">YOU</Badge>}
                       </span>
-                      <span className="text-[10px] text-muted-foreground font-mono hidden sm:block italic">
-                        {index === 0 ? "Grandmaster" : index === 1 ? "Master" : index === 2 ? "Master" : "Challenger"}
+                      <span className="text-[10px] text-muted-foreground font-mono hidden sm:block uppercase tracking-tighter opacity-60 font-black">
+                        {index === 0 ? "Circuit Leader" : index === 1 ? "Elite" : index === 2 ? "Advanced" : "Rising"}
                       </span>
                     </div>
                   </Link>
                 </div>
               </TableCell>
               <TableCell className="text-right">
-                <div className="flex items-center justify-end gap-1.5">
-                  <Target className="h-3 w-3 text-primary/70" />
-                  <span className="font-heading font-bold">{user.problemsSolved}</span>
+                <div className="flex items-center justify-end gap-2 pr-2">
+                  <Target className="h-3.5 w-3.5 text-primary/50" />
+                  <span className="font-heading font-black text-base tabular-nums transition-all group-hover:scale-110 group-hover:text-primary">{user.problemsSolved}</span>
                 </div>
               </TableCell>
               <TableCell className="text-right">
-                <div className="flex items-center justify-end gap-1.5">
-                  <Flame className={cn("h-3 w-3", user.streak > 0 ? "text-orange-500" : "text-muted-foreground/30")} />
-                  <span className="font-mono text-xs font-bold">{user.streak}d</span>
+                <div className="flex items-center justify-end gap-2 pr-2">
+                  <div className={cn(
+                    "flex items-center gap-1.5 px-2 py-0.5 rounded-xl border text-[10px] font-black",
+                    user.streak > 0 ? "bg-leetcode/10 text-leetcode border-leetcode/20" : "text-muted-foreground/30 border-foreground/5"
+                  )}>
+                    <Flame className="h-3 w-3" />
+                    <span className="font-mono tabular-nums">{user.streak}d</span>
+                  </div>
                 </div>
               </TableCell>
-              <TableCell className="text-right hidden sm:table-cell">
-                <div className="flex items-center justify-end gap-1">
+              <TableCell className="text-right hidden sm:table-cell pr-6">
+                <div className="flex items-center justify-end gap-1.5">
                   {Object.entries(user.platformStats || {}).map(([platform, count]) => (
                     <Badge 
                       key={platform} 
                       variant="outline" 
-                      className="bg-transparent text-[9px] py-0 px-1 border-border/30 font-mono"
+                      className="bg-foreground/5 text-[9px] font-black font-mono py-0 px-1.5 border-foreground/5 group-hover:border-primary/20 transition-colors"
                     >
                       {count as number}
                     </Badge>
@@ -302,8 +308,9 @@ function FriendsLeaderboard({ users }: { users: FriendUser[] }) {
               </TableCell>
             </TableRow>
           ))}
-        </TableBody>
-      </Table>
+          </TableBody>
+        </Table>
+      </div>
     </motion.div>
   );
 }
@@ -323,62 +330,65 @@ function UserCard({
 }) {
   return (
     <motion.div
-      initial={{ opacity: 0, scale: 0.95 }}
-      animate={{ opacity: 1, scale: 1 }}
-      transition={{ delay }}
+      initial={{ opacity: 0, scale: 0.9, y: 20 }}
+      animate={{ opacity: 1, scale: 1, y: 0 }}
+      transition={{ delay, duration: 0.6, ease: [0.23, 1, 0.32, 1] }}
+      className="h-full"
     >
-      <Card className="h-full rounded-3xl border-border/60 bg-card/40 backdrop-blur-xl transition-all hover:border-primary/30 hover:shadow-lg group">
-        <CardHeader className="flex flex-row items-center gap-4 space-y-0 pb-3">
+      <Card className="h-full rounded-[2rem] border border-foreground/10 bg-card/30 backdrop-blur-2xl transition-all duration-500 hover:-translate-y-2 hover:shadow-2xl hover:shadow-primary/5 hover:border-primary/20 group tilt-card premium-border overflow-hidden">
+        <div className="absolute inset-0 bg-gradient-to-br from-foreground/[0.04] to-transparent pointer-events-none" />
+        
+        <CardHeader className="flex flex-row items-center gap-4 space-y-0 pb-4 relative z-10">
           <Link to={`/dashboard/${user._id}`} className="shrink-0 hover:opacity-80 transition-opacity">
-            <Avatar className="h-12 w-12 rounded-2xl border border-border/40 ring-2 ring-transparent group-hover:ring-primary/10 transition-all shadow-sm">
+            <Avatar className="h-14 w-14 rounded-2xl border-2 border-foreground/10 shadow-2xl transition-all duration-500 group-hover:border-primary/50 group-hover:scale-105 group-hover:shadow-primary/20">
               {user.profileImage && <AvatarImage src={user.profileImage} className="object-cover" />}
-              <AvatarFallback className="rounded-2xl bg-gradient-to-br from-primary/10 to-primary/5 font-mono text-xs font-bold text-primary">
+              <AvatarFallback className="rounded-2xl bg-gradient-to-br from-primary/20 to-primary/5 font-black text-sm text-primary uppercase">
                 {initials(user.username)}
               </AvatarFallback>
             </Avatar>
           </Link>
           
           <div className="min-w-0 flex-1">
-            <Link to={`/dashboard/${user._id}`} className="hover:underline decoration-primary/30 underline-offset-4">
-              <h4 className="truncate font-heading text-sm font-bold text-foreground group-hover:text-primary transition-colors">
+            <Link to={`/dashboard/${user._id}`} className="block group/link">
+              <h4 className="truncate font-heading text-sm sm:text-base font-black text-foreground group-hover:text-primary transition-colors tracking-tight">
                 {user.username}
               </h4>
             </Link>
-            <p className="truncate font-mono text-[10px] text-muted-foreground/70">{user.email}</p>
+            <p className="truncate font-mono text-[9px] sm:text-[10px] text-muted-foreground/60 uppercase tracking-tighter font-black">{user.email}</p>
           </div>
 
           {!isFriend && (
             <button
               onClick={onAdd}
               disabled={isAdding}
-              className="h-10 w-10 shrink-0 rounded-2xl bg-primary/10 flex items-center justify-center text-primary hover:bg-primary hover:text-white transition-all disabled:opacity-50"
+              className="h-10 w-10 sm:h-11 sm:w-11 shrink-0 rounded-2xl bg-primary/10 border border-primary/20 flex items-center justify-center text-primary hover:bg-primary hover:text-white transition-all duration-300 shadow-lg shadow-primary/10 hover:shadow-primary/30 active:scale-90"
             >
-              {isAdding ? <Loader2 className="h-4 w-4 animate-spin" /> : <UserPlus className="h-4 w-4" />}
+              {isAdding ? <Loader2 className="h-4 w-4 sm:h-5 sm:w-5 animate-spin" /> : <UserPlus className="h-4 w-4 sm:h-5 sm:w-5" />}
             </button>
           )}
           {isFriend && (
-            <div className="h-2 w-2 rounded-full bg-green-400 shadow-[0_0_8px_rgba(74,222,128,0.6)]" title="Connected" />
+            <div className="h-2 w-2 rounded-full bg-green-400 shadow-[0_0_10px_rgba(74,222,128,0.8)] pulse-indicator" title="Connected" />
           )}
         </CardHeader>
 
-        <CardContent className="pt-1">
-          <div className="grid grid-cols-2 gap-2 rounded-2xl border border-border/30 bg-muted/20 p-2.5">
-            <div className="flex items-center gap-2">
-              <div className="w-7 h-7 rounded-lg bg-orange-400/10 flex items-center justify-center">
-                <Flame className="h-3.5 w-3.5 text-orange-400" />
+        <CardContent className="pt-2 relative z-10">
+          <div className="grid grid-cols-2 gap-3 rounded-2xl border border-foreground/5 bg-foreground/[0.03] p-4 transition-all duration-500 group-hover:bg-foreground/[0.05] group-hover:border-foreground/10">
+            <div className="flex items-center gap-3">
+              <div className="w-9 h-9 rounded-xl bg-orange-400/10 border border-orange-400/20 flex items-center justify-center shadow-inner">
+                <Flame className="h-4 w-4 text-orange-400" />
               </div>
               <div>
-                <p className="font-mono text-[9px] uppercase tracking-tighter text-muted-foreground">Streak</p>
-                <p className="font-mono text-xs font-bold text-foreground">{user.streak || 0}</p>
+                <p className="font-mono text-[9px] uppercase tracking-widest text-muted-foreground font-black opacity-60">Streak</p>
+                <p className="font-mono text-xs font-black text-foreground tabular-nums">{user.streak || 0}</p>
               </div>
             </div>
-            <div className="flex items-center gap-2">
-              <div className="w-7 h-7 rounded-lg bg-primary/10 flex items-center justify-center">
-                <Trophy className="h-3.5 w-3.5 text-primary" />
+            <div className="flex items-center gap-3">
+              <div className="w-9 h-9 rounded-xl bg-primary/10 border border-primary/20 flex items-center justify-center shadow-inner">
+                <Trophy className="h-4 w-4 text-primary" />
               </div>
               <div>
-                <p className="font-mono text-[9px] uppercase tracking-tighter text-muted-foreground">Solved</p>
-                <p className="font-mono text-xs font-bold text-foreground">{user.problemsSolved || 0}</p>
+                <p className="font-mono text-[9px] uppercase tracking-widest text-muted-foreground font-black opacity-60">Solved</p>
+                <p className="font-mono text-xs font-black text-foreground tabular-nums">{user.problemsSolved || 0}</p>
               </div>
             </div>
           </div>
@@ -387,3 +397,4 @@ function UserCard({
     </motion.div>
   );
 }
+

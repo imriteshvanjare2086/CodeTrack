@@ -1,24 +1,45 @@
 <!doctype html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <!-- TODO: Set the document title to the name of your application -->
-    <title>CodeTrack</title>
-    <meta name="description" content="CodeTrack - Track your coding journey" />
-    <meta name="author" content="CodeTrack" />
-    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+<head>
+  <script>
+    (function () {
+      try {
+        const savedTheme = localStorage.getItem("theme");
+        const theme = savedTheme ? savedTheme : "light";
+        const root = document.documentElement;
 
-    <meta property="og:title" content="CodeTrack" />
-    <meta property="og:description" content="Track your coding journey with CodeTrack" />
-    <meta property="og:type" content="website" />
+        // Ensure only one theme class exists
+        root.classList.remove("light", "dark");
+        root.classList.add(theme);
 
-    <meta name="twitter:card" content="summary_large_image" />
-    <meta name="twitter:site" content="@CodeTrack" />
-  </head>
+        // Prevent background flash immediately
+        if (theme === "dark") {
+          root.style.backgroundColor = "#0B1120";
+        } else {
+          root.style.backgroundColor = "#F8FAFC";
+        }
+      } catch (e) {}
+    })();
+  </script>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <!-- TODO: Set the document title to the name of your application -->
+  <title>CodeTrack</title>
+  <meta name="description" content="CodeTrack - Track your coding journey" />
+  <meta name="author" content="CodeTrack" />
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
 
-  <body>
-    <div id="root"></div>
-    <script type="module" src="/src/main.tsx"></script>
-  </body>
+  <meta property="og:title" content="CodeTrack" />
+  <meta property="og:description" content="Track your coding journey with CodeTrack" />
+  <meta property="og:type" content="website" />
+
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:site" content="@CodeTrack" />
+</head>
+
+<body>
+  <div id="root"></div>
+  <script type="module" src="/src/main.tsx"></script>
+</body>
+
 </html>

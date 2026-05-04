@@ -36,6 +36,7 @@ function DeepBreathing() {
       });
     }, 1000);
     return () => clearInterval(id);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [active, phase]);
 
   const reset = () => { setActive(false); setPhase("inhale"); setCount(4); };

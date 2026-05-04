@@ -21,6 +21,8 @@ import Notes from "./pages/Notes.tsx";
 import Courses from "./pages/Courses.tsx";
 import Goals from "./pages/Goals.tsx";
 import CodeT from "./pages/CodeT.tsx";
+import BattleArena from "./pages/BattleArena.tsx";
+import Certifications from "./pages/Certifications.tsx";
 
 const queryClient = new QueryClient();
 
@@ -33,8 +35,8 @@ const App = () => {
         <Toaster />
         <Sonner />
         {!ready ? (
-          <div className="min-h-screen bg-[#050505] flex items-center justify-center p-6">
-            <div className="max-w-md w-full rounded-2xl border border-white/10 bg-[#0a0a0a] shadow-2xl p-8">
+          <div className="min-h-screen bg-[#050505] flex items-center justify-center p-4 sm:p-6">
+            <div className="max-w-md w-full rounded-2xl border border-white/10 bg-[#0a0a0a] shadow-2xl p-6 sm:p-8">
               <p className="text-sm font-mono text-gray-100 italic">Starting CodeTrack...</p>
               {error && <p className="text-xs font-mono text-red-400 mt-2">{error}</p>}
               <p className="text-[10px] font-mono text-gray-500 mt-4 leading-relaxed">
@@ -64,6 +66,8 @@ const App = () => {
               <Route path="/focus" element={<ProtectedRoute><FocusMode /></ProtectedRoute>} />
               <Route path="/onboarding" element={<ProtectedRoute><Onboarding /></ProtectedRoute>} />
               <Route path="/codet" element={<ProtectedRoute><CodeT /></ProtectedRoute>} />
+              <Route path="/battle" element={<ProtectedRoute><BattleArena /></ProtectedRoute>} />
+              <Route path="/certifications" element={<ProtectedRoute><Certifications /></ProtectedRoute>} />
 
               {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
               <Route path="*" element={<NotFound />} />

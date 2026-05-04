@@ -1,0 +1,172 @@
+[
+  {
+    "id": 1,
+    "title": "Google IT Support Professional Certificate",
+    "platform": "Coursera",
+    "domain": "IT Support",
+    "type": "Professional Certificate",
+    "rating": 4.8,
+    "image": "https://images.unsplash.com/photo-1517694712202-14dd9538aa97?q=80&w=2070&auto=format&fit=crop",
+    "url": "https://www.coursera.org/professional-certificates/google-it-support"
+  },
+  {
+    "id": 2,
+    "title": "Meta Front-End Developer Professional Certificate",
+    "platform": "Coursera",
+    "domain": "Web Development",
+    "type": "Career Certificate",
+    "rating": 4.9,
+    "image": "https://images.unsplash.com/photo-1498050108023-c5249f4df085?q=80&w=2072&auto=format&fit=crop",
+    "url": "https://www.coursera.org/professional-certificates/meta-front-end-developer"
+  },
+  {
+    "id": 3,
+    "title": "AWS Certified Solutions Architect - Associate",
+    "platform": "Udemy",
+    "domain": "Cloud Computing",
+    "type": "Official Certification",
+    "rating": 4.7,
+    "image": "https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?q=80&w=2070&auto=format&fit=crop",
+    "url": "https://www.udemy.com/course/aws-certified-solutions-architect-associate-saa-c03/"
+  },
+  {
+    "id": 4,
+    "title": "IBM Data Science Professional Certificate",
+    "platform": "Coursera",
+    "domain": "Data Science",
+    "type": "Specialization",
+    "rating": 4.6,
+    "image": "https://images.unsplash.com/photo-1504639725590-34d0984388bd?q=80&w=1974&auto=format&fit=crop",
+    "url": "https://www.coursera.org/professional-certificates/ibm-data-science"
+  },
+  {
+    "id": 5,
+    "title": "Microsoft Certified: Azure Developer Associate",
+    "platform": "Udemy",
+    "domain": "Cloud Computing",
+    "type": "Certification Prep",
+    "rating": 4.8,
+    "image": "https://images.unsplash.com/photo-1542831371-29b0f74f9713?q=80&w=2070&auto=format&fit=crop",
+    "url": "https://www.udemy.com/course/az-204-azure-developer-associate-exam-prep/"
+  },
+  {
+    "id": 6,
+    "title": "Java Programming and Software Engineering Fundamentals",
+    "platform": "Coursera",
+    "domain": "OOPs",
+    "type": "Specialization",
+    "rating": 4.7,
+    "image": "https://images.unsplash.com/photo-1515879218367-8466d910aaa4?q=80&w=2069&auto=format&fit=crop",
+    "url": "https://www.coursera.org/specializations/java-programming"
+  },
+  {
+    "id": 7,
+    "title": "Mastering Data Structures & Algorithms using C and C++",
+    "platform": "Udemy",
+    "domain": "DSA",
+    "type": "Mastery Certificate",
+    "rating": 4.9,
+    "image": "https://images.unsplash.com/photo-1555066931-4365d14bab8c?q=80&w=2070&auto=format&fit=crop",
+    "url": "https://www.udemy.com/course/datastructurescncpp/"
+  },
+  {
+    "id": 8,
+    "title": "Python for Everybody Specialization",
+    "platform": "Coursera",
+    "domain": "Python",
+    "type": "Specialization",
+    "rating": 4.8,
+    "image": "https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?q=80&w=2070&auto=format&fit=crop",
+    "url": "https://www.coursera.org/specializations/python"
+  },
+  {
+    "id": 9,
+    "title": "C++ Nanodegree Program",
+    "platform": "Udacity",
+    "domain": "C++",
+    "type": "Nanodegree",
+    "rating": 4.7,
+    "image": "https://images.unsplash.com/photo-1542831371-29b0f74f9713?q=80&w=2070&auto=format&fit=crop",
+    "url": "https://www.udacity.com/course/c-plus-plus-nanodegree--nd213"
+  },
+  {
+    "id": 10,
+    "title": "C Programming: Language Foundations",
+    "platform": "Coursera",
+    "domain": "C",
+    "type": "Professional Certificate",
+    "rating": 4.6,
+    "image": "https://images.unsplash.com/photo-1515879218367-8466d910aaa4?q=80&w=2069&auto=format&fit=crop",
+    "url": "https://www.coursera.org/specializations/c-programming"
+  },
+  {
+    "id": 11,
+    "title": "Advanced C Programming Masterclass",
+    "platform": "Udemy",
+    "domain": "C",
+    "type": "Certification",
+    "rating": 4.7,
+    "image": "https://images.unsplash.com/photo-1517694712202-14dd9538aa97?q=80&w=2070&auto=format&fit=crop",
+    "url": "https://www.udemy.com/course/advanced-c-programming-course/"
+  },
+  {
+    "id": 12,
+    "title": "Object-Oriented Design and Patterns",
+    "platform": "Coursera",
+    "domain": "OOPs",
+    "type": "Specialization",
+    "rating": 4.8,
+    "image": "https://images.unsplash.com/photo-1517694712202-14dd9538aa97?q=80&w=2070&auto=format&fit=crop",
+    "url": "https://www.coursera.org/specializations/object-oriented-design"
+  },
+  {
+    "id": 13,
+    "title": "Complete Python Developer",
+    "platform": "Udemy",
+    "domain": "Python",
+    "type": "Career Certificate",
+    "rating": 4.9,
+    "image": "https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?q=80&w=2070&auto=format&fit=crop",
+    "url": "https://www.udemy.com/course/complete-python-developer-zero-to-mastery/"
+  },
+  {
+    "id": 14,
+    "title": "Web Design for Everybody",
+    "platform": "Coursera",
+    "domain": "Web Development",
+    "type": "Specialization",
+    "rating": 4.7,
+    "image": "https://images.unsplash.com/photo-1498050108023-c5249f4df085?q=80&w=2072&auto=format&fit=crop",
+    "url": "https://www.coursera.org/specializations/web-design"
+  },
+  {
+    "id": 15,
+    "title": "Algorithms and Data Structures MicroMasters",
+    "platform": "edX",
+    "domain": "DSA",
+    "type": "MicroMasters",
+    "rating": 4.8,
+    "image": "https://images.unsplash.com/photo-1555066931-4365d14bab8c?q=80&w=2070&auto=format&fit=crop",
+    "url": "https://www.edx.org/micromasters/uc-san-diegox-algorithms-and-data-structures"
+  },
+  {
+    "id": 16,
+    "title": "Data Engineering with Google Cloud",
+    "platform": "Coursera",
+    "domain": "Data Science",
+    "type": "Professional Certificate",
+    "rating": 4.9,
+    "image": "https://images.unsplash.com/photo-1504639725590-34d0984388bd?q=80&w=1974&auto=format&fit=crop",
+    "url": "https://www.coursera.org/professional-certificates/gcp-data-engineering"
+  },
+  {
+    "id": 17,
+    "title": "Modern C++ Professional Certification",
+    "platform": "Udemy",
+    "domain": "C++",
+    "type": "Professional Certificate",
+    "rating": 4.8,
+    "image": "https://images.unsplash.com/photo-1542831371-29b0f74f9713?q=80&w=2070&auto=format&fit=crop",
+    "url": "https://www.udemy.com/course/beg-modern-cpp/"
+  }
+]

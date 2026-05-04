@@ -26,7 +26,7 @@ export function RatingGraph({ userId }: { userId?: string }) {
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: 0.65 }}
-      className="rounded-2xl border border-border/60 bg-card/60 backdrop-blur-xl p-5 h-full"
+      className="rounded-2xl border border-border/60 bg-card/60 backdrop-blur-xl p-5 h-full card-hover"
     >
       <div className="flex items-center justify-between mb-5">
         <div className="flex items-center gap-2.5">
@@ -68,29 +68,31 @@ export function RatingGraph({ userId }: { userId?: string }) {
                 <stop offset="100%" stopColor={config.color} stopOpacity={0} />
               </linearGradient>
             </defs>
-            <CartesianGrid strokeDasharray="3 3" stroke="hsl(228, 12%, 14%)" />
+            <CartesianGrid strokeDasharray="3 3" stroke="currentColor" className="text-slate-200 dark:text-white/5" vertical={false} />
             <XAxis
               dataKey="contest"
-              tick={{ fontSize: 10, fill: "hsl(215, 12%, 40%)" }}
-              axisLine={{ stroke: "hsl(228, 12%, 14%)" }}
+              tick={{ fontSize: 9, fill: "currentColor" }}
+              className="text-[#64748B] dark:text-slate-500"
+              axisLine={false}
               tickLine={false}
             />
             <YAxis
-              tick={{ fontSize: 10, fill: "hsl(215, 12%, 40%)" }}
+              tick={{ fontSize: 9, fill: "currentColor" }}
+              className="text-[#64748B] dark:text-slate-500"
               axisLine={false}
               tickLine={false}
               domain={["dataMin - 50", "dataMax + 50"]}
             />
             <Tooltip
               contentStyle={{
-                backgroundColor: "hsl(228, 14%, 10%)",
-                border: "1px solid hsl(228, 12%, 18%)",
+                backgroundColor: "var(--card)",
+                border: "1px solid var(--border)",
                 borderRadius: "12px",
                 fontSize: "12px",
                 fontFamily: "JetBrains Mono",
-                boxShadow: "0 8px 32px rgba(0,0,0,0.4)",
+                boxShadow: "0 8px 32px rgba(0,0,0,0.1)",
               }}
-              labelStyle={{ color: "hsl(210, 20%, 92%)" }}
+              labelStyle={{ color: "var(--foreground)" }}
             />
             <Area
               type="monotone"

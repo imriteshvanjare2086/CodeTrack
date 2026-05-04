@@ -11,7 +11,7 @@ export function GoalsSection() {
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.85 }}
-        className="rounded-2xl border border-border/60 bg-card/60 backdrop-blur-xl p-5 h-full flex flex-col"
+        className="rounded-2xl border border-border/60 bg-card/60 backdrop-blur-xl p-5 h-full flex flex-col card-hover"
       >
         <div className="flex items-center gap-2.5 mb-5">
           <div className="p-1.5 rounded-lg bg-primary/10">
@@ -32,7 +32,7 @@ export function GoalsSection() {
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: 0.85 }}
-      className="rounded-2xl border border-border/60 bg-card/60 backdrop-blur-xl p-5 h-full flex flex-col"
+      className="rounded-2xl border border-border/60 bg-card/60 backdrop-blur-xl p-5 h-full flex flex-col card-hover"
     >
       <div className="flex items-center gap-2.5 mb-5">
         <div className="p-1.5 rounded-lg bg-primary/10">
@@ -70,7 +70,7 @@ export function GoalsSection() {
         {Array.from({ length: dailyGoal.target }).map((_, i) => (
           <div
             key={i}
-            className={`flex items-center gap-2 rounded-lg px-3 py-1.5 text-xs font-mono transition-colors ${
+            className={`flex items-center gap-2 rounded-lg px-3 py-1.5 text-xs font-mono card-hover ${
               i < dailyGoal.completed
                 ? "text-primary bg-primary/5"
                 : "text-muted-foreground"

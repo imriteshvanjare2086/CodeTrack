@@ -37,3 +37,7 @@ ts_errors.txt
 *.njsproj
 *.sln
 *.sw?
+.env
+server/.env
+.env.local
+.env.*.local

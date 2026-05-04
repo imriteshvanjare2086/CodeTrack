@@ -2,70 +2,64 @@ import express from "express";
 import mongoose from "mongoose";
 import dotenv from "dotenv";
 import cors from "cors";
-import path from "path";
-import { fileURLToPath } from "url";
 import jwt from "jsonwebtoken";
 import { OAuth2Client } from "google-auth-library";
-import User from "./models/User.js";
 import bcrypt from "bcryptjs";
+
+import User from "./models/User.js";
 import auth from "./middleware/auth.js";
 
-// Fix __dirname for ES modules
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
-
-// Load .env properly
-dotenv.config({
-  path: path.join(__dirname, ".env"),
-});
-
-const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID || "421801607650-3gmqs9da96nfa99akaufqn67kjfjbpo7.apps.googleusercontent.com");
+// Load env
+dotenv.config();
 
 const app = express();
 
-// Middleware
-app.use(cors());
+// -------------------- MIDDLEWARE --------------------
+app.use(cors()); // Allow all origins for easier debugging
 app.use(express.json());
+
+// -------------------- GOOGLE CLIENT --------------------
+const client = new OAuth2Client(); // Audience is passed during verification
 
 // -------------------- ROUTES --------------------
 
-// Test route
+// Test
 app.get("/", (req, res) => {
   res.send("API is running...");
 });
 
-// 🔥 GOOGLE AUTH API
+
+// 🔥 GOOGLE AUTH
 app.post("/api/auth/google", async (req, res) => {
   try {
     const { credential } = req.body;
-    console.log("Received Google Auth request...");
-    
+
     if (!credential) {
-      console.log("Error: No credential provided in request body");
       return res.status(400).json({ message: "Token is required" });
     }
 
-    console.log("Verifying token with Google...");
+    if (!process.env.GOOGLE_CLIENT_ID) {
+      console.error("CRITICAL: GOOGLE_CLIENT_ID is missing in server .env");
+      return res.status(500).json({ message: "Server configuration error (Missing Client ID)" });
+    }
+
     const ticket = await client.verifyIdToken({
       idToken: credential,
-      audience: process.env.GOOGLE_CLIENT_ID || "421801607650-3gmqs9da96nfa99akaufqn67kjfjbpo7.apps.googleusercontent.com",
+      audience: process.env.GOOGLE_CLIENT_ID,
     });
 
     const payload = ticket.getPayload();
     const { sub: googleId, email, name, picture } = payload;
-    console.log(`Token verified for: ${email}`);
 
     let user = await User.findOne({ email });
 
     if (user) {
-      console.log("Existing user found. Updating profile info...");
       if (!user.googleId) {
         user.googleId = googleId;
         user.profileImage = picture;
         await user.save();
       }
     } else {
-      console.log("No user found. Creating new account...");
       user = new User({
         username: name,
         email,
@@ -75,34 +69,23 @@ app.post("/api/auth/google", async (req, res) => {
       await user.save();
     }
 
-    console.log("Generating JWT...");
-    const token = jwt.sign({ userId: user._id }, process.env.JWT_SECRET || "ritesh_secret", { expiresIn: "7d" });
+    const token = jwt.sign(
+      { userId: user._id },
+      process.env.JWT_SECRET,
+      { expiresIn: "7d" }
+    );
 
-    console.log("Google Login successful!");
-    res.json({
-      message: "Google login successful",
-      token,
-      user: {
-        _id: user._id,
-        username: user.username,
-        email: user.email,
-        profileImage: user.profileImage,
-        streak: user.streak || 0,
-        problemsSolved: user.problemsSolved || 0,
-        platformStats: user.platformStats || { leetcode: 0, codeforces: 0, codechef: 0 },
-      },
-    });
+    res.json({ message: "Google login successful", token, user });
   } catch (err) {
     console.error("Google Auth Error:", err);
     res.status(500).json({ message: "Google authentication failed" });
   }
 });
 
-// 🔥 REGISTER API
+
+// 🔥 REGISTER
 app.post("/api/auth/register", async (req, res) => {
   try {
-    console.log("BODY:", req.body);
-
     const { username, email, password } = req.body;
 
     if (!username || !email || !password) {
@@ -124,243 +107,159 @@ app.post("/api/auth/register", async (req, res) => {
 
     await newUser.save();
 
-    const token = jwt.sign({ userId: newUser._id }, process.env.JWT_SECRET || "ritesh_secret", { expiresIn: "7d" });
+    const token = jwt.sign(
+      { userId: newUser._id },
+      process.env.JWT_SECRET,
+      { expiresIn: "7d" }
+    );
 
     res.status(201).json({
       message: "User registered successfully",
       token,
-      user: {
-        _id: newUser._id,
-        username: newUser.username,
-        email: newUser.email,
-      },
+      user: newUser,
     });
-
   } catch (err) {
-    console.log("ERROR:", err);
     res.status(500).json({ message: err.message });
   }
 });
 
+
+// 🔥 LOGIN
 app.post("/api/auth/login", async (req, res) => {
   try {
     const { email, password } = req.body;
 
-    if (!email || !password) {
-      return res.status(400).json({ message: "All fields required" });
-    }
-
     const user = await User.findOne({ email });
-
     if (!user) {
       return res.status(400).json({ message: "User not found" });
     }
 
     const isMatch = await bcrypt.compare(password, user.password);
-
     if (!isMatch) {
       return res.status(400).json({ message: "Invalid password" });
     }
 
-    const token = jwt.sign({ userId: user._id }, process.env.JWT_SECRET || "ritesh_secret", { expiresIn: "7d" });
+    const token = jwt.sign(
+      { userId: user._id },
+      process.env.JWT_SECRET,
+      { expiresIn: "7d" }
+    );
 
-    res.json({
-      message: "Login successful",
-      token,
-      user: {
-        _id: user._id,
-        username: user.username,
-        email: user.email,
-      },
-    });
-
+    res.json({ message: "Login successful", token, user });
   } catch (err) {
     res.status(500).json({ message: err.message });
   }
 });
 
-// User routes (Protected)
+
+// 🔥 PROFILE
 app.get("/api/user/profile", auth, async (req, res) => {
   try {
     const user = await User.findById(req.user.userId).select("-password");
-    if (!user) {
-      return res.status(404).json({ message: "User not found" });
-    }
     res.json(user);
   } catch (err) {
     res.status(500).json({ message: err.message });
   }
 });
 
-// User search API
+
+// 🔥 SEARCH USERS
 app.get("/api/users/search", auth, async (req, res) => {
   try {
-    const { q } = req.query;
-    console.log(`Search request received for query: "${q}" by User ID: ${req.user.userId}`);
-    
-    if (!q) return res.json([]);
-
-    // Create a fuzzy regex: "chaitanyamore" -> "chaitanya.*more"
-    const searchTerms = q.trim().split(/\s+/).join("|");
-    console.log(`Searching with regex pattern: ${searchTerms}`);
-
+    const query = req.query.query || "";
     const users = await User.find({
-      $and: [
-        { _id: { $ne: req.user.userId } }, // Exclude current user
-        {
-          $or: [
-            { username: { $regex: searchTerms, $options: "i" } },
-            { email: { $regex: q.trim(), $options: "i" } },
-          ],
-        },
-      ],
-    }).select("username email profileImage streak problemsSolved platformStats").limit(10);
-
-    console.log(`Found ${users.length} matching users.`);
+      username: { $regex: query, $options: "i" },
+      _id: { $ne: req.user.userId }
+    }).select("username email profileImage platformStats problemsSolved streak");
     res.json(users);
   } catch (err) {
-    console.error("Search Error:", err);
     res.status(500).json({ message: err.message });
   }
 });
 
-// 🔥 LEADERBOARD API
-app.get("/api/leaderboard", auth, async (req, res) => {
+// 🔥 LEADERBOARD
+app.get("/api/users/leaderboard", async (req, res) => {
   try {
-    console.log("Leaderboard request received...");
-    const users = await User.find({})
-      .select("username profileImage problemsSolved streak platformStats")
-      .sort({ problemsSolved: -1 }) // Sort by problems solved descending
-      .limit(50); // Get top 50 users
-
-    console.log(`Returning ${users.length} users for leaderboard.`);
-    res.json(users);
+    console.log("Leaderboard: Fetching all users...");
+    const users = await User.find({}); // Find all users
+    
+    console.log(`Leaderboard: Found ${users.length} users in database.`);
+    
+    // Sort manually if needed, but for now just send them all
+    const sortedUsers = users.sort((a, b) => (b.problemsSolved || 0) - (a.problemsSolved || 0));
+    
+    res.json(sortedUsers);
   } catch (err) {
     console.error("Leaderboard Error:", err);
     res.status(500).json({ message: err.message });
   }
 });
 
-// 🔥 GET USER BY ID API
-app.get("/api/users/:userId", auth, async (req, res) => {
+// 🔥 ADD FRIEND
+app.post("/api/users/add-friend", auth, async (req, res) => {
   try {
-    const { userId } = req.params;
-    console.log(`Fetching profile for User ID: ${userId}`);
+    const { friendId } = req.body;
+    console.log(`Add Friend Request: ${req.user.userId} adding ${friendId}`);
     
-    // Validate ID format
-    if (!mongoose.Types.ObjectId.isValid(userId)) {
-      return res.status(400).json({ message: "Invalid User ID format" });
+    const user = await User.findById(req.user.userId);
+    if (!user) {
+      console.error("User not found during add-friend");
+      return res.status(404).json({ message: "User not found" });
     }
 
-    const user = await User.findById(userId).select("-password");
+    // Initialize friends array if it doesn't exist
+    if (!user.friends) user.friends = [];
+
+    // Compare using string conversion to avoid ObjectId vs String issues
+    const isAlreadyFriend = user.friends.some(f => f.toString() === friendId);
+
+    if (!isAlreadyFriend) {
+      user.friends.push(friendId);
+      await user.save();
+      console.log("Friend added successfully");
+      res.json({ message: "Friend added successfully" });
+    } else {
+      console.log("Already friends");
+      res.status(400).json({ message: "Already friends" });
+    }
+  } catch (err) {
+    console.error("Add Friend Error:", err);
+    res.status(500).json({ message: err.message });
+  }
+});
+
+// 🔥 GET FRIENDS
+app.get("/api/users/friends", auth, async (req, res) => {
+  try {
+    const user = await User.findById(req.user.userId).populate("friends", "username email profileImage problemsSolved streak platformStats");
+    res.json(user.friends);
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+});
+
+// 🔥 GET USER STATS BY USERNAME
+app.get("/api/user-stats/:username", async (req, res) => {
+  try {
+    const user = await User.findOne({ username: req.params.username }).select("username problemsSolved streak platformStats profileImage");
     if (!user) {
       return res.status(404).json({ message: "User not found" });
     }
-    
     res.json(user);
   } catch (err) {
-    console.error("Fetch User Error:", err);
     res.status(500).json({ message: err.message });
   }
 });
 
-// 🔥 GET USER BY USERNAME API (for Battle Arena)
-app.get("/api/user-stats/:username", auth, async (req, res) => {
-  try {
-    const { username } = req.params;
-    console.log(`Battle Arena: Fetching stats for username: ${username}`);
-    
-    // Case-insensitive search for username
-    const user = await User.findOne({ 
-      username: { $regex: new RegExp("^" + username + "$", "i") } 
-    }).select("-password");
-
-    if (!user) {
-      return res.status(404).json({ message: `User "${username}" not found` });
-    }
-    
-    res.json(user);
-  } catch (err) {
-    console.error("Fetch User Stats Error:", err);
-    res.status(500).json({ message: err.message });
-  }
-});
-
-// Add friend API (Follow)
-app.post("/api/friends/add", auth, async (req, res) => {
-  try {
-    const { friendId } = req.body;
-    if (!friendId) return res.status(400).json({ message: "Friend ID required" });
-
-    const user = await User.findById(req.user.userId);
-    if (user.friends.includes(friendId)) {
-      return res.status(400).json({ message: "Already in friends list" });
-    }
-
-    user.friends.push(friendId);
-    await user.save();
-
-    // Also add current user to friend's list (Mutual)
-    const friend = await User.findById(friendId);
-    if (friend && !friend.friends.includes(user._id)) {
-      friend.friends.push(user._id);
-      await friend.save();
-    }
-
-    res.json({ message: "Friend added successfully" });
-  } catch (err) {
-    res.status(500).json({ message: err.message });
-  }
-});
-
-// Update fetch friends route to return full data
-app.get("/api/friends", auth, async (req, res) => {
-  try {
-    const user = await User.findById(req.user.userId).populate("friends", "username email profileImage streak problemsSolved platformStats");
-    if (!user) return res.status(404).json({ message: "User not found" });
-    
-    // Create the list of people for the leaderboard (friends + current user)
-    const members = [
-      {
-        _id: user._id,
-        username: user.username,
-        email: user.email,
-        profileImage: user.profileImage,
-        streak: user.streak || 0,
-        problemsSolved: user.problemsSolved || 0,
-        platformStats: user.platformStats || { leetcode: 0, codeforces: 0, codechef: 0 },
-        isMe: true
-      },
-      ...user.friends.map(f => ({
-        _id: f._id,
-        username: f.username,
-        email: f.email,
-        profileImage: f.profileImage,
-        streak: f.streak || 0,
-        problemsSolved: f.problemsSolved || 0,
-        platformStats: f.platformStats || { leetcode: 0, codeforces: 0, codechef: 0 },
-        isMe: false
-      }))
-    ];
-
-    // Sort by problems solved descending
-    members.sort((a, b) => b.problemsSolved - a.problemsSolved);
-
-    res.json({ friends: members });
-  } catch (err) {
-    res.status(500).json({ message: err.message });
-  }
-});
 
 // -------------------- DATABASE --------------------
-
 mongoose
   .connect(process.env.MONGO_URI)
   .then(() => console.log("MongoDB connected"))
   .catch((err) => console.log("Mongo Error:", err));
 
-// -------------------- SERVER --------------------
 
+// -------------------- SERVER --------------------
 const PORT = process.env.PORT || 4000;
 
 app.listen(PORT, () => {

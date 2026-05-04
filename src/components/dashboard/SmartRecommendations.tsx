@@ -11,7 +11,7 @@ export function SmartRecommendations() {
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: 0.75 }}
-      className="rounded-2xl border border-border/60 bg-card/60 backdrop-blur-xl p-5"
+      className="rounded-2xl border border-border/60 bg-card/60 backdrop-blur-xl p-5 card-hover"
     >
       <div className="flex items-center gap-2.5 mb-5">
         <div className="p-1.5 rounded-lg bg-primary/10">
@@ -35,7 +35,7 @@ export function SmartRecommendations() {
             initial={{ opacity: 0, x: 10 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ delay: 0.8 + i * 0.06 }}
-            className="group flex items-center gap-3 rounded-xl bg-muted/40 hover:bg-muted/60 border border-border/30 p-3.5 text-xs text-secondary-foreground font-mono transition-all duration-200 cursor-pointer"
+            className="group flex items-center gap-3 rounded-xl bg-muted/40 border border-border/30 p-3.5 text-xs text-secondary-foreground font-mono card-hover"
           >
             <ArrowRight className="h-3.5 w-3.5 text-primary shrink-0 transition-transform duration-200 group-hover:translate-x-0.5" />
             <span className="flex-1">{text}</span>

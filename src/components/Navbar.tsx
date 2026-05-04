@@ -1,19 +1,29 @@
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import { Bell, Search, Command, Moon, Sun, LogOut } from "lucide-react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { useState, useEffect } from "react";
 
 export function Navbar() {
   const navigate = useNavigate();
+  const location = useLocation();
+  const isDashboard = location.pathname === "/" || location.pathname === "/dashboard";
   const [query, setQuery] = useState("");
-  // Intentionally defaulting to light or parsing the existing root class
   const [darkMode, setDarkMode] = useState(() => {
-    return document.documentElement.classList.contains("dark");
+    if (typeof window !== "undefined") {
+      const savedTheme = localStorage.getItem("theme");
+      return savedTheme === "dark" || (!savedTheme && document.documentElement.classList.contains("dark"));
+    }
+    return false;
   });
+  const [mounted, setMounted] = useState(false);
   const [showDropdown, setShowDropdown] = useState(false);
   const [showNotifications, setShowNotifications] = useState(false);
   const [username, setUsername] = useState("");
   const [profilePhoto, setProfilePhoto] = useState<string | null>(localStorage.getItem("profile-photo"));
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   useEffect(() => {
     const updateUser = () => {
@@ -41,9 +51,14 @@ export function Navbar() {
     : "U";
 
   const toggleTheme = () => {
-    const isDark = document.documentElement.classList.toggle("dark");
-    setDarkMode(isDark);
-    localStorage.setItem("theme", isDark ? "dark" : "light");
+    const root = document.documentElement;
+    const newTheme = root.classList.contains("dark") ? "light" : "dark";
+    
+    root.classList.remove("light", "dark");
+    root.classList.add(newTheme);
+    
+    setDarkMode(newTheme === "dark");
+    localStorage.setItem("theme", newTheme);
   };
 
   const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -88,55 +103,68 @@ export function Navbar() {
     <header className="sticky top-0 z-30 flex h-14 items-center justify-between border-b border-border/40 bg-background/60 backdrop-blur-2xl px-4">
       <div className="flex items-center gap-3">
         <SidebarTrigger className="text-muted-foreground hover:text-foreground transition-colors" />
-        <div className="relative" id="tour-search">
-          <div className="hidden sm:flex items-center gap-2 rounded-xl border border-border/50 bg-muted/30 px-3 py-1.5 text-sm text-muted-foreground focus-within:bg-muted/50 focus-within:ring-2 focus-within:ring-primary/20 transition-all shadow-sm">
-            <Search className="h-3.5 w-3.5" />
-            <input 
-              type="text" 
-              placeholder="Search features..." 
-              className="bg-transparent border-none outline-none font-mono text-xs w-56 text-foreground placeholder:text-muted-foreground/70"
-              value={query}
-              onChange={handleSearch}
-            />
-            <kbd className="hidden md:inline-flex ml-1 h-5 items-center gap-0.5 rounded-md border border-border/60 bg-muted/70 px-1.5 text-[10px] font-mono text-muted-foreground">
-              <Command className="h-2.5 w-2.5" />K
-            </kbd>
-          </div>
-          {query.trim().length > 0 && (
-            <div className="absolute top-11 left-0 w-full rounded-xl border border-border/60 bg-card shadow-xl p-2 z-50 flex flex-col gap-1 overflow-hidden">
-              {filteredSearch.length > 0 ? (
-                filteredSearch.map(item => (
-                  <div
-                    key={item.path}
-                    onClick={() => { navigate(item.path); setQuery(""); }}
-                    className="px-3 py-2 text-sm text-foreground hover:bg-primary/10 hover:text-primary rounded-lg cursor-pointer transition-colors"
-                  >
-                    {highlightText(item.name, query)}
-                  </div>
-                ))
-              ) : (
-                <div className="px-3 py-3 text-xs text-muted-foreground text-center font-mono italic">
-                  No results found
-                </div>
-              )}
+        
+        {isDashboard && (
+          <div className="relative group h-9 flex items-center" id="tour-search">
+            <div className="hidden sm:flex items-center gap-3 rounded-xl border border-foreground/10 bg-foreground/[0.05] px-4 h-9 text-sm text-muted-foreground backdrop-blur-xl transition-colors duration-300 focus-within:bg-foreground/[0.08] focus-within:ring-1 focus-within:ring-primary/40 focus-within:border-primary/40 shadow-2xl hover:bg-foreground/[0.08]">
+              <Search className="h-3.5 w-3.5 text-foreground/60 transition-colors group-focus-within:text-primary" />
+              <input 
+                type="text" 
+                placeholder="Search..." 
+                className="bg-transparent border-none outline-none font-mono text-xs w-64 text-foreground placeholder:text-foreground/50"
+                value={query}
+                onChange={handleSearch}
+              />
+              <div className="hidden md:flex items-center gap-1 px-1.5 py-0.5 rounded-md bg-foreground/10 border border-foreground/20">
+                <Command className="h-2.5 w-2.5" />
+                <span className="text-[9px] font-mono font-black">K</span>
+              </div>
             </div>
-          )}
-        </div>
+            
+            {/* Focus glow effect */}
+            <div className="absolute -inset-1 bg-primary/20 blur-xl opacity-0 group-focus-within:opacity-100 transition-opacity duration-700 pointer-events-none -z-10" />
+
+            {query.trim().length > 0 && (
+              <div className="absolute top-[calc(100%+0.5rem)] left-0 w-full rounded-2xl border border-foreground/10 bg-card/95 backdrop-blur-3xl shadow-2xl p-2 z-50 flex flex-col gap-1 overflow-hidden premium-border">
+                {filteredSearch.length > 0 ? (
+                  filteredSearch.map(item => (
+                    <div
+                      key={item.path}
+                      onClick={() => { navigate(item.path); setQuery(""); }}
+                      className="px-4 py-2.5 text-xs font-bold text-foreground/90 hover:bg-primary/10 hover:text-primary rounded-xl cursor-pointer transition-all duration-300 flex items-center justify-between group/result"
+                    >
+                      <span className="font-mono tracking-tight">{highlightText(item.name, query)}</span>
+                      <div className="h-1.5 w-1.5 rounded-full bg-primary opacity-0 group-hover/result:opacity-100 transition-opacity shadow-[0_0_8px_hsla(var(--primary),1)]" />
+                    </div>
+                  ))
+                ) : (
+                  <div className="px-4 py-5 text-[10px] text-foreground/70 text-center font-mono uppercase tracking-[0.2em] font-black italic">
+                    No matching modules
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
+        )}
       </div>
       <div className="flex items-center gap-2">
         <button 
           onClick={toggleTheme}
-          className="relative rounded-xl p-2 text-muted-foreground hover:text-foreground hover:bg-muted/40 transition-all duration-200"
+          className="relative rounded-xl p-2.5 sm:p-2 text-muted-foreground hover:text-foreground hover:bg-muted/40 transition-all duration-200"
         >
-          {darkMode ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
+          {!mounted ? (
+            <div className="h-4 w-4 sm:h-4 sm:w-4" />
+          ) : (
+            darkMode ? <Sun className="h-4 w-4 sm:h-4 sm:w-4" /> : <Moon className="h-4 w-4 sm:h-4 sm:w-4" />
+          )}
         </button>
         <div className="relative">
           <button 
             onClick={() => { setShowNotifications(!showNotifications); setShowDropdown(false); }}
-            className="relative rounded-xl p-2 text-muted-foreground hover:text-foreground hover:bg-muted/40 transition-all duration-200"
+            className="relative rounded-xl p-2.5 sm:p-2 text-muted-foreground hover:text-foreground hover:bg-muted/40 transition-all duration-200"
           >
-            <Bell className="h-4 w-4" />
-            <span className="absolute top-1.5 right-1.5 h-2 w-2 rounded-full bg-primary animate-pulse" />
+            <Bell className="h-4 w-4 sm:h-4 sm:w-4" />
+            <span className="absolute top-2 right-2 h-2 w-2 rounded-full bg-primary animate-pulse" />
           </button>
           {showNotifications && (
             <div className="absolute right-0 mt-2 w-64 rounded-xl border border-border/60 bg-card/90 backdrop-blur-xl shadow-lg p-3 z-50">
@@ -144,8 +172,8 @@ export function Navbar() {
                 <span className="text-xs font-bold font-heading text-foreground">Notifications</span>
               </div>
               <div className="flex flex-col items-center justify-center py-6 px-4 bg-muted/20 rounded-lg border border-border/30">
-                <Bell className="h-6 w-6 text-muted-foreground/30 mb-2" />
-                <p className="text-[11px] font-mono text-muted-foreground text-center">No notifications yet</p>
+                <Bell className="h-6 w-6 text-muted-foreground mb-2" />
+                <p className="text-[11px] font-mono text-foreground/80 text-center font-semibold">No notifications yet</p>
               </div>
             </div>
           )}
@@ -154,7 +182,7 @@ export function Navbar() {
           <div 
             id="tour-profile"
             onClick={() => { setShowDropdown(!showDropdown); setShowNotifications(false); }}
-            className="h-8 w-8 rounded-xl bg-gradient-to-br from-primary/30 to-primary/10 border border-primary/20 flex items-center justify-center text-xs font-bold text-primary font-mono cursor-pointer hover:bg-primary/20 transition-all overflow-hidden"
+            className="h-9 w-9 sm:h-8 sm:w-8 rounded-xl bg-gradient-to-br from-primary/30 to-primary/10 border border-primary/20 flex items-center justify-center text-xs font-bold text-primary font-mono cursor-pointer hover:bg-primary/20 transition-all overflow-hidden"
           >
             {profilePhoto ? (
               <img src={profilePhoto} alt="User" className="h-full w-full object-cover" />
@@ -172,7 +200,7 @@ export function Navbar() {
               </button>
               <button 
                 onClick={handleLogout} 
-                className="w-full text-left px-3 py-2 text-sm text-destructive hover:bg-destructive/10 rounded-lg flex items-center gap-2 mt-1"
+                className="w-full text-left px-3 py-2 text-sm font-semibold text-white bg-destructive/80 hover:bg-destructive hover:brightness-110 rounded-lg flex items-center gap-2 mt-1 transition-all duration-200"
               >
                 <LogOut className="h-4 w-4" /> Logout
               </button>

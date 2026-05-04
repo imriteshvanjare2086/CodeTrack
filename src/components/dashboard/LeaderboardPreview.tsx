@@ -17,7 +17,7 @@ export function LeaderboardPreview() {
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: 0.8 }}
-      className="rounded-2xl border border-border/60 bg-card/60 backdrop-blur-xl p-5"
+      className="rounded-2xl border border-border/60 bg-card/60 backdrop-blur-xl p-5 card-hover"
     >
       <div className="flex items-center gap-2.5 mb-5">
         <div className="p-1.5 rounded-lg bg-leetcode/10">
@@ -33,10 +33,10 @@ export function LeaderboardPreview() {
             initial={{ opacity: 0, x: -10 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ delay: 0.85 + i * 0.05 }}
-            className={`group flex items-center gap-3 rounded-xl p-3 text-sm font-mono transition-all duration-200 ${
+            className={`group flex items-center gap-3 rounded-xl p-3 text-sm font-mono card-hover ${
               user.name === "You"
                 ? "bg-primary/10 border border-primary/20 shadow-sm shadow-primary/5"
-                : "hover:bg-muted/40"
+                : ""
             }`}
           >
             <div className="w-7 flex items-center justify-center">

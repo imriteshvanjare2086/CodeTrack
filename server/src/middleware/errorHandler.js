@@ -6,7 +6,7 @@ export function errorHandler(err, _req, res, _next) {
       : "Internal Server Error";
 
   if (status >= 500) {
-    // eslint-disable-next-line no-console
+     
     console.error(err);
   }
 

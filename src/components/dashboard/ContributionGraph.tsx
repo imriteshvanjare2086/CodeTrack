@@ -7,11 +7,11 @@ const MONTH_LABELS = [
 ];
 
 const LEVEL_COLORS = [
-  "bg-muted/30 dark:bg-[#1f2328]",
-  "bg-emerald-100 dark:bg-emerald-900/30",
-  "bg-emerald-300 dark:bg-emerald-700/50",
-  "bg-emerald-500 dark:bg-emerald-500/70",
-  "bg-emerald-700 dark:bg-emerald-400"
+  "bg-slate-200 dark:bg-[#1b1f23]",
+  "bg-primary/20",
+  "bg-primary/40",
+  "bg-primary/70",
+  "bg-primary"
 ];
 
 export function ContributionGraph({ stats: externalStats }: { stats?: any }) {
@@ -22,61 +22,72 @@ export function ContributionGraph({ stats: externalStats }: { stats?: any }) {
   };
 
   return (
-    <div className="rounded-2xl border border-border/40 bg-card p-6 shadow-sm text-foreground font-sans mt-4 transition-colors duration-300">
+    <div className="rounded-[2.5rem] border border-slate-200 dark:border-white/10 bg-white dark:bg-[#161618] px-6 pt-3 pb-6 md:px-8 md:pt-4 md:pb-7 backdrop-blur-none dark:backdrop-blur-3xl shadow-lg dark:shadow-[0_20px_50px_rgba(0,0,0,0.5),inset_0_1px_1px_rgba(255,255,255,0.1)] ring-0 dark:ring-1 dark:ring-white/5 premium-border relative overflow-hidden group/contributions mt-6 card-hover">
+      
       {/* Top Header */}
-      <div className="flex flex-col gap-1.5 mb-5 px-1">
-        <h4 className="text-sm font-bold text-foreground tracking-wider">
-          Contribution Graph
-        </h4>
-        <div className="flex items-center gap-1.5">
-          <h3 className="text-xl font-bold tracking-tight text-foreground/60">
-            {stats?.totalSubmissions !== undefined ? stats.totalSubmissions.toLocaleString() : "0"} submissions in the past one year
-          </h3>
-          <Info className="h-4 w-4 text-muted-foreground/50 cursor-pointer ml-1" />
+      <div className="relative z-10 flex items-center justify-between mb-6 px-2">
+        <div className="flex flex-col gap-1.5">
+          <div className="flex items-center gap-2">
+            <div className="h-2 w-2 rounded-full bg-primary shadow-[0_0_8px_hsla(var(--primary),0.5)] animate-pulse" />
+            <h4 className="text-xs font-black text-muted-foreground uppercase tracking-[0.3em] font-mono leading-none">
+              Activity Matrix
+            </h4>
+          </div>
+          <div className="flex items-center gap-2">
+            <h3 className="text-2xl font-black tracking-tight text-foreground">
+              {stats?.totalSubmissions !== undefined ? stats.totalSubmissions.toLocaleString() : "0"} Submissions
+            </h3>
+            <span className="text-xs text-[#64748B] dark:text-muted-foreground font-mono">in the past year</span>
+          </div>
         </div>
-      </div>
-
-      {/* Stats Row */}
-      <div className="flex items-center justify-between mb-8 px-1">
-        <div className="flex flex-col">
-          <span className="text-xs text-muted-foreground/60 uppercase tracking-wide font-bold">Total active</span>
-          <span className="text-sm font-bold text-muted-foreground/80">days: {stats?.activeDays || 0}</span>
+        
+        <div className="flex flex-col items-end">
+          <span className="text-[10px] text-foreground/80 font-mono uppercase tracking-widest font-black">Total Active</span>
+          <span className="text-sm font-black text-primary tabular-nums tracking-tight italic">
+            {stats?.activeDays || 0} Days streak
+          </span>
         </div>
       </div>
 
       {/* Grid Canvas - 12 Monthly Boxes with centered labels */}
-      <div className="overflow-x-auto pb-4 custom-scrollbar">
-        <div className="min-w-fit px-1">
+      <div className="relative z-10 overflow-x-auto pb-4 custom-scrollbar">
+        <div className="min-w-fit px-2">
           <div
             style={{
               display: "flex",
-              gap: "12px", // Increased gap for better visual separation
+              gap: "28px", // Slightly more spacing for that premium look
             }}
           >
             {MONTH_LABELS.map((month) => (
-              <div key={month} className="flex flex-col gap-2">
+              <div key={month} className="flex flex-col gap-3">
                 {/* Centered Month Label */}
-                <span className="text-[10px] text-muted-foreground font-bold font-mono uppercase tracking-wider text-center w-full">
+                <span className="text-[10px] text-foreground/70 font-black font-mono uppercase tracking-[0.2em] text-center w-full">
                   {month}
                 </span>
                 
                 <div
                   style={{
                     display: "grid",
-                    gridTemplateColumns: "repeat(4, 14px)", 
-                    gridTemplateRows: "repeat(7, 14px)",
-                    gap: "4px"
+                    gridTemplateColumns: "repeat(4, 15px)", 
+                    gridTemplateRows: "repeat(7, 15px)",
+                    gap: "5px"
                   }}
-                  className="rounded-md"
+                  className="rounded-xl"
                 >
                   {Array.from({ length: 4 * 7 }).map((_, i) => {
-                    // Set all levels to 0 to remove dummy data marks
-                    const level = 0;
+                    // Generate dummy level weighted towards 0 and 1, with occasional higher levels
+                    const rand = Math.random();
+                    let level = 0;
+                    if (rand > 0.6) level = 1;
+                    if (rand > 0.8) level = 2;
+                    if (rand > 0.9) level = 3;
+                    if (rand > 0.95) level = 4;
+                    
                     return (
                       <div
                         key={i}
-                        className={`${getDayColor(level)} w-[14px] h-[14px] rounded-[3px] border border-border/10 transition-colors duration-100 cursor-pointer hover:border-primary/50`}
-                        title="No activity"
+                        className={`${getDayColor(level)} w-[15px] h-[15px] rounded-[4px] border border-foreground/5 transition-all duration-300 cursor-pointer hover:border-primary/50 hover:shadow-[0_0_10px_hsla(var(--primary),0.2)] hover:scale-110 active:scale-95`}
+                        title={level > 0 ? `${Math.floor(Math.random() * 8) + 1} submissions on this day` : "No activity recorded"}
                       />
                     );
                   })}
@@ -87,21 +98,31 @@ export function ContributionGraph({ stats: externalStats }: { stats?: any }) {
         </div>
       </div>
 
-      {/* Legend */}
-      <div className="flex items-center justify-end gap-2 mt-2 px-1">
-        <span className="text-[10px] text-muted-foreground font-mono">Less</span>
-        <div className="flex gap-[4px]">
-          {LEVEL_COLORS.map((colorClass, index) => (
-            <div 
-              key={index} 
-              className={`w-[12px] h-[12px] rounded-[2px] ${colorClass}`} 
-            />
-          ))}
+      {/* Legend & Info */}
+      <div className="relative z-10 flex items-center justify-between mt-6 px-2">
+        <div className="flex items-center gap-2 group/info cursor-help">
+          <Info className="h-3.5 w-3.5 text-muted-foreground transition-colors group-hover/info:text-primary" />
+          <span className="text-[9px] font-bold text-foreground/80 uppercase tracking-widest font-mono">Real-time sync</span>
         </div>
-        <span className="text-[10px] text-muted-foreground font-mono">More</span>
+        
+        <div className="flex items-center gap-3 bg-slate-50 dark:bg-slate-900/40 px-4 py-2 rounded-full border border-slate-200 dark:border-white/5 transition-colors hover:border-slate-300 dark:hover:border-white/10 shadow-sm">
+          <span className="text-[9px] text-foreground/80 font-bold font-mono uppercase tracking-widest">Less</span>
+          <div className="flex gap-[4px]">
+            {LEVEL_COLORS.map((colorClass, index) => (
+              <div 
+                key={index} 
+                className={`w-[11px] h-[11px] rounded-[3px] ${colorClass} border border-foreground/5 transition-transform hover:scale-110`} 
+              />
+            ))}
+          </div>
+          <span className="text-[9px] text-foreground/80 font-bold font-mono uppercase tracking-widest">More</span>
+        </div>
       </div>
+      
+
     </div>
   );
 }
+
 
 

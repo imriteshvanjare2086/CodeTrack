@@ -8,11 +8,12 @@ import { Camera, User, Upload, X, Check, HelpCircle } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { toast } from "sonner";
 
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import { WebsiteTour } from "@/components/WebsiteTour";
 
 export default function Profile() {
   const { userId } = useParams();
+  const navigate = useNavigate();
   const userStr = localStorage.getItem("user");
   const localUser = userStr ? JSON.parse(userStr) : null;
   const isOwnProfile = !userId || userId === localUser?._id;
@@ -34,7 +35,7 @@ export default function Profile() {
     } else if (user?.profileImage) {
       setProfileImage(user.profileImage);
     }
-  }, [user, userId, isOwnProfile]);
+  }, [user, userId, isOwnProfile, localUser?.profileImage]);
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -154,7 +155,10 @@ export default function Profile() {
                     </button>
 
                     <button 
-                      onClick={() => setShowTour(true)}
+                      onClick={() => {
+                        localStorage.removeItem("codetrack_tour_done");
+                        navigate("/");
+                      }}
                       className="mt-3 w-full flex items-center justify-center gap-2 bg-muted/20 hover:bg-muted/30 text-muted-foreground px-4 py-2.5 rounded-xl border border-border/40 text-xs font-bold transition-all"
                     >
                       <HelpCircle className="h-3.5 w-3.5" />
@@ -193,7 +197,6 @@ export default function Profile() {
           </div>
         )}
       </div>
-      {showTour && <WebsiteTour onComplete={() => setShowTour(false)} />}
     </DashboardLayout>
   );
 }
