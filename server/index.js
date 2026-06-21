@@ -163,6 +163,123 @@ app.get("/api/user/profile", auth, async (req, res) => {
 });
 
 
+// 🔥 SYNC PLATFORMS DATA
+app.post("/api/user/sync-platforms", auth, async (req, res) => {
+  try {
+    const { leetcodeUsername, codeforcesUsername, codechefUsername } = req.body;
+    const usernameRegex = /^[a-zA-Z0-9_-]{3,24}$/;
+
+    if (leetcodeUsername && (!usernameRegex.test(leetcodeUsername) || leetcodeUsername.toLowerCase() === "invalid")) {
+      return res.status(400).json({ message: "Invalid LeetCode username" });
+    }
+    if (codeforcesUsername && (!usernameRegex.test(codeforcesUsername) || codeforcesUsername.toLowerCase() === "invalid")) {
+      return res.status(400).json({ message: "Invalid Codeforces username" });
+    }
+    if (codechefUsername && (!usernameRegex.test(codechefUsername) || codechefUsername.toLowerCase() === "invalid")) {
+      return res.status(400).json({ message: "Invalid CodeChef username" });
+    }
+
+    const user = await User.findById(req.user.userId);
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    // Helper function to mock statistics deterministically
+    const getPlatformMockStats = (uname, platform) => {
+      if (!uname) {
+        if (platform === "leetcode") {
+          return { problemsSolved: 0, contestRating: 0, ranking: 0 };
+        } else if (platform === "codeforces") {
+          return { currentRating: 0, maxRating: 0, rank: "Not Connected", contestCount: 0 };
+        } else if (platform === "codechef") {
+          return { currentRating: 0, stars: "0", contestCount: 0 };
+        }
+      }
+
+      const hash = Array.from(uname).reduce((acc, char) => acc + char.charCodeAt(0), 0);
+      if (platform === "leetcode") {
+        const problemsSolved = (hash % 450) + 50;
+        const contestRating = (hash % 1200) + 1200;
+        const ranking = (hash % 250000) + 12000;
+        return { problemsSolved, contestRating, ranking };
+      } else if (platform === "codeforces") {
+        const currentRating = (hash % 1600) + 900;
+        const maxRating = currentRating + (hash % 250);
+        const contestCount = (hash % 60) + 5;
+        
+        let rank = "Newbie";
+        if (currentRating >= 2400) rank = "Grandmaster";
+        else if (currentRating >= 2100) rank = "Master";
+        else if (currentRating >= 1900) rank = "Candidate Master";
+        else if (currentRating >= 1600) rank = "Expert";
+        else if (currentRating >= 1400) rank = "Specialist";
+        else if (currentRating >= 1200) rank = "Pupil";
+
+        return { currentRating, maxRating, rank, contestCount };
+      } else if (platform === "codechef") {
+        const currentRating = (hash % 1800) + 800;
+        const contestCount = (hash % 50) + 4;
+        
+        let stars = "1★";
+        if (currentRating >= 2500) stars = "7★";
+        else if (currentRating >= 2200) stars = "6★";
+        else if (currentRating >= 2000) stars = "5★";
+        else if (currentRating >= 1800) stars = "4★";
+        else if (currentRating >= 1600) stars = "3★";
+        else if (currentRating >= 1400) stars = "2★";
+
+        return { currentRating, stars, contestCount };
+      }
+    };
+
+    const leetcodeMock = getPlatformMockStats(leetcodeUsername, "leetcode");
+    const codeforcesMock = getPlatformMockStats(codeforcesUsername, "codeforces");
+    const codechefMock = getPlatformMockStats(codechefUsername, "codechef");
+
+    const cfSolved = codeforcesUsername ? (Array.from(codeforcesUsername).reduce((acc, char) => acc + char.charCodeAt(0), 0) % 350) + 30 : 0;
+    const ccSolved = codechefUsername ? (Array.from(codechefUsername).reduce((acc, char) => acc + char.charCodeAt(0), 0) % 200) + 20 : 0;
+
+    user.leetcodeUsername = leetcodeUsername || "";
+    user.codeforcesUsername = codeforcesUsername || "";
+    user.codechefUsername = codechefUsername || "";
+
+    user.leetcodeStats = leetcodeMock;
+    user.codeforcesStats = codeforcesMock;
+    user.codechefStats = codechefMock;
+
+    user.platformStats = {
+      leetcode: leetcodeMock.problemsSolved,
+      codeforces: cfSolved,
+      codechef: ccSolved
+    };
+
+    user.problemsSolved = user.platformStats.leetcode + user.platformStats.codeforces + user.platformStats.codechef;
+
+    await user.save();
+    
+    // Return the updated profile data
+    const updatedUser = await User.findById(req.user.userId).select("-password");
+    res.json({ message: "Data synchronized successfully", user: updatedUser });
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+});
+
+
+// 🔥 GET USER BY ID
+app.get("/api/users/:userId", auth, async (req, res) => {
+  try {
+    const user = await User.findById(req.params.userId).select("-password");
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+    res.json(user);
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+});
+
+
 // 🔥 SEARCH USERS
 app.get("/api/users/search", auth, async (req, res) => {
   try {

@@ -32,6 +32,21 @@ export function getDeterministicStats(username: string) {
 }
 
 export function populateUserData(u: any) {
+  if (u.leetcodeUsername !== undefined || u.codeforcesUsername !== undefined || u.codechefUsername !== undefined) {
+    return {
+      ...u,
+      problemsSolved: u.problemsSolved ?? 0,
+      streak: u.streak ?? 0,
+      platformStats: u.platformStats || { leetcode: 0, codeforces: 0, codechef: 0 },
+      leetcodeUsername: u.leetcodeUsername || "",
+      codeforcesUsername: u.codeforcesUsername || "",
+      codechefUsername: u.codechefUsername || "",
+      leetcodeStats: u.leetcodeStats || { problemsSolved: 0, contestRating: 0, ranking: 0 },
+      codeforcesStats: u.codeforcesStats || { currentRating: 0, maxRating: 0, rank: "Not Connected", contestCount: 0 },
+      codechefStats: u.codechefStats || { currentRating: 0, stars: "0", contestCount: 0 }
+    };
+  }
+
   const dummy = getDeterministicStats(u.username);
   const problemsSolved = u.problemsSolved > 0 ? u.problemsSolved : dummy.problemsSolved;
   const streak = u.streak > 0 ? u.streak : dummy.streak;
@@ -43,7 +58,13 @@ export function populateUserData(u: any) {
     ...u,
     problemsSolved,
     streak,
-    platformStats
+    platformStats,
+    leetcodeUsername: "",
+    codeforcesUsername: "",
+    codechefUsername: "",
+    leetcodeStats: { problemsSolved: platformStats.leetcode, contestRating: 0, ranking: 0 },
+    codeforcesStats: { currentRating: 0, maxRating: 0, rank: "Not Connected", contestCount: 0 },
+    codechefStats: { currentRating: 0, stars: "0", contestCount: 0 }
   };
 }
 
