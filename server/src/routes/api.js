@@ -298,6 +298,12 @@ apiRouter.get("/dashboard", requireAuth, async (req, res, next) => {
     const longestStreak = streak;
     const level = totalProblems >= 200 ? "Expert" : totalProblems >= 75 ? "Intermediate" : "Beginner";
 
+    // Total contests across all platforms
+    const lcContests = req.user.leetcodeStats?.contestCount || 0;
+    const cfContests = req.user.codeforcesStats?.contestCount || 0;
+    const ccContests = req.user.codechefStats?.contestCount || 0;
+    const totalContests = lcContests + cfContests + ccContests;
+
     const today = toIsoDate(now);
     const todaySolved = solvedUps.filter((s) => toIsoDate(new Date(s.solvedAt)) === today).length;
     const dailyTarget = typeof req.user.dailyTarget === "number" ? req.user.dailyTarget : 3;
@@ -305,6 +311,7 @@ apiRouter.get("/dashboard", requireAuth, async (req, res, next) => {
     res.json({
       heroStats: {
         totalProblems,
+        totalContests,
         streak,
         longestStreak,
         level,

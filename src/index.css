@@ -129,20 +129,19 @@
     }
   }
   .card-hover {
-    @apply transition-all duration-500 cursor-pointer;
-    transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+    @apply transition-all duration-300 cursor-pointer;
     
     &:hover {
-      transform: translateY(-4px) scale(1.005) !important;
-      @apply shadow-[0_12px_30px_-10px_rgba(0,0,0,0.08)] dark:shadow-[0_20px_40px_-10px_rgba(0,0,0,0.5)];
-      @apply dark:brightness-110;
+      transform: translateY(-2px) !important;
+      @apply shadow-[0_8px_20px_-6px_rgba(0,0,0,0.06)] dark:shadow-[0_15px_30px_-8px_rgba(0,0,0,0.4)];
+      @apply dark:brightness-[1.03];
       @apply bg-white dark:bg-white/5;
-      @apply border-primary/30 dark:border-primary/20;
+      @apply border-primary/20 dark:border-primary/10;
     }
     
     &:active {
-      transform: translateY(-1px) scale(0.99) !important;
-      transition-duration: 150ms !important;
+      transform: translateY(0px) scale(0.995) !important;
+      transition-duration: 100ms !important;
     }
   }
   .card-glow-primary {

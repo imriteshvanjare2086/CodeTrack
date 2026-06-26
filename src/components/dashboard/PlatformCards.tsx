@@ -1,5 +1,8 @@
-import { motion } from "framer-motion";
-import { Star, TrendingUp, Award, Hash } from "lucide-react";
+import { useState } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import { Star, TrendingUp, Award, Hash, LogOut, Loader2, AlertTriangle } from "lucide-react";
+import { api } from "@/lib/apiClient";
+import { useQueryClient } from "@tanstack/react-query";
 
 interface PlatformStats {
   username: string;
@@ -11,10 +14,85 @@ interface PlatformStats {
   rank?: string;
   contestCount?: number;
   stars?: string;
+  badge?: string;
+}
+
+function StatBox({ label, value, colorClass }: { label: string; value: string | number; colorClass: string }) {
+  const str = String(value);
+  const textSize =
+    str.length <= 4  ? "text-2xl" :
+    str.length <= 7  ? "text-xl" :
+    str.length <= 11 ? "text-lg" :
+    "text-base";
+
+  return (
+    <div className="flex flex-col items-center justify-center px-2 py-[14px] rounded-2xl bg-[#F8FAFC] dark:bg-slate-900/50 border border-[#E2E8F0] dark:border-white/[0.06] min-h-[80px]">
+      <span
+        className={`${textSize} font-black font-heading ${colorClass} w-full text-center leading-none whitespace-nowrap overflow-hidden`}
+        title={str}
+      >
+        {value}
+      </span>
+      <span className="text-[11px] text-[#64748B] dark:text-slate-400 uppercase tracking-wider font-mono font-semibold mt-2 text-center whitespace-nowrap">
+        {label}
+      </span>
+    </div>
+  );
+}
+
+// Confirm disconnect modal
+function DisconnectModal({
+  name,
+  colorClass,
+  onConfirm,
+  onCancel,
+  loading,
+}: {
+  name: string;
+  colorClass: string;
+  onConfirm: () => void;
+  onCancel: () => void;
+  loading: boolean;
+}) {
+  return (
+    <motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      className="absolute inset-0 z-20 rounded-3xl bg-[#111113]/95 backdrop-blur-sm flex flex-col items-center justify-center gap-4 p-6"
+    >
+      <div className="p-3 rounded-2xl bg-red-500/10 border border-red-500/20">
+        <AlertTriangle className="h-6 w-6 text-red-400" />
+      </div>
+      <div className="text-center">
+        <p className="text-sm font-heading font-bold text-foreground">Disconnect {name}?</p>
+        <p className="text-[11px] text-muted-foreground font-mono mt-1">
+          Your stats will be cleared. You can reconnect anytime.
+        </p>
+      </div>
+      <div className="flex gap-2 w-full">
+        <button
+          onClick={onCancel}
+          className="flex-1 px-3 py-2 rounded-xl text-[12px] font-mono font-semibold bg-muted/60 hover:bg-muted text-foreground transition-colors"
+        >
+          Cancel
+        </button>
+        <button
+          onClick={onConfirm}
+          disabled={loading}
+          className="flex-1 px-3 py-2 rounded-xl text-[12px] font-mono font-semibold bg-red-500/20 hover:bg-red-500/30 text-red-400 border border-red-500/30 transition-colors flex items-center justify-center gap-1.5 disabled:opacity-50"
+        >
+          {loading ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <LogOut className="h-3.5 w-3.5" />}
+          {loading ? "Disconnecting…" : "Disconnect"}
+        </button>
+      </div>
+    </motion.div>
+  );
 }
 
 function PlatformCard({
   name,
+  platformKey,
   icon: Icon,
   colorClass,
   gradientColor,
@@ -22,9 +100,10 @@ function PlatformCard({
   isConnected,
   mainStat,
   gridStats,
-  delay
+  delay,
 }: {
   name: string;
+  platformKey: string;
   icon: any;
   colorClass: string;
   gradientColor: string;
@@ -34,61 +113,98 @@ function PlatformCard({
   gridStats: Array<{ label: string; value: string | number }>;
   delay: number;
 }) {
+  const [showConfirm, setShowConfirm] = useState(false);
+  const [disconnecting, setDisconnecting] = useState(false);
+  const queryClient = useQueryClient();
+
+  const handleDisconnect = async () => {
+    setDisconnecting(true);
+    try {
+      await api.post("/user/disconnect-platform", { platform: platformKey });
+      await queryClient.invalidateQueries({ queryKey: ["dashboard"] });
+      await queryClient.refetchQueries({ queryKey: ["dashboard"] });
+    } catch (e) {
+      console.error("Disconnect failed:", e);
+    } finally {
+      setDisconnecting(false);
+      setShowConfirm(false);
+    }
+  };
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 24 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay, duration: 0.5 }}
-      className={`group relative rounded-3xl border border-slate-200 dark:border-transparent bg-white dark:bg-[#1A1A1E] dark:bg-gradient-to-br dark:${gradientColor} px-6 pt-5 pb-6 backdrop-blur-none dark:backdrop-blur-md overflow-hidden card-hover`}
+      className={`group relative rounded-3xl border border-slate-200 dark:border-transparent bg-white dark:bg-[#1A1A1E] dark:bg-gradient-to-br dark:${gradientColor} px-6 pt-6 pb-6 overflow-hidden card-hover`}
     >
       <div className="absolute inset-0 bg-gradient-to-br from-foreground/[0.03] to-transparent pointer-events-none" />
-      
-      <div className="relative flex flex-col h-full justify-between">
-        <div>
-          <div className="flex items-center justify-between mb-6">
-            <div className="flex items-center gap-3">
-              <div className={`h-10 w-10 rounded-xl bg-[#F8FAFC] dark:bg-slate-900/50 border border-[#E2E8F0] dark:border-transparent flex items-center justify-center shadow-sm`}>
-                <Icon className={`h-5 w-5 ${colorClass}`} />
-              </div>
-              <div className="text-left">
-                <h3 className="text-base font-heading font-bold text-[#1E293B] dark:text-foreground leading-tight">{name}</h3>
-                <p className="text-[11px] text-muted-foreground font-mono font-medium mt-0.5 max-w-[120px] truncate" title={isConnected ? username : undefined}>
-                  {isConnected ? `@${username}` : "Not Connected"}
-                </p>
-              </div>
+
+      {/* Disconnect confirm overlay */}
+      <AnimatePresence>
+        {showConfirm && (
+          <DisconnectModal
+            name={name}
+            colorClass={colorClass}
+            onConfirm={handleDisconnect}
+            onCancel={() => setShowConfirm(false)}
+            loading={disconnecting}
+          />
+        )}
+      </AnimatePresence>
+
+      <div className="relative flex flex-col gap-5">
+        {/* Platform header */}
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div className="h-11 w-11 rounded-2xl bg-[#F8FAFC] dark:bg-slate-900/60 border border-[#E2E8F0] dark:border-white/5 flex items-center justify-center shadow-sm shrink-0">
+              <Icon className={`h-5 w-5 ${colorClass}`} />
             </div>
-            <div className={`px-2 py-0.5 rounded-full text-[9px] font-mono font-bold tracking-tight shrink-0 ${
-              isConnected 
-                ? "bg-emerald-50 dark:bg-emerald-950/30 border border-emerald-100 dark:border-emerald-900/30 text-emerald-600 dark:text-emerald-400" 
-                : "bg-slate-50 dark:bg-slate-900/30 border border-slate-150 dark:border-white/5 text-slate-500 dark:text-muted-foreground"
-            }`}>
-              {isConnected ? "CONNECTED" : "NOT CONNECTED"}
+            <div className="text-left">
+              <h3 className="text-lg font-heading font-black text-[#1E293B] dark:text-foreground leading-tight">{name}</h3>
+              <p className="text-[11px] text-muted-foreground font-mono font-medium mt-0.5 max-w-[130px] truncate" title={isConnected ? username : undefined}>
+                {isConnected ? `@${username}` : "Not Connected"}
+              </p>
             </div>
           </div>
 
-          <div className="mb-6 text-center">
-            <p className="text-[10px] text-[#64748B] dark:text-muted-foreground uppercase tracking-[0.2em] font-mono font-black mb-1">
-              {mainStat.label}
-            </p>
-            <p className={`text-5xl font-black font-heading ${colorClass} tracking-tighter`}>
-              {mainStat.value}
-            </p>
+          <div className="flex items-center gap-2 shrink-0">
+            {/* Status pill */}
+            <div className={`px-2.5 py-1 rounded-full text-[9px] font-mono font-bold tracking-wide ${
+              isConnected
+                ? "bg-emerald-50 dark:bg-emerald-950/30 border border-emerald-100 dark:border-emerald-900/30 text-emerald-600 dark:text-emerald-400"
+                : "bg-slate-50 dark:bg-slate-900/30 border border-slate-200 dark:border-white/5 text-slate-500 dark:text-muted-foreground"
+            }`}>
+              {isConnected ? "LIVE" : "OFFLINE"}
+            </div>
+
+            {/* Disconnect button — only shown when connected */}
+            {isConnected && (
+              <button
+                onClick={() => setShowConfirm(true)}
+                title={`Disconnect ${name}`}
+                className="p-1.5 rounded-lg bg-red-500/20 hover:bg-red-500/30 border border-red-500/30 hover:border-red-500/50 text-red-400 transition-colors"
+              >
+                <LogOut className="h-3.5 w-3.5" />
+              </button>
+            )}
           </div>
         </div>
 
-        <div className={`grid ${gridStats.length === 3 ? 'grid-cols-3' : 'grid-cols-2'} gap-2 mt-auto`}>
+        {/* Main stat */}
+        <div className="flex flex-col items-center justify-center text-center py-4 h-[110px] rounded-2xl bg-[#F8FAFC] dark:bg-slate-900/30 border border-[#E2E8F0] dark:border-white/[0.04]">
+          <p className="text-[10px] text-[#64748B] dark:text-muted-foreground uppercase tracking-[0.25em] font-mono font-bold mb-2">
+            {mainStat.label}
+          </p>
+          <p className={`text-6xl font-black font-heading ${colorClass} tracking-tighter leading-none`}>
+            {mainStat.value}
+          </p>
+        </div>
+
+        {/* Grid stats */}
+        <div className={`grid ${gridStats.length === 3 ? "grid-cols-3" : "grid-cols-2"} gap-3`}>
           {gridStats.map((stat, i) => (
-            <div 
-              key={i} 
-              className="flex flex-col items-center justify-center p-2 rounded-xl bg-[#F8FAFC] dark:bg-slate-900/40 border border-[#E2E8F0] dark:border-white/5 backdrop-blur-none dark:backdrop-blur-sm card-hover min-h-[56px]"
-            >
-              <span className={`text-[15px] font-black font-heading ${colorClass} truncate w-full text-center`} title={stat.value.toString()}>
-                {stat.value}
-              </span>
-              <span className="text-[8px] text-[#64748B] dark:text-muted-foreground uppercase tracking-wider font-mono font-bold mt-1 text-center leading-tight">
-                {stat.label}
-              </span>
-            </div>
+            <StatBox key={i} label={stat.label} value={stat.value} colorClass={colorClass} />
           ))}
         </div>
       </div>
@@ -96,11 +212,11 @@ function PlatformCard({
   );
 }
 
-export function PlatformCards({ 
-  leetcodeStats, 
-  codeforcesStats, 
-  codechefStats 
-}: { 
+export function PlatformCards({
+  leetcodeStats,
+  codeforcesStats,
+  codechefStats,
+}: {
   leetcodeStats?: PlatformStats;
   codeforcesStats?: PlatformStats;
   codechefStats?: PlatformStats;
@@ -112,6 +228,7 @@ export function PlatformCards({
   const platforms = [
     {
       name: "LeetCode",
+      platformKey: "leetcode",
       icon: Hash,
       colorClass: "text-leetcode",
       gradientColor: "from-leetcode/20 to-leetcode/5",
@@ -119,53 +236,57 @@ export function PlatformCards({
       isConnected: isLcConnected,
       mainStat: {
         label: "Problems Solved",
-        value: isLcConnected ? (leetcodeStats?.problemsSolved || 0) : 0
+        value: isLcConnected ? (leetcodeStats?.problemsSolved || 0) : 0,
       },
       gridStats: [
-        { label: "Contest Rating", value: isLcConnected ? Math.round(leetcodeStats?.contestRating || 0) : 0 },
-        { label: "Ranking", value: isLcConnected ? (leetcodeStats?.ranking || 0) : 0 }
+        { label: "Rating", value: isLcConnected ? Math.round(leetcodeStats?.contestRating || 0) : 0 },
+        { label: "Contests", value: isLcConnected ? (leetcodeStats?.contestCount || 0) : 0 },
+        { label: "Badge", value: isLcConnected ? (leetcodeStats?.badge && leetcodeStats?.badge !== "None" ? leetcodeStats.badge : "None") : "—" },
       ],
-      delay: 0.4
+      delay: 0.4,
     },
     {
       name: "Codeforces",
+      platformKey: "codeforces",
       icon: TrendingUp,
       colorClass: "text-codeforces",
       gradientColor: "from-codeforces/20 to-codeforces/5",
       username: codeforcesStats?.username || "",
       isConnected: isCfConnected,
       mainStat: {
-        label: "Current Rating",
-        value: isCfConnected ? (codeforcesStats?.currentRating || 0) : 0
+        label: "Problems Solved",
+        value: isCfConnected ? (codeforcesStats?.problemsSolved || 0) : 0,
       },
       gridStats: [
-        { label: "Max Rating", value: isCfConnected ? (codeforcesStats?.maxRating || 0) : 0 },
-        { label: "Rank", value: isCfConnected ? (codeforcesStats?.rank || "Not Connected") : "Not Connected" },
-        { label: "Contest Count", value: isCfConnected ? (codeforcesStats?.contestCount || 0) : 0 }
+        { label: "Rating", value: isCfConnected ? (codeforcesStats?.currentRating || 0) : 0 },
+        { label: "Contests", value: isCfConnected ? (codeforcesStats?.contestCount || 0) : 0 },
+        { label: "Rank", value: isCfConnected ? (codeforcesStats?.rank || "—") : "—" },
       ],
-      delay: 0.5
+      delay: 0.5,
     },
     {
       name: "CodeChef",
+      platformKey: "codechef",
       icon: Award,
       colorClass: "text-codechef",
       gradientColor: "from-codechef/20 to-codechef/5",
       username: codechefStats?.username || "",
       isConnected: isCcConnected,
       mainStat: {
-        label: "Current Rating",
-        value: isCcConnected ? (codechefStats?.currentRating || 0) : 0
+        label: "Problems Solved",
+        value: isCcConnected ? (codechefStats?.problemsSolved || 0) : 0,
       },
       gridStats: [
-        { label: "Stars", value: isCcConnected ? (codechefStats?.stars || "0") : "0" },
-        { label: "Contests", value: isCcConnected ? (codechefStats?.contestCount || 0) : 0 }
+        { label: "Rating", value: isCcConnected ? (codechefStats?.currentRating || 0) : 0 },
+        { label: "Contests", value: isCcConnected ? (codechefStats?.contestCount || 0) : 0 },
+        { label: "Stars", value: isCcConnected ? (codechefStats?.stars || "0★") : "—" },
       ],
-      delay: 0.6
-    }
+      delay: 0.6,
+    },
   ];
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+    <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
       {platforms.map((p) => (
         <PlatformCard key={p.name} {...p} />
       ))}

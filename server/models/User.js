@@ -17,19 +17,35 @@ const userSchema = new mongoose.Schema({
   leetcodeStats: {
     problemsSolved: { type: Number, default: 0 },
     contestRating: { type: Number, default: 0 },
-    ranking: { type: Number, default: 0 }
+    ranking: { type: Number, default: 0 },
+    contestCount: { type: Number, default: 0 },
+    badge: { type: String, default: "None" }
   },
   codeforcesStats: {
     currentRating: { type: Number, default: 0 },
     maxRating: { type: Number, default: 0 },
     rank: { type: String, default: "Not Connected" },
-    contestCount: { type: Number, default: 0 }
+    contestCount: { type: Number, default: 0 },
+    problemsSolved: { type: Number, default: 0 }
   },
   codechefStats: {
     currentRating: { type: Number, default: 0 },
     stars: { type: String, default: "0" },
-    contestCount: { type: Number, default: 0 }
+    contestCount: { type: Number, default: 0 },
+    problemsSolved: { type: Number, default: 0 }
   },
+  codeforcesRatingHistory: [{
+    contest: { type: String },
+    rating: { type: Number }
+  }],
+  leetcodeRatingHistory: [{
+    contest: { type: String },
+    rating: { type: Number }
+  }],
+  codechefRatingHistory: [{
+    contest: { type: String },
+    rating: { type: Number }
+  }],
   streak: { type: Number, default: 0 },
   problemsSolved: { type: Number, default: 0 },
   friends: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }]

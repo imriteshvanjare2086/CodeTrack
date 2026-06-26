@@ -163,6 +163,239 @@ app.get("/api/user/profile", auth, async (req, res) => {
 });
 
 
+// Helper function to fetch LeetCode statistics
+const fetchLeetCodeStats = async (username) => {
+  if (!username) {
+    return { problemsSolved: 0, contestRating: 0, ranking: 0, contestCount: 0, badge: "None" };
+  }
+  try {
+    const response = await fetch("https://leetcode.com/graphql", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Referer": "https://leetcode.com",
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36"
+      },
+      body: JSON.stringify({
+        query: `
+          query userProblemsSolved($username: String!) {
+            matchedUser(username: $username) {
+              submitStatsGlobal {
+                acSubmissionNum {
+                  difficulty
+                  count
+                }
+              }
+              profile {
+                ranking
+              }
+            }
+            userContestRanking(username: $username) {
+              rating
+              attendedContestsCount
+            }
+          }
+        `,
+        variables: { username }
+      })
+    });
+    const data = await response.json();
+    if (!data.data || !data.data.matchedUser) {
+      throw new Error(`LeetCode user "${username}" not found or profile is private.`);
+    }
+
+    const matchedUser = data.data.matchedUser;
+    const acSubmissions = matchedUser.submitStatsGlobal?.acSubmissionNum;
+    const allStats = acSubmissions 
+      ? acSubmissions.find((item) => item.difficulty === "All") 
+      : null;
+    const problemsSolved = allStats ? allStats.count : 0;
+    const ranking = matchedUser.profile ? matchedUser.profile.ranking : 0;
+    const contestRating = data.data.userContestRanking 
+      ? Math.round(data.data.userContestRanking.rating) 
+      : 0;
+    const contestCount = data.data.userContestRanking
+      ? data.data.userContestRanking.attendedContestsCount || 0
+      : 0;
+
+    let badge = "None";
+    if (contestRating >= 2190) badge = "Guardian";
+    else if (contestRating >= 1850) badge = "Knight";
+
+    const ratingHistory = data.data.userContestRankingHistory
+      ? data.data.userContestRankingHistory
+          .filter((item) => item.attended)
+          .map((item) => ({
+            contest: item.contest.title,
+            rating: Math.round(item.rating)
+          }))
+      : [];
+
+    return { problemsSolved, contestRating, ranking, contestCount, badge, ratingHistory };
+  } catch (err) {
+    console.error(`Error fetching LeetCode stats for ${username}:`, err);
+    throw new Error(`LeetCode sync failed: ${err.message}`);
+  }
+};
+
+// Helper function to fetch Codeforces statistics
+const fetchCodeforcesStats = async (username) => {
+  if (!username) {
+    return { currentRating: 0, maxRating: 0, rank: "Not Connected", contestCount: 0, solvedCount: 0 };
+  }
+  try {
+    // 1. Fetch User Info
+    const infoRes = await fetch(`https://codeforces.com/api/user.info?handles=${username}`);
+    const infoData = await infoRes.json();
+    if (infoData.status !== "OK" || !infoData.result || infoData.result.length === 0) {
+      throw new Error(`Codeforces user "${username}" not found.`);
+    }
+
+    const info = infoData.result[0];
+    const currentRating = info.rating || 0;
+    const maxRating = info.maxRating || 0;
+    const rank = info.rank 
+      ? info.rank.split(' ').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ') 
+      : "Unrated";
+
+    // 2. Fetch Rating history for contest count and history list
+    let contestCount = 0;
+    let ratingHistory = [];
+    try {
+      const ratingRes = await fetch(`https://codeforces.com/api/user.rating?handle=${username}`);
+      const ratingData = await ratingRes.json();
+      if (ratingData.status === "OK" && ratingData.result) {
+        contestCount = ratingData.result.length;
+        ratingHistory = ratingData.result.map(entry => ({
+          contest: entry.contestName,
+          rating: entry.newRating
+        }));
+      }
+    } catch (e) {
+      console.warn("Failed to fetch Codeforces contest history, using 0:", e.message);
+    }
+
+    // 3. Fetch submissions status for solved count
+    let solvedCount = 0;
+    try {
+      const statusRes = await fetch(`https://codeforces.com/api/user.status?handle=${username}`);
+      const statusData = await statusRes.json();
+      if (statusData.status === "OK" && statusData.result) {
+        const solvedProblems = new Set();
+        statusData.result.forEach(sub => {
+          if (sub.verdict === "OK" && sub.problem) {
+            solvedProblems.add(`${sub.problem.contestId}-${sub.problem.index}`);
+          }
+        });
+        solvedCount = solvedProblems.size;
+      }
+    } catch (e) {
+      console.warn("Failed to fetch Codeforces submissions status:", e.message);
+    }
+
+    return { currentRating, maxRating, rank, contestCount, solvedCount, ratingHistory };
+  } catch (err) {
+    console.error(`Error fetching Codeforces stats for ${username}:`, err);
+    throw new Error(`Codeforces sync failed: ${err.message}`);
+  }
+};
+
+// Helper function to fetch CodeChef statistics (using community API with direct scrape fallback)
+const fetchCodeChefStats = async (username) => {
+  if (!username) {
+    return { currentRating: 0, stars: "0", contestCount: 0, solvedCount: 0, ratingHistory: [] };
+  }
+  try {
+    // Attempt method 1: community API
+    try {
+      const response = await fetch(`https://codechef-api.vercel.app/handle/${username}`);
+      if (response.ok) {
+        const data = await response.json();
+        if (data && data.success !== false) {
+          const currentRating = parseInt(data.currentRating || data.rating) || 0;
+          const stars = data.stars || "1★";
+          const contestCount = (data.ratingData && data.ratingData.length) || 0;
+          
+          let solvedCount = parseInt(data.problemsSolved) || 0;
+          if (solvedCount === 0 && data.solvedProblems && Array.isArray(data.solvedProblems)) {
+            solvedCount = data.solvedProblems.length;
+          }
+          if (solvedCount === 0 && data.fullySolved && Array.isArray(data.fullySolved)) {
+            solvedCount = data.fullySolved.length;
+          }
+
+          let ratingHistory = [];
+          if (data.ratingData && Array.isArray(data.ratingData)) {
+            ratingHistory = data.ratingData.map(entry => ({
+              contest: entry.code || entry.name || "Contest",
+              rating: parseInt(entry.rating) || 0
+            }));
+          }
+          
+          // Only return early if rating is valid AND we found solved problems
+          if (currentRating > 0 && solvedCount > 0) {
+            return { currentRating, stars, contestCount, solvedCount, ratingHistory };
+          }
+        }
+      }
+    } catch (apiErr) {
+      console.warn(`CodeChef API endpoint failed for ${username}, falling back to scraping:`, apiErr.message);
+    }
+
+    // Attempt method 2: direct web scraping fallback
+    const htmlResponse = await fetch(`https://www.codechef.com/users/${username}`, {
+      headers: {
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36"
+      }
+    });
+    if (!htmlResponse.ok) {
+      throw new Error(`HTTP error ${htmlResponse.status}`);
+    }
+    const html = await htmlResponse.text();
+
+    // Parse current rating
+    const ratingMatch = html.match(/<div class="rating-number">([^<]+)<\/div>/) || html.match(/rating-number">(\d+)/);
+    const currentRating = ratingMatch ? parseInt(ratingMatch[1]) : 0;
+    if (currentRating === 0 && html.includes("Not Found")) {
+      throw new Error(`CodeChef user "${username}" not found.`);
+    }
+
+    // Parse stars
+    const starMatch = html.match(/class="rating">([^<]+)<\/span>/) || html.match(/([1-7]★)/);
+    const stars = starMatch ? starMatch[1].trim() : "1★";
+
+    // Parse solved count (Fully Solved / Solved / Practice)
+    const solvedMatch = 
+      html.match(/Fully Solved\s*\(\s*(\d+)\s*\)/i) || 
+      html.match(/Solved\s*\(\s*(\d+)\s*\)/i) || 
+      html.match(/Practice\s*\(\s*(\d+)\s*\)/i) ||
+      html.match(/Problems\s+Solved\s*:\s*(\d+)/i);
+    const solvedCount = solvedMatch ? parseInt(solvedMatch[1]) : 0;
+
+    // Parse contest count (rating history entries)
+    const historyMatch = html.match(/var\s+all_rating\s*=\s*(\[[^\]]+\])/);
+    let contestCount = 0;
+    let ratingHistory = [];
+    if (historyMatch) {
+      try {
+        const ratingArr = JSON.parse(historyMatch[1]);
+        contestCount = ratingArr.length;
+        ratingHistory = ratingArr.map(entry => ({
+          contest: entry.code || entry.name || "Contest",
+          rating: parseInt(entry.rating) || 0
+        }));
+      } catch (e) {
+        console.warn("Failed parsing CodeChef rating history JSON:", e.message);
+      }
+    }
+
+    return { currentRating, stars, contestCount, solvedCount, ratingHistory };
+  } catch (err) {
+    console.error(`Error fetching CodeChef stats for ${username}:`, err);
+    throw new Error(`CodeChef sync failed: ${err.message}`);
+  }
+};
+
 // 🔥 SYNC PLATFORMS DATA
 app.post("/api/user/sync-platforms", auth, async (req, res) => {
   try {
@@ -184,73 +417,48 @@ app.post("/api/user/sync-platforms", auth, async (req, res) => {
       return res.status(404).json({ message: "User not found" });
     }
 
-    // Helper function to mock statistics deterministically
-    const getPlatformMockStats = (uname, platform) => {
-      if (!uname) {
-        if (platform === "leetcode") {
-          return { problemsSolved: 0, contestRating: 0, ranking: 0 };
-        } else if (platform === "codeforces") {
-          return { currentRating: 0, maxRating: 0, rank: "Not Connected", contestCount: 0 };
-        } else if (platform === "codechef") {
-          return { currentRating: 0, stars: "0", contestCount: 0 };
-        }
-      }
-
-      const hash = Array.from(uname).reduce((acc, char) => acc + char.charCodeAt(0), 0);
-      if (platform === "leetcode") {
-        const problemsSolved = (hash % 450) + 50;
-        const contestRating = (hash % 1200) + 1200;
-        const ranking = (hash % 250000) + 12000;
-        return { problemsSolved, contestRating, ranking };
-      } else if (platform === "codeforces") {
-        const currentRating = (hash % 1600) + 900;
-        const maxRating = currentRating + (hash % 250);
-        const contestCount = (hash % 60) + 5;
-        
-        let rank = "Newbie";
-        if (currentRating >= 2400) rank = "Grandmaster";
-        else if (currentRating >= 2100) rank = "Master";
-        else if (currentRating >= 1900) rank = "Candidate Master";
-        else if (currentRating >= 1600) rank = "Expert";
-        else if (currentRating >= 1400) rank = "Specialist";
-        else if (currentRating >= 1200) rank = "Pupil";
-
-        return { currentRating, maxRating, rank, contestCount };
-      } else if (platform === "codechef") {
-        const currentRating = (hash % 1800) + 800;
-        const contestCount = (hash % 50) + 4;
-        
-        let stars = "1★";
-        if (currentRating >= 2500) stars = "7★";
-        else if (currentRating >= 2200) stars = "6★";
-        else if (currentRating >= 2000) stars = "5★";
-        else if (currentRating >= 1800) stars = "4★";
-        else if (currentRating >= 1600) stars = "3★";
-        else if (currentRating >= 1400) stars = "2★";
-
-        return { currentRating, stars, contestCount };
-      }
-    };
-
-    const leetcodeMock = getPlatformMockStats(leetcodeUsername, "leetcode");
-    const codeforcesMock = getPlatformMockStats(codeforcesUsername, "codeforces");
-    const codechefMock = getPlatformMockStats(codechefUsername, "codechef");
-
-    const cfSolved = codeforcesUsername ? (Array.from(codeforcesUsername).reduce((acc, char) => acc + char.charCodeAt(0), 0) % 350) + 30 : 0;
-    const ccSolved = codechefUsername ? (Array.from(codechefUsername).reduce((acc, char) => acc + char.charCodeAt(0), 0) % 200) + 20 : 0;
+    // Fetch stats in parallel for better performance
+    const [leetcodeStats, codeforcesStats, codechefStats] = await Promise.all([
+      fetchLeetCodeStats(leetcodeUsername),
+      fetchCodeforcesStats(codeforcesUsername),
+      fetchCodeChefStats(codechefUsername)
+    ]);
 
     user.leetcodeUsername = leetcodeUsername || "";
     user.codeforcesUsername = codeforcesUsername || "";
     user.codechefUsername = codechefUsername || "";
 
-    user.leetcodeStats = leetcodeMock;
-    user.codeforcesStats = codeforcesMock;
-    user.codechefStats = codechefMock;
+    user.leetcodeStats = {
+      problemsSolved: leetcodeStats.problemsSolved,
+      contestRating: leetcodeStats.contestRating,
+      ranking: leetcodeStats.ranking,
+      contestCount: leetcodeStats.contestCount,
+      badge: leetcodeStats.badge
+    };
+
+    user.codeforcesStats = {
+      currentRating: codeforcesStats.currentRating,
+      maxRating: codeforcesStats.maxRating,
+      rank: codeforcesStats.rank,
+      contestCount: codeforcesStats.contestCount,
+      problemsSolved: codeforcesStats.solvedCount
+    };
+
+    user.codechefStats = {
+      currentRating: codechefStats.currentRating,
+      stars: codechefStats.stars,
+      contestCount: codechefStats.contestCount,
+      problemsSolved: codechefStats.solvedCount
+    };
+
+    user.codeforcesRatingHistory = codeforcesStats.ratingHistory || [];
+    user.leetcodeRatingHistory = leetcodeStats.ratingHistory || [];
+    user.codechefRatingHistory = codechefStats.ratingHistory || [];
 
     user.platformStats = {
-      leetcode: leetcodeMock.problemsSolved,
-      codeforces: cfSolved,
-      codechef: ccSolved
+      leetcode: leetcodeStats.problemsSolved,
+      codeforces: codeforcesStats.solvedCount,
+      codechef: codechefStats.solvedCount
     };
 
     user.problemsSolved = user.platformStats.leetcode + user.platformStats.codeforces + user.platformStats.codechef;
@@ -266,7 +474,45 @@ app.post("/api/user/sync-platforms", auth, async (req, res) => {
 });
 
 
-// 🔥 GET USER BY ID
+// 🔥 DISCONNECT PLATFORM
+app.post("/api/user/disconnect-platform", auth, async (req, res) => {
+  try {
+    const { platform } = req.body;
+    if (!["leetcode", "codeforces", "codechef"].includes(platform)) {
+      return res.status(400).json({ message: "Invalid platform" });
+    }
+
+    const user = await User.findById(req.user.userId);
+    if (!user) return res.status(404).json({ message: "User not found" });
+
+    if (platform === "leetcode") {
+      user.leetcodeUsername = "";
+      user.leetcodeStats = { problemsSolved: 0, contestRating: 0, ranking: 0, contestCount: 0, badge: "None" };
+      user.leetcodeRatingHistory = [];
+    } else if (platform === "codeforces") {
+      user.codeforcesUsername = "";
+      user.codeforcesStats = { currentRating: 0, maxRating: 0, rank: "Not Connected", contestCount: 0, problemsSolved: 0 };
+      user.codeforcesRatingHistory = [];
+    } else if (platform === "codechef") {
+      user.codechefUsername = "";
+      user.codechefStats = { currentRating: 0, stars: "0", contestCount: 0, problemsSolved: 0 };
+      user.codechefRatingHistory = [];
+    }
+
+    user.problemsSolved =
+      (user.leetcodeStats?.problemsSolved || 0) +
+      (user.codeforcesStats?.problemsSolved || 0) +
+      (user.codechefStats?.problemsSolved || 0);
+
+    await user.save();
+    res.json({ message: `${platform} disconnected successfully` });
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+});
+
+
+
 app.get("/api/users/:userId", auth, async (req, res) => {
   try {
     const user = await User.findById(req.params.userId).select("-password");
