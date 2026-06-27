@@ -19,6 +19,7 @@ interface PlatformStats {
 
 function StatBox({ label, value, colorClass }: { label: string; value: string | number; colorClass: string }) {
   const str = String(value);
+  const isLong = str.length > 5;
   const textSize =
     str.length <= 4  ? "text-2xl" :
     str.length <= 7  ? "text-xl" :
@@ -26,13 +27,26 @@ function StatBox({ label, value, colorClass }: { label: string; value: string | 
     "text-base";
 
   return (
-    <div className="flex flex-col items-center justify-center px-2 py-[14px] rounded-2xl bg-[#F8FAFC] dark:bg-slate-900/50 border border-[#E2E8F0] dark:border-white/[0.06] min-h-[80px]">
-      <span
-        className={`${textSize} font-black font-heading ${colorClass} w-full text-center leading-none whitespace-nowrap overflow-hidden`}
-        title={str}
-      >
-        {value}
-      </span>
+    <div className="flex flex-col items-center justify-center px-2 py-4 rounded-2xl bg-[#F8FAFC] dark:bg-slate-900/50 border border-[#E2E8F0] dark:border-white/[0.06] min-h-[88px] overflow-hidden">
+      {isLong ? (
+        <div className="marquee-container w-full">
+          <div className="marquee-track">
+            <span className={`${textSize} font-black font-heading ${colorClass} leading-none`} title={str}>
+              {value}
+            </span>
+            <span className={`${textSize} font-black font-heading ${colorClass} leading-none`} aria-hidden>
+              {value}
+            </span>
+          </div>
+        </div>
+      ) : (
+        <span
+          className={`${textSize} font-black font-heading ${colorClass} w-full text-center leading-none whitespace-nowrap`}
+          title={str}
+        >
+          {value}
+        </span>
+      )}
       <span className="text-[11px] text-[#64748B] dark:text-slate-400 uppercase tracking-wider font-mono font-semibold mt-2 text-center whitespace-nowrap">
         {label}
       </span>
@@ -192,11 +206,11 @@ function PlatformCard({
         </div>
 
         {/* Main stat */}
-        <div className="flex flex-col items-center justify-center text-center py-4 h-[110px] rounded-2xl bg-[#F8FAFC] dark:bg-slate-900/30 border border-[#E2E8F0] dark:border-white/[0.04]">
-          <p className="text-[10px] text-[#64748B] dark:text-muted-foreground uppercase tracking-[0.25em] font-mono font-bold mb-2">
+        <div className="flex flex-col items-center justify-center text-center py-4 h-[100px] rounded-2xl bg-[#F8FAFC] dark:bg-slate-900/30 border border-[#E2E8F0] dark:border-white/[0.04]">
+          <p className="text-[12px] text-[#64748B] dark:text-muted-foreground uppercase tracking-[0.2em] font-mono font-bold mb-2">
             {mainStat.label}
           </p>
-          <p className={`text-6xl font-black font-heading ${colorClass} tracking-tighter leading-none`}>
+          <p className={`text-5xl font-black font-heading ${colorClass} tracking-tighter leading-none`}>
             {mainStat.value}
           </p>
         </div>

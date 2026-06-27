@@ -16,6 +16,12 @@ interface HeroStatsData {
   highestRating: number;
   highestRank: string;
   badges?: Badge[];
+  leetcodeRating?: number;
+  codeforcesRating?: number;
+  codechefRating?: number;
+  leetcodeRank?: string;
+  codeforcesRank?: string;
+  codechefRank?: string;
 }
 
 type StatCard = {
@@ -165,50 +171,73 @@ export function HeroStats({ stats: externalStats }: { stats?: HeroStatsData }) {
               </div>
               
               <div className="text-center mt-2">
-                <p className="text-[10px] text-[#475569] dark:text-muted-foreground uppercase tracking-[0.2em] font-mono font-black mb-1.5">
-                  {card.label === "Total Problems" ? "Problems Solved" : 
-                   card.label === "Total Contests" ? "Contests Entered" : 
-                   card.label === "Highest Rating" ? "Peak Rating" : "Peak Rank"}
-                </p>
-                <h4 className={`text-3xl md:text-4xl font-black font-heading tracking-tighter ${card.color}`}>
-                  {card.isNumeric ? (
-                    <AnimatedCounter value={Number(card.value)} suffix={card.suffix} />
-                  ) : (
-                    card.value
-                  )}
-                </h4>
+                {(card.label === "Total Problems" || card.label === "Total Contests") && (
+                  <>
+                    <p className="text-[10px] text-[#475569] dark:text-muted-foreground uppercase tracking-[0.2em] font-mono font-black mb-1.5">
+                      {card.label === "Total Problems" ? "Problems Solved" : "Contests Entered"}
+                    </p>
+                    <h4 className={`text-3xl md:text-4xl font-black font-heading tracking-tighter ${card.color}`}>
+                      {card.isNumeric ? (
+                        <AnimatedCounter value={Number(card.value)} suffix={card.suffix} />
+                      ) : (
+                        card.value
+                      )}
+                    </h4>
+                  </>
+                )}
               </div>
 
               {card.label === "Highest Rating" && (
-                <div className="mt-4 pt-3 border-t border-slate-100 dark:border-white/[0.04] grid grid-cols-3 gap-1 text-[11px] font-mono font-bold">
-                  <div className="flex flex-col items-center">
-                    <span className="text-[9px] uppercase tracking-wider text-[#F7931A]">LC</span>
-                    <span className="text-foreground mt-0.5">{stats.leetcodeRating || "—"}</span>
+                <div className="mt-4 pt-3 border-t border-slate-100 dark:border-white/[0.04] grid grid-cols-3 text-[20px] font-mono font-bold">
+                  <div className="flex flex-col items-center justify-center gap-1 px-1">
+                    <span className="text-[14px] uppercase tracking-wider text-[#F7931A]">LC</span>
+                    <span className="text-foreground">{stats.leetcodeRating || "—"}</span>
                   </div>
-                  <div className="flex flex-col items-center border-x border-slate-100 dark:border-white/[0.04]">
-                    <span className="text-[9px] uppercase tracking-wider text-[#1F8ACB]">CF</span>
-                    <span className="text-foreground mt-0.5">{stats.codeforcesRating || "—"}</span>
+                  <div className="flex flex-col items-center justify-center gap-1 border-x border-slate-100 dark:border-white/[0.04] px-1">
+                    <span className="text-[14px] uppercase tracking-wider text-[#1F8ACB]">CF</span>
+                    <span className="text-foreground">{stats.codeforcesRating || "—"}</span>
                   </div>
-                  <div className="flex flex-col items-center">
-                    <span className="text-[9px] uppercase tracking-wider text-[#572E15] dark:text-[#B57C50]">CC</span>
-                    <span className="text-foreground mt-0.5">{stats.codechefRating || "—"}</span>
+                  <div className="flex flex-col items-center justify-center gap-1 px-1">
+                    <span className="text-[14px] uppercase tracking-wider text-[#572E15] dark:text-[#B57C50]">CC</span>
+                    <span className="text-foreground">{stats.codechefRating || "—"}</span>
                   </div>
                 </div>
               )}
 
               {card.label === "Highest Rank" && (
-                <div className="mt-4 pt-3 border-t border-slate-100 dark:border-white/[0.04] grid grid-cols-3 gap-1 text-[9px] font-mono font-bold">
-                  <div className="flex flex-col items-center">
-                    <span className="text-[9px] uppercase tracking-wider text-[#F7931A]">LC</span>
-                    <span className="text-foreground mt-0.5 truncate max-w-full text-center px-0.5" title={stats.leetcodeRank}>{stats.leetcodeRank || "—"}</span>
+                <div className="mt-4 pt-3 border-t border-slate-100 dark:border-white/[0.04] grid grid-cols-3 text-[20px] font-mono font-bold">
+                  {/* LC rank */}
+                  <div className="flex flex-col items-center justify-center gap-1 px-1 overflow-hidden">
+                    <span className="text-[14px] uppercase tracking-wider text-[#F7931A]">LC</span>
+                    {(stats.leetcodeRank || "—").length > 4 ? (
+                      <div className="marquee-container w-full">
+                        <div className="marquee-track">
+                          <span className="text-foreground" title={stats.leetcodeRank}>{stats.leetcodeRank || "—"}</span>
+                          <span className="text-foreground" aria-hidden>{stats.leetcodeRank || "—"}</span>
+                        </div>
+                      </div>
+                    ) : (
+                      <span className="text-foreground">{stats.leetcodeRank || "—"}</span>
+                    )}
                   </div>
-                  <div className="flex flex-col items-center border-x border-slate-100 dark:border-white/[0.04]">
-                    <span className="text-[9px] uppercase tracking-wider text-[#1F8ACB]">CF</span>
-                    <span className="text-foreground mt-0.5 truncate max-w-full text-center px-0.5" title={stats.codeforcesRank}>{stats.codeforcesRank || "—"}</span>
+                  {/* CF rank */}
+                  <div className="flex flex-col items-center justify-center gap-1 border-x border-slate-100 dark:border-white/[0.04] px-1 overflow-hidden">
+                    <span className="text-[14px] uppercase tracking-wider text-[#1F8ACB]">CF</span>
+                    {(stats.codeforcesRank || "—").length > 4 ? (
+                      <div className="marquee-container w-full">
+                        <div className="marquee-track">
+                          <span className="text-foreground" title={stats.codeforcesRank}>{stats.codeforcesRank || "—"}</span>
+                          <span className="text-foreground" aria-hidden>{stats.codeforcesRank || "—"}</span>
+                        </div>
+                      </div>
+                    ) : (
+                      <span className="text-foreground">{stats.codeforcesRank || "—"}</span>
+                    )}
                   </div>
-                  <div className="flex flex-col items-center">
-                    <span className="text-[9px] uppercase tracking-wider text-[#572E15] dark:text-[#B57C50]">CC</span>
-                    <span className="text-foreground mt-0.5 truncate max-w-full text-center px-0.5" title={stats.codechefRank}>{stats.codechefRank || "—"}</span>
+                  {/* CC stars — always short */}
+                  <div className="flex flex-col items-center justify-center gap-1 px-1">
+                    <span className="text-[14px] uppercase tracking-wider text-[#572E15] dark:text-[#B57C50]">CC</span>
+                    <span className="text-foreground">{stats.codechefRank || "—"}</span>
                   </div>
                 </div>
               )}

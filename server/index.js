@@ -189,6 +189,9 @@ const fetchLeetCodeStats = async (username) => {
               profile {
                 ranking
               }
+              activeBadge {
+                displayName
+              }
             }
             userContestRanking(username: $username) {
               rating
@@ -218,9 +221,16 @@ const fetchLeetCodeStats = async (username) => {
       ? data.data.userContestRanking.attendedContestsCount || 0
       : 0;
 
+    // Use the real badge from LeetCode's API if available, otherwise derive from rating
+    const apiBadge = matchedUser.activeBadge?.displayName || null;
     let badge = "None";
-    if (contestRating >= 2190) badge = "Guardian";
-    else if (contestRating >= 1850) badge = "Knight";
+    if (apiBadge && (apiBadge === "Guardian" || apiBadge === "Knight")) {
+      badge = apiBadge;
+    } else if (contestRating >= 2190) {
+      badge = "Guardian";
+    } else if (contestRating >= 1850) {
+      badge = "Knight";
+    }
 
     const ratingHistory = data.data.userContestRankingHistory
       ? data.data.userContestRankingHistory
@@ -468,6 +478,57 @@ app.post("/api/user/sync-platforms", auth, async (req, res) => {
     // Return the updated profile data
     const updatedUser = await User.findById(req.user.userId).select("-password");
     res.json({ message: "Data synchronized successfully", user: updatedUser });
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+});
+
+
+// 🔥 FETCH STATS FOR ANY PLATFORM USERNAME
+app.get("/api/public/platform-stats", async (req, res) => {
+  try {
+    const { platform, username } = req.query;
+    if (!platform || !username) {
+      return res.status(400).json({ message: "Platform and username are required" });
+    }
+    if (!["leetcode", "codeforces", "codechef"].includes(platform)) {
+      return res.status(400).json({ message: "Invalid platform" });
+    }
+    const usernameRegex = /^[a-zA-Z0-9_-]{3,24}$/;
+    if (!usernameRegex.test(username) || username.toLowerCase() === "invalid") {
+      return res.status(400).json({ message: "Invalid username format" });
+    }
+
+    if (platform === "leetcode") {
+      const stats = await fetchLeetCodeStats(username);
+      return res.json({
+        username,
+        problemsSolved: stats.problemsSolved,
+        contestRating: stats.contestRating,
+        ranking: stats.ranking,
+        contestCount: stats.contestCount,
+        badge: stats.badge
+      });
+    } else if (platform === "codeforces") {
+      const stats = await fetchCodeforcesStats(username);
+      return res.json({
+        username,
+        problemsSolved: stats.solvedCount,
+        currentRating: stats.currentRating,
+        maxRating: stats.maxRating,
+        rank: stats.rank,
+        contestCount: stats.contestCount
+      });
+    } else if (platform === "codechef") {
+      const stats = await fetchCodeChefStats(username);
+      return res.json({
+        username,
+        problemsSolved: stats.solvedCount,
+        currentRating: stats.currentRating,
+        contestCount: stats.contestCount,
+        stars: stats.stars
+      });
+    }
   } catch (err) {
     res.status(500).json({ message: err.message });
   }

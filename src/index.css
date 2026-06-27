@@ -290,3 +290,28 @@ body::before {
   --card: 0 0% 100%;
   --border: 214.3 31.8% 91.4%;
 }
+
+/* Infinite circular marquee for long rank/badge text */
+@keyframes marquee-loop {
+  0%   { transform: translateX(0%); }
+  100% { transform: translateX(-50%); }
+}
+
+.marquee-container {
+  overflow: hidden;
+  width: 100%;
+  position: relative;
+  display: flex;
+}
+
+/* Inner track holds two copies of the text side by side */
+.marquee-track {
+  display: flex;
+  white-space: nowrap;
+  animation: marquee-loop 7s linear infinite;
+}
+
+.marquee-track span {
+  display: inline-block;
+  padding-right: 2rem; /* gap between the two copies */
+}
