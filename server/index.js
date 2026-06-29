@@ -257,13 +257,13 @@ const fetchLeetCodeStats = async (username) => {
 
     const matchedUser = data.data.matchedUser;
     const acSubmissions = matchedUser.submitStatsGlobal?.acSubmissionNum;
-    const allStats = acSubmissions 
-      ? acSubmissions.find((item) => item.difficulty === "All") 
+    const allStats = acSubmissions
+      ? acSubmissions.find((item) => item.difficulty === "All")
       : null;
     const problemsSolved = allStats ? allStats.count : 0;
     const ranking = matchedUser.profile ? matchedUser.profile.ranking : 0;
-    const contestRating = data.data.userContestRanking 
-      ? Math.round(data.data.userContestRanking.rating) 
+    const contestRating = data.data.userContestRanking
+      ? Math.round(data.data.userContestRanking.rating)
       : 0;
     const contestCount = data.data.userContestRanking
       ? data.data.userContestRanking.attendedContestsCount || 0
@@ -282,11 +282,11 @@ const fetchLeetCodeStats = async (username) => {
 
     const ratingHistory = data.data.userContestRankingHistory
       ? data.data.userContestRankingHistory
-          .filter((item) => item.attended)
-          .map((item) => ({
-            contest: item.contest.title,
-            rating: Math.round(item.rating)
-          }))
+        .filter((item) => item.attended)
+        .map((item) => ({
+          contest: item.contest.title,
+          rating: Math.round(item.rating)
+        }))
       : [];
 
     return { problemsSolved, contestRating, ranking, contestCount, badge, ratingHistory };
@@ -312,8 +312,8 @@ const fetchCodeforcesStats = async (username) => {
     const info = infoData.result[0];
     const currentRating = info.rating || 0;
     const maxRating = info.maxRating || 0;
-    const rank = info.rank 
-      ? info.rank.split(' ').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ') 
+    const rank = info.rank
+      ? info.rank.split(' ').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ')
       : "Unrated";
 
     // 2. Fetch Rating history for contest count and history list
@@ -373,7 +373,7 @@ const fetchCodeChefStats = async (username) => {
           const currentRating = parseInt(data.currentRating || data.rating) || 0;
           const stars = data.stars || "1★";
           const contestCount = (data.ratingData && data.ratingData.length) || 0;
-          
+
           let solvedCount = parseInt(data.problemsSolved) || 0;
           if (solvedCount === 0 && data.solvedProblems && Array.isArray(data.solvedProblems)) {
             solvedCount = data.solvedProblems.length;
@@ -389,7 +389,7 @@ const fetchCodeChefStats = async (username) => {
               rating: parseInt(entry.rating) || 0
             }));
           }
-          
+
           // Only return early if rating is valid AND we found solved problems
           if (currentRating > 0 && solvedCount > 0) {
             return { currentRating, stars, contestCount, solvedCount, ratingHistory };
@@ -423,9 +423,9 @@ const fetchCodeChefStats = async (username) => {
     const stars = starMatch ? starMatch[1].trim() : "1★";
 
     // Parse solved count (Fully Solved / Solved / Practice)
-    const solvedMatch = 
-      html.match(/Fully Solved\s*\(\s*(\d+)\s*\)/i) || 
-      html.match(/Solved\s*\(\s*(\d+)\s*\)/i) || 
+    const solvedMatch =
+      html.match(/Fully Solved\s*\(\s*(\d+)\s*\)/i) ||
+      html.match(/Solved\s*\(\s*(\d+)\s*\)/i) ||
       html.match(/Practice\s*\(\s*(\d+)\s*\)/i) ||
       html.match(/Problems\s+Solved\s*:\s*(\d+)/i);
     const solvedCount = solvedMatch ? parseInt(solvedMatch[1]) : 0;
@@ -522,7 +522,7 @@ app.post("/api/user/sync-platforms", auth, async (req, res) => {
     user.problemsSolved = user.platformStats.leetcode + user.platformStats.codeforces + user.platformStats.codechef;
 
     await user.save();
-    
+
     // Return the updated profile data
     const updatedUser = await User.findById(req.user.userId).select("-password");
     res.json({ message: "Data synchronized successfully", user: updatedUser });
@@ -968,12 +968,17 @@ app.get("/api/user-stats/:username", async (req, res) => {
 
 
 // -------------------- DATABASE --------------------
+// -------------------- DATABASE --------------------
 mongoose
   .connect(process.env.MONGO_URI)
-  .then(() => console.log("MongoDB connected"))
-  .catch((err) => console.log("Mongo Error:", err));
-
-
+  .then(() => {
+    console.log("MongoDB connected");
+    console.log("Database:", mongoose.connection.name);
+    console.log("Ready State:", mongoose.connection.readyState);
+  })
+  .catch((err) => {
+    console.error("Mongo Error:", err);
+  });
 // -------------------- TEMP: CLEAR DATA --------------------
 app.post("/api/temp/clear-data", auth, async (req, res) => {
   console.log("Received TEMP clear-data request from user:", req.user.userId);
@@ -993,8 +998,8 @@ app.post("/api/temp/clear-data", auth, async (req, res) => {
     });
 
     console.log("Delete result:", deleteResult);
-    res.json({ 
-      message: "All old users deleted and friend data cleared successfully" 
+    res.json({
+      message: "All old users deleted and friend data cleared successfully"
     });
   } catch (err) {
     console.error("Error clearing data:", err);
