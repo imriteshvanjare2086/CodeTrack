@@ -36,9 +36,6 @@ type NavItem = { title: string; url: string; icon: typeof LayoutDashboard };
 
 const primaryNav: NavItem[] = [
   { title: "Dashboard", url: "/", icon: LayoutDashboard },
-  { title: "Learning Path", url: "/learning-path", icon: Route },
-  { title: "Problems", url: "/problems", icon: Code2 },
-  { title: "Weekly Challenges", url: "/weekly-challenges", icon: CalendarRange },
   { title: "Battle Arena", url: "/battle", icon: Swords },
   { title: "CodeT Assistant", url: "/codet", icon: Bot },
   { title: "Focus Mode", url: "/focus", icon: Focus },
@@ -47,9 +44,6 @@ const primaryNav: NavItem[] = [
 const restNav: NavItem[] = [
   { title: "Friends", url: "/friends", icon: Users },
   { title: "Leaderboard", url: "/leaderboard", icon: Trophy },
-  { title: "Notes", url: "/notes", icon: StickyNote },
-  { title: "Courses", url: "/courses", icon: GraduationCap },
-  { title: "Certification Center", url: "/certifications", icon: Award },
   { title: "Goals", url: "/goals", icon: Target },
   { title: "Profile", url: "/profile", icon: User },
 ];

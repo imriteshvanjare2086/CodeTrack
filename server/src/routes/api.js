@@ -17,6 +17,22 @@ function toIsoDate(d) {
   return d.toISOString().slice(0, 10);
 }
 
+function profilePayload(u) {
+  return {
+    _id: String(u._id),
+    username: u.username,
+    email: u.email,
+    platforms: u.platforms || [],
+    profileLinks: u.profileLinks || { github: "", linkedin: "", leetcode: "", codeforces: "", codechef: "" },
+    skills: u.skills || [],
+    goal: u.goal || "",
+    dailyTarget: typeof u.dailyTarget === "number" ? u.dailyTarget : 3,
+    streak: u.streak,
+    problemsSolved: u.problemsSolved,
+    platformStats: u.platformStats || { leetcode: 0, codeforces: 0, codechef: 0 },
+  };
+}
+
 apiRouter.post("/auth/register", async (req, res, next) => {
   try {
     const { username, email, password } = req.body || {};
@@ -56,19 +72,7 @@ apiRouter.get("/user/profile", requireAuth, async (req, res, next) => {
   try {
     const u = await User.findById(req.user._id).lean();
     if (!u) throw httpError(404, "User not found");
-    res.json({
-      user: {
-        _id: String(u._id),
-        username: u.username,
-        email: u.email,
-        platforms: u.platforms || [],
-        goal: u.goal || "",
-        dailyTarget: typeof u.dailyTarget === "number" ? u.dailyTarget : 3,
-        streak: u.streak,
-        problemsSolved: u.problemsSolved,
-        platformStats: u.platformStats || { leetcode: 0, codeforces: 0, codechef: 0 },
-      },
-    });
+    res.json({ user: profilePayload(u) });
   } catch (e) {
     next(e);
   }
@@ -81,20 +85,21 @@ apiRouter.patch("/user/profile", requireAuth, async (req, res, next) => {
     for (const k of allowed) {
       if (k in (req.body || {})) patch[k] = req.body[k];
     }
+    if (req.body?.profileLinks && typeof req.body.profileLinks === "object") {
+      patch.profileLinks = {
+        github: String(req.body.profileLinks.github || "").trim(),
+        linkedin: String(req.body.profileLinks.linkedin || "").trim(),
+        leetcode: String(req.body.profileLinks.leetcode || "").trim(),
+        codeforces: String(req.body.profileLinks.codeforces || "").trim(),
+        codechef: String(req.body.profileLinks.codechef || "").trim(),
+      };
+    }
+    if (Array.isArray(req.body?.skills)) {
+      patch.skills = req.body.skills.map((skill) => String(skill).trim()).filter(Boolean).slice(0, 20);
+    }
     const u = await User.findByIdAndUpdate(req.user._id, patch, { new: true }).lean();
-    res.json({
-      user: {
-        _id: String(u._id),
-        username: u.username,
-        email: u.email,
-        platforms: u.platforms || [],
-        goal: u.goal || "",
-        dailyTarget: typeof u.dailyTarget === "number" ? u.dailyTarget : 3,
-        streak: u.streak,
-        problemsSolved: u.problemsSolved,
-        platformStats: u.platformStats || { leetcode: 0, codeforces: 0, codechef: 0 },
-      },
-    });
+    if (!u) throw httpError(404, "User not found");
+    res.json({ user: profilePayload(u) });
   } catch (e) {
     next(e);
   }

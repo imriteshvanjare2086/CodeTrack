@@ -7,22 +7,17 @@ import { useAuthBootstrap } from "@/hooks/useAuthBootstrap";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
 import Index from "./pages/Index.tsx";
 import NotFound from "./pages/NotFound.tsx";
-import LearningPath from "./pages/LearningPath.tsx";
-import Problems from "./pages/Problems.tsx";
 import Onboarding from "./pages/Onboarding.tsx";
-import WeeklyChallenges from "./pages/WeeklyChallenges.tsx";
 import Friends from "./pages/Friends.tsx";
 import FocusMode from "./pages/FocusMode.tsx";
 import Login from "./pages/Login.tsx";
 import Register from "./pages/Register.tsx";
 import Profile from "./pages/Profile.tsx";
+import PublicProfile from "./pages/PublicProfile.tsx";
 import Leaderboard from "./pages/Leaderboard.tsx";
-import Notes from "./pages/Notes.tsx";
-import Courses from "./pages/Courses.tsx";
 import Goals from "./pages/Goals.tsx";
 import CodeT from "./pages/CodeT.tsx";
 import BattleArena from "./pages/BattleArena.tsx";
-import Certifications from "./pages/Certifications.tsx";
 
 const queryClient = new QueryClient();
 
@@ -53,21 +48,16 @@ const App = () => {
               <Route path="/" element={<ProtectedRoute><Index /></ProtectedRoute>} />
               <Route path="/dashboard" element={<ProtectedRoute><Index /></ProtectedRoute>} />
               <Route path="/dashboard/:userId" element={<ProtectedRoute><Index /></ProtectedRoute>} />
-              <Route path="/learning-path" element={<ProtectedRoute><LearningPath /></ProtectedRoute>} />
-              <Route path="/problems" element={<ProtectedRoute><Problems /></ProtectedRoute>} />
-              <Route path="/weekly-challenges" element={<ProtectedRoute><WeeklyChallenges /></ProtectedRoute>} />
               <Route path="/friends" element={<ProtectedRoute><Friends /></ProtectedRoute>} />
               <Route path="/leaderboard" element={<ProtectedRoute><Leaderboard /></ProtectedRoute>} />
-              <Route path="/notes" element={<ProtectedRoute><Notes /></ProtectedRoute>} />
-              <Route path="/courses" element={<ProtectedRoute><Courses /></ProtectedRoute>} />
               <Route path="/goals" element={<ProtectedRoute><Goals /></ProtectedRoute>} />
               <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
-              <Route path="/profile/:userId" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
+              <Route path="/profile/:userId" element={<ProtectedRoute><PublicProfile /></ProtectedRoute>} />
+              <Route path="/user/:userId" element={<ProtectedRoute><PublicProfile /></ProtectedRoute>} />
               <Route path="/focus" element={<ProtectedRoute><FocusMode /></ProtectedRoute>} />
               <Route path="/onboarding" element={<ProtectedRoute><Onboarding /></ProtectedRoute>} />
               <Route path="/codet" element={<ProtectedRoute><CodeT /></ProtectedRoute>} />
               <Route path="/battle" element={<ProtectedRoute><BattleArena /></ProtectedRoute>} />
-              <Route path="/certifications" element={<ProtectedRoute><Certifications /></ProtectedRoute>} />
 
               {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
               <Route path="*" element={<NotFound />} />

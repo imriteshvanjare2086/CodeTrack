@@ -1,4 +1,5 @@
-import { api } from "@/lib/apiClient";
+import { api, getToken } from "@/lib/apiClient";
+import axios from "axios";
 
 export type UserProfile = {
   _id: string;
@@ -7,11 +8,14 @@ export type UserProfile = {
   streak: number;
   problemsSolved: number;
   platformStats: { leetcode: number; codeforces: number; codechef: number };
+  profileImage?: string;
+  profileLinks?: { github?: string; linkedin?: string; leetcode?: string; codeforces?: string; codechef?: string };
+  skills?: string[];
 };
 
 export async function fetchProfile() {
   const res = await api.get("/user/profile");
-  return res.data as UserProfile;
+  return populateUserData(res.data.user || res.data) as UserProfile;
 }
 
 export function getDeterministicStats(username: string) {
@@ -38,6 +42,8 @@ export function populateUserData(u: any) {
       problemsSolved: u.problemsSolved ?? 0,
       streak: u.streak ?? 0,
       platformStats: u.platformStats || { leetcode: 0, codeforces: 0, codechef: 0 },
+      profileLinks: u.profileLinks || { github: "", linkedin: "", leetcode: "", codeforces: "", codechef: "" },
+      skills: u.skills || [],
       leetcodeUsername: u.leetcodeUsername || "",
       codeforcesUsername: u.codeforcesUsername || "",
       codechefUsername: u.codechefUsername || "",
@@ -59,6 +65,8 @@ export function populateUserData(u: any) {
     problemsSolved,
     streak,
     platformStats,
+    profileLinks: u.profileLinks || { github: "", linkedin: "", leetcode: "", codeforces: "", codechef: "" },
+    skills: u.skills || [],
     leetcodeUsername: "",
     codeforcesUsername: "",
     codechefUsername: "",
@@ -70,17 +78,68 @@ export function populateUserData(u: any) {
 
 export async function getLeaderboard() {
   const res = await api.get("/users/leaderboard");
-  let data = res.data as UserProfile[];
-  
-  // Inject consistent dummy data based on names
-  data = data.map((u) => populateUserData(u) as UserProfile);
+  let data = res.data as (UserProfile & { overallScore?: number; isMe?: boolean })[];
+
+  data = data.map((u) => {
+    const pop = populateUserData(u) as UserProfile & { overallScore?: number; isMe?: boolean };
+    return {
+      ...pop,
+      overallScore: u.overallScore ?? pop.overallScore,
+      isMe: u.isMe,
+    };
+  });
 
   return data;
 }
 
 export async function fetchUserProfile(userId: string) {
-  const res = await api.get(`/user/profile`); // Simplified for now
-  return res.data as UserProfile;
+  const res = await api.get(`/users/${userId}`);
+  return populateUserData(res.data.user || res.data) as UserProfile;
+}
+
+export async function updateProfile(payload: {
+  username?: string;
+  profileLinks?: { github: string; linkedin: string; leetcode: string; codeforces: string; codechef: string };
+  skills?: string[];
+}) {
+  const res = await patchProfile(payload);
+  return populateUserData(res.data.user || res.data) as UserProfile;
+}
+
+async function patchProfile(payload: {
+  username?: string;
+  profileLinks?: { github: string; linkedin: string; leetcode: string; codeforces: string; codechef: string };
+  skills?: string[];
+}) {
+  try {
+    return await api.patch("/user/profile", payload);
+  } catch (err: any) {
+    const isRouteNotFound =
+      err.response?.status === 404 &&
+      (!err.response?.data?.message || err.response.data.message === "Not Found");
+
+    if (!isRouteNotFound) {
+      throw err;
+    }
+
+    try {
+      return await api.post("/user/profile", payload);
+    } catch (postErr: any) {
+      const isPostRouteNotFound =
+        postErr.response?.status === 404 &&
+        (!postErr.response?.data?.message || postErr.response.data.message === "Not Found");
+
+      if (!isPostRouteNotFound) {
+        throw postErr;
+      }
+
+      return axios.post("http://localhost:4000/api/user/profile", payload, {
+        headers: {
+          Authorization: `Bearer ${getToken()}`,
+        },
+      });
+    }
+  }
 }
 
 export async function searchUsers(query: string) {

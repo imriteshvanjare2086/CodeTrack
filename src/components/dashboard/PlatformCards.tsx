@@ -115,6 +115,7 @@ function PlatformCard({
   mainStat,
   gridStats,
   delay,
+  readOnly = false,
 }: {
   name: string;
   platformKey: string;
@@ -126,6 +127,7 @@ function PlatformCard({
   mainStat: { label: string; value: string | number };
   gridStats: Array<{ label: string; value: string | number }>;
   delay: number;
+  readOnly?: boolean;
 }) {
   const [showConfirm, setShowConfirm] = useState(false);
   const [disconnecting, setDisconnecting] = useState(false);
@@ -192,8 +194,8 @@ function PlatformCard({
               {isConnected ? "LIVE" : "OFFLINE"}
             </div>
 
-            {/* Disconnect button — only shown when connected */}
-            {isConnected && (
+            {/* Disconnect button — only shown when connected and editable */}
+            {isConnected && !readOnly && (
               <button
                 onClick={() => setShowConfirm(true)}
                 title={`Disconnect ${name}`}
@@ -230,10 +232,12 @@ export function PlatformCards({
   leetcodeStats,
   codeforcesStats,
   codechefStats,
+  readOnly = false,
 }: {
   leetcodeStats?: PlatformStats;
   codeforcesStats?: PlatformStats;
   codechefStats?: PlatformStats;
+  readOnly?: boolean;
 }) {
   const isLcConnected = !!leetcodeStats?.username;
   const isCfConnected = !!codeforcesStats?.username;
@@ -302,7 +306,7 @@ export function PlatformCards({
   return (
     <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
       {platforms.map((p) => (
-        <PlatformCard key={p.name} {...p} />
+        <PlatformCard key={p.name} {...p} readOnly={readOnly} />
       ))}
     </div>
   );

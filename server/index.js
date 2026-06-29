@@ -8,6 +8,7 @@ import bcrypt from "bcryptjs";
 
 import User from "./models/User.js";
 import auth from "./middleware/auth.js";
+import { calculateOverallScore, sortByOverallScore, LEADERBOARD_FIELDS, toLeaderboardEntry } from "./lib/ranking.js";
 
 // Load env
 dotenv.config();
@@ -161,6 +162,53 @@ app.get("/api/user/profile", auth, async (req, res) => {
     res.status(500).json({ message: err.message });
   }
 });
+
+async function saveUserProfile(req, res) {
+  console.log(`Received ${req.method} /api/user/profile request:`, req.body);
+  try {
+    const patch = {};
+
+    if (req.body.username && typeof req.body.username === "string") {
+      patch.username = req.body.username.trim();
+    }
+
+    if (req.body.profileLinks && typeof req.body.profileLinks === "object") {
+      patch.profileLinks = {
+        github: String(req.body.profileLinks.github || "").trim(),
+        linkedin: String(req.body.profileLinks.linkedin || "").trim(),
+        leetcode: String(req.body.profileLinks.leetcode || "").trim(),
+        codeforces: String(req.body.profileLinks.codeforces || "").trim(),
+        codechef: String(req.body.profileLinks.codechef || "").trim(),
+      };
+    }
+
+    if (Array.isArray(req.body.skills)) {
+      patch.skills = req.body.skills
+        .map((skill) => String(skill).trim())
+        .filter(Boolean)
+        .slice(0, 20);
+    }
+
+    const updatedUser = await User.findByIdAndUpdate(
+      req.user.userId,
+      { $set: patch },
+      { new: true, runValidators: true }
+    ).select("-password");
+
+    if (!updatedUser) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    console.log("Updated user:", updatedUser);
+    res.json(updatedUser);
+  } catch (err) {
+    console.error("Error updating profile:", err);
+    res.status(500).json({ message: err.message });
+  }
+}
+
+app.patch("/api/user/profile", auth, saveUserProfile);
+app.post("/api/user/profile", auth, saveUserProfile);
 
 
 // Helper function to fetch LeetCode statistics
@@ -574,6 +622,325 @@ app.post("/api/user/disconnect-platform", auth, async (req, res) => {
 
 
 
+// 🔥 SEARCH USERS
+app.get("/api/users/search", auth, async (req, res) => {
+  try {
+    const query = req.query.query || "";
+    const currentUser = await User.findById(req.user.userId);
+    if (!currentUser) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    const users = await User.find({
+      username: { $regex: query, $options: "i" },
+      _id: { $ne: req.user.userId }
+    }).select(LEADERBOARD_FIELDS);
+
+    const friendIds = new Set((currentUser.friends || []).map((id) => id.toString()));
+    const sentIds = new Set((currentUser.friendRequestsSent || []).map((id) => id.toString()));
+    const receivedIds = new Set((currentUser.friendRequestsReceived || []).map((id) => id.toString()));
+
+    const results = users.map((user) => ({
+      ...toLeaderboardEntry(user, req.user.userId),
+      friendStatus: friendIds.has(user._id.toString())
+        ? "friends"
+        : sentIds.has(user._id.toString())
+          ? "request_sent"
+          : receivedIds.has(user._id.toString())
+            ? "request_received"
+            : "none",
+    }));
+
+    res.json(results);
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+});
+
+// 🔥 GLOBAL LEADERBOARD
+app.get("/api/users/leaderboard", auth, async (req, res) => {
+  try {
+    const users = await User.find({}).select(LEADERBOARD_FIELDS);
+    const ranked = sortByOverallScore(users, req.user.userId);
+    res.json(ranked);
+  } catch (err) {
+    console.error("Leaderboard Error:", err);
+    res.status(500).json({ message: err.message });
+  }
+});
+
+// 🔥 FRIENDS LEADERBOARD (current user + friends)
+app.get("/api/users/friends-leaderboard", auth, async (req, res) => {
+  try {
+    const user = await User.findById(req.user.userId).populate(
+      "friends",
+      LEADERBOARD_FIELDS
+    );
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    const participants = [user, ...(user.friends || [])];
+    const ranked = sortByOverallScore(participants, req.user.userId);
+    res.json(ranked);
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+});
+
+// 🔥 PUBLIC PROFILE
+app.get("/api/users/public/:userId", auth, async (req, res) => {
+  try {
+    const user = await User.findById(req.params.userId).select(`-password -friendRequestsSent -friendRequestsReceived -friends`);
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+    res.json(user);
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+});
+
+// 🔥 SEND FRIEND REQUEST
+app.post("/api/users/friend-request", auth, async (req, res) => {
+  try {
+    const { friendId } = req.body;
+    if (!friendId || friendId === req.user.userId) {
+      return res.status(400).json({ message: "Invalid friend request" });
+    }
+
+    const [user, target] = await Promise.all([
+      User.findById(req.user.userId),
+      User.findById(friendId),
+    ]);
+
+    if (!user || !target) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    user.friends = user.friends || [];
+    user.friendRequestsSent = user.friendRequestsSent || [];
+    user.friendRequestsReceived = user.friendRequestsReceived || [];
+    target.friends = target.friends || [];
+    target.friendRequestsSent = target.friendRequestsSent || [];
+    target.friendRequestsReceived = target.friendRequestsReceived || [];
+
+    const isFriend = user.friends.some((f) => f.toString() === friendId);
+    if (isFriend) {
+      return res.status(400).json({ message: "Already friends" });
+    }
+
+    const alreadySent = user.friendRequestsSent.some((f) => f.toString() === friendId);
+    if (alreadySent) {
+      return res.status(400).json({ message: "Friend request already sent" });
+    }
+
+    const reversePending = user.friendRequestsReceived.some((f) => f.toString() === friendId);
+    if (reversePending) {
+      user.friends.push(friendId);
+      target.friends.push(user._id);
+      user.friendRequestsReceived = user.friendRequestsReceived.filter((f) => f.toString() !== friendId);
+      target.friendRequestsSent = target.friendRequestsSent.filter((f) => f.toString() !== user._id.toString());
+      await Promise.all([user.save(), target.save()]);
+      return res.json({ message: "Friend request accepted", status: "friends" });
+    }
+
+    user.friendRequestsSent.push(friendId);
+    target.friendRequestsReceived.push(user._id);
+    await Promise.all([user.save(), target.save()]);
+    res.json({ message: "Friend request sent", status: "request_sent" });
+  } catch (err) {
+    console.error("Friend Request Error:", err);
+    res.status(500).json({ message: err.message });
+  }
+});
+
+// 🔥 GET FRIEND REQUESTS
+app.get("/api/users/friend-requests", auth, async (req, res) => {
+  try {
+    const user = await User.findById(req.user.userId)
+      .populate("friendRequestsReceived", "username email profileImage problemsSolved streak platformStats")
+      .populate("friendRequestsSent", "username email profileImage problemsSolved streak platformStats");
+
+    res.json({
+      received: user?.friendRequestsReceived || [],
+      sent: user?.friendRequestsSent || [],
+    });
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+});
+
+// 🔥 ACCEPT FRIEND REQUEST
+app.post("/api/users/friend-request/accept", auth, async (req, res) => {
+  try {
+    const { friendId } = req.body;
+    const [user, requester] = await Promise.all([
+      User.findById(req.user.userId),
+      User.findById(friendId),
+    ]);
+
+    if (!user || !requester) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    const hasRequest = (user.friendRequestsReceived || []).some((f) => f.toString() === friendId);
+    if (!hasRequest) {
+      return res.status(400).json({ message: "No pending friend request from this user" });
+    }
+
+    user.friends = user.friends || [];
+    requester.friends = requester.friends || [];
+
+    if (!user.friends.some((f) => f.toString() === friendId)) {
+      user.friends.push(friendId);
+    }
+    if (!requester.friends.some((f) => f.toString() === user._id.toString())) {
+      requester.friends.push(user._id);
+    }
+
+    user.friendRequestsReceived = user.friendRequestsReceived.filter((f) => f.toString() !== friendId);
+    requester.friendRequestsSent = requester.friendRequestsSent.filter((f) => f.toString() !== user._id.toString());
+
+    await Promise.all([user.save(), requester.save()]);
+    res.json({ message: "Friend request accepted" });
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+});
+
+// 🔥 REJECT FRIEND REQUEST
+app.post("/api/users/friend-request/reject", auth, async (req, res) => {
+  try {
+    const { friendId } = req.body;
+    const [user, requester] = await Promise.all([
+      User.findById(req.user.userId),
+      User.findById(friendId),
+    ]);
+
+    if (!user || !requester) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    user.friendRequestsReceived = (user.friendRequestsReceived || []).filter((f) => f.toString() !== friendId);
+    requester.friendRequestsSent = (requester.friendRequestsSent || []).filter((f) => f.toString() !== user._id.toString());
+
+    await Promise.all([user.save(), requester.save()]);
+    res.json({ message: "Friend request rejected" });
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+});
+
+// 🔥 CANCEL FRIEND REQUEST
+app.post("/api/users/friend-request/cancel", auth, async (req, res) => {
+  try {
+    const { friendId } = req.body;
+    const [user, target] = await Promise.all([
+      User.findById(req.user.userId),
+      User.findById(friendId),
+    ]);
+
+    if (!user || !target) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    user.friendRequestsSent = (user.friendRequestsSent || []).filter((f) => f.toString() !== friendId);
+    target.friendRequestsReceived = (target.friendRequestsReceived || []).filter((f) => f.toString() !== user._id.toString());
+
+    await Promise.all([user.save(), target.save()]);
+    res.json({ message: "Friend request cancelled" });
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+});
+
+// 🔥 ADD FRIEND (legacy alias – sends friend request)
+app.post("/api/users/add-friend", auth, async (req, res) => {
+  try {
+    const { friendId } = req.body;
+    if (!friendId || friendId === req.user.userId) {
+      return res.status(400).json({ message: "Invalid friend request" });
+    }
+
+    const [user, target] = await Promise.all([
+      User.findById(req.user.userId),
+      User.findById(friendId),
+    ]);
+
+    if (!user || !target) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    user.friends = user.friends || [];
+    user.friendRequestsSent = user.friendRequestsSent || [];
+    user.friendRequestsReceived = user.friendRequestsReceived || [];
+    target.friends = target.friends || [];
+    target.friendRequestsSent = target.friendRequestsSent || [];
+    target.friendRequestsReceived = target.friendRequestsReceived || [];
+
+    if (user.friends.some((f) => f.toString() === friendId)) {
+      return res.status(400).json({ message: "Already friends" });
+    }
+    if (user.friendRequestsSent.some((f) => f.toString() === friendId)) {
+      return res.status(400).json({ message: "Friend request already sent" });
+    }
+
+    const reversePending = user.friendRequestsReceived.some((f) => f.toString() === friendId);
+    if (reversePending) {
+      user.friends.push(friendId);
+      target.friends.push(user._id);
+      user.friendRequestsReceived = user.friendRequestsReceived.filter((f) => f.toString() !== friendId);
+      target.friendRequestsSent = target.friendRequestsSent.filter((f) => f.toString() !== user._id.toString());
+      await Promise.all([user.save(), target.save()]);
+      return res.json({ message: "Friend added successfully", status: "friends" });
+    }
+
+    user.friendRequestsSent.push(friendId);
+    target.friendRequestsReceived.push(user._id);
+    await Promise.all([user.save(), target.save()]);
+    res.json({ message: "Friend request sent", status: "request_sent" });
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+});
+
+// 🔥 REMOVE FRIEND
+app.delete("/api/users/friends/:friendId", auth, async (req, res) => {
+  try {
+    const { friendId } = req.params;
+    const [user, friend] = await Promise.all([
+      User.findById(req.user.userId),
+      User.findById(friendId),
+    ]);
+
+    if (!user || !friend) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    user.friends = (user.friends || []).filter((f) => f.toString() !== friendId);
+    friend.friends = (friend.friends || []).filter((f) => f.toString() !== user._id.toString());
+
+    await Promise.all([user.save(), friend.save()]);
+    res.json({ message: "Friend removed successfully" });
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+});
+
+// 🔥 GET FRIENDS
+app.get("/api/users/friends", auth, async (req, res) => {
+  try {
+    const user = await User.findById(req.user.userId).populate("friends", LEADERBOARD_FIELDS);
+    const friends = (user?.friends || []).map((f) => toLeaderboardEntry(f, req.user.userId));
+    friends.sort((a, b) => b.overallScore - a.overallScore);
+    res.json(friends);
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+});
+
+// 🔥 GET USER BY ID (must be after specific /users/* routes)
 app.get("/api/users/:userId", auth, async (req, res) => {
   try {
     const user = await User.findById(req.params.userId).select("-password");
@@ -586,86 +953,10 @@ app.get("/api/users/:userId", auth, async (req, res) => {
   }
 });
 
-
-// 🔥 SEARCH USERS
-app.get("/api/users/search", auth, async (req, res) => {
-  try {
-    const query = req.query.query || "";
-    const users = await User.find({
-      username: { $regex: query, $options: "i" },
-      _id: { $ne: req.user.userId }
-    }).select("username email profileImage platformStats problemsSolved streak");
-    res.json(users);
-  } catch (err) {
-    res.status(500).json({ message: err.message });
-  }
-});
-
-// 🔥 LEADERBOARD
-app.get("/api/users/leaderboard", async (req, res) => {
-  try {
-    console.log("Leaderboard: Fetching all users...");
-    const users = await User.find({}); // Find all users
-    
-    console.log(`Leaderboard: Found ${users.length} users in database.`);
-    
-    // Sort manually if needed, but for now just send them all
-    const sortedUsers = users.sort((a, b) => (b.problemsSolved || 0) - (a.problemsSolved || 0));
-    
-    res.json(sortedUsers);
-  } catch (err) {
-    console.error("Leaderboard Error:", err);
-    res.status(500).json({ message: err.message });
-  }
-});
-
-// 🔥 ADD FRIEND
-app.post("/api/users/add-friend", auth, async (req, res) => {
-  try {
-    const { friendId } = req.body;
-    console.log(`Add Friend Request: ${req.user.userId} adding ${friendId}`);
-    
-    const user = await User.findById(req.user.userId);
-    if (!user) {
-      console.error("User not found during add-friend");
-      return res.status(404).json({ message: "User not found" });
-    }
-
-    // Initialize friends array if it doesn't exist
-    if (!user.friends) user.friends = [];
-
-    // Compare using string conversion to avoid ObjectId vs String issues
-    const isAlreadyFriend = user.friends.some(f => f.toString() === friendId);
-
-    if (!isAlreadyFriend) {
-      user.friends.push(friendId);
-      await user.save();
-      console.log("Friend added successfully");
-      res.json({ message: "Friend added successfully" });
-    } else {
-      console.log("Already friends");
-      res.status(400).json({ message: "Already friends" });
-    }
-  } catch (err) {
-    console.error("Add Friend Error:", err);
-    res.status(500).json({ message: err.message });
-  }
-});
-
-// 🔥 GET FRIENDS
-app.get("/api/users/friends", auth, async (req, res) => {
-  try {
-    const user = await User.findById(req.user.userId).populate("friends", "username email profileImage problemsSolved streak platformStats");
-    res.json(user.friends);
-  } catch (err) {
-    res.status(500).json({ message: err.message });
-  }
-});
-
 // 🔥 GET USER STATS BY USERNAME
 app.get("/api/user-stats/:username", async (req, res) => {
   try {
-    const user = await User.findOne({ username: req.params.username }).select("username problemsSolved streak platformStats profileImage");
+    const user = await User.findOne({ username: req.params.username }).select("username problemsSolved streak platformStats profileImage leetcodeUsername codeforcesUsername codechefUsername leetcodeStats codeforcesStats codechefStats");
     if (!user) {
       return res.status(404).json({ message: "User not found" });
     }
@@ -682,6 +973,34 @@ mongoose
   .then(() => console.log("MongoDB connected"))
   .catch((err) => console.log("Mongo Error:", err));
 
+
+// -------------------- TEMP: CLEAR DATA --------------------
+app.post("/api/temp/clear-data", auth, async (req, res) => {
+  console.log("Received TEMP clear-data request from user:", req.user.userId);
+  try {
+    // Clear friend data for all users
+    await User.updateMany({}, {
+      $set: {
+        friends: [],
+        friendRequestsSent: [],
+        friendRequestsReceived: [],
+      }
+    });
+
+    // Delete all users except current logged in tester
+    const deleteResult = await User.deleteMany({
+      _id: { $ne: req.user.userId }
+    });
+
+    console.log("Delete result:", deleteResult);
+    res.json({ 
+      message: "All old users deleted and friend data cleared successfully" 
+    });
+  } catch (err) {
+    console.error("Error clearing data:", err);
+    res.status(500).json({ message: "Failed to clear data" });
+  }
+});
 
 // -------------------- SERVER --------------------
 const PORT = process.env.PORT || 4000;

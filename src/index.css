@@ -205,6 +205,11 @@
   to { background-position: 200% 0; }
 }
 
+@keyframes shineline {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(100%); }
+}
+
 @keyframes pulse-glow {
   0% { box-shadow: 0 0 5px hsla(var(--primary), 0.2); }
   50% { box-shadow: 0 0 20px hsla(var(--primary), 0.4); }

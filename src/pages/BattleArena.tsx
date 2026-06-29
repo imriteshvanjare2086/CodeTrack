@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Swords, Search, Trophy, Loader2, ArrowLeft } from 'lucide-react';
+import { Swords, Search, Trophy, Loader2, ArrowLeft, Code2, Medal, Star, TrendingUp } from 'lucide-react';
 import { api } from '@/lib/apiClient';
 import { populateUserData } from '@/services/user';
 import { useNavigate } from 'react-router-dom';
@@ -14,6 +14,13 @@ interface PlayerStats {
   leetcodeRating: number;
   codeforcesRating: number;
   codechefRating: number;
+  leetcodeRanking: number;
+  leetcodeContestCount: number;
+  codeforcesContestCount: number;
+  codechefContestCount: number;
+  leetcodeRank: string;
+  codeforcesRank: string;
+  codechefRank: string;
   badges: number;
   maxStreak: number;
 }
@@ -54,20 +61,24 @@ export default function BattleArena() {
       const p1Populated = populateUserData(p1Raw);
       const p2Populated = populateUserData(p2Raw);
 
-      const hash1 = Array.from(p1Raw.username || "User").reduce((acc, char: any) => acc + char.charCodeAt(0), 0);
-      const hash2 = Array.from(p2Raw.username || "User").reduce((acc, char: any) => acc + char.charCodeAt(0), 0);
-
       setStats1({
         username: p1Raw.username,
         problemsSolved: p1Populated.problemsSolved,
         leetcodeSolved: p1Populated.platformStats?.leetcode || 0,
         codeforcesSolved: p1Populated.platformStats?.codeforces || 0,
         codechefSolved: p1Populated.platformStats?.codechef || 0,
-        leetcodeRating: 1400 + (hash1 % 800),
-        codeforcesRating: 1200 + (hash1 % 900),
-        codechefRating: 1300 + (hash1 % 700),
+        leetcodeRating: Math.round(p1Populated.leetcodeStats?.contestRating || 0),
+        codeforcesRating: Math.round(Math.max(p1Populated.codeforcesStats?.currentRating || 0, p1Populated.codeforcesStats?.maxRating || 0)),
+        codechefRating: Math.round(p1Populated.codechefStats?.currentRating || 0),
+        leetcodeRanking: p1Populated.leetcodeStats?.ranking || 0,
+        leetcodeContestCount: p1Populated.leetcodeStats?.contestCount || 0,
+        codeforcesContestCount: p1Populated.codeforcesStats?.contestCount || 0,
+        codechefContestCount: p1Populated.codechefStats?.contestCount || 0,
+        leetcodeRank: p1Populated.leetcodeStats?.badge || "None",
+        codeforcesRank: p1Populated.codeforcesStats?.rank || "None",
+        codechefRank: p1Populated.codechefStats?.stars || "None",
         badges: Math.floor(p1Populated.problemsSolved / 50) + 2, // Realistic badge count based on problems
-        maxStreak: Math.max(p1Populated.streak, 32 + (hash1 % 20)),
+        maxStreak: p1Populated.streak || 0,
       });
 
       setStats2({
@@ -76,11 +87,18 @@ export default function BattleArena() {
         leetcodeSolved: p2Populated.platformStats?.leetcode || 0,
         codeforcesSolved: p2Populated.platformStats?.codeforces || 0,
         codechefSolved: p2Populated.platformStats?.codechef || 0,
-        leetcodeRating: 1400 + (hash2 % 800),
-        codeforcesRating: 1200 + (hash2 % 900),
-        codechefRating: 1300 + (hash2 % 700),
+        leetcodeRating: Math.round(p2Populated.leetcodeStats?.contestRating || 0),
+        codeforcesRating: Math.round(Math.max(p2Populated.codeforcesStats?.currentRating || 0, p2Populated.codeforcesStats?.maxRating || 0)),
+        codechefRating: Math.round(p2Populated.codechefStats?.currentRating || 0),
+        leetcodeRanking: p2Populated.leetcodeStats?.ranking || 0,
+        leetcodeContestCount: p2Populated.leetcodeStats?.contestCount || 0,
+        codeforcesContestCount: p2Populated.codeforcesStats?.contestCount || 0,
+        codechefContestCount: p2Populated.codechefStats?.contestCount || 0,
+        leetcodeRank: p2Populated.leetcodeStats?.badge || "None",
+        codeforcesRank: p2Populated.codeforcesStats?.rank || "None",
+        codechefRank: p2Populated.codechefStats?.stars || "None",
         badges: Math.floor(p2Populated.problemsSolved / 50) + 2,
-        maxStreak: Math.max(p2Populated.streak, 32 + (hash2 % 20)),
+        maxStreak: p2Populated.streak || 0,
       });
 
       setBattleStarted(true);
@@ -109,22 +127,103 @@ export default function BattleArena() {
     else if (score2 > score1) winner = 2;
   }
 
-  const renderMetricRow = (label: string, val1: number, val2: number, suffix = "") => {
-    const p1Wins = val1 > val2;
-    const p2Wins = val2 > val1;
+  const totalContests = (stats: PlayerStats) =>
+    stats.leetcodeContestCount + stats.codeforcesContestCount + stats.codechefContestCount;
+
+  const displayNumber = (value: number) => value > 0 ? value.toLocaleString() : "None";
+
+  const displayRank = (value: string | number | undefined) => {
+    const clean = String(value ?? "").trim();
+    if (!clean || clean === "0" || clean === "0★" || clean === "—" || clean.toLowerCase() === "not connected") {
+      return "None";
+    }
+    return clean;
+  };
+
+  const renderStatLine = (label: string, value: string | number, tone: "orange" | "blue") => (
+    <div className="flex items-center justify-between gap-3 rounded-xl border border-slate-100 dark:border-white/10 bg-slate-50 dark:bg-white/5 px-3 py-2.5">
+      <span className="text-[10px] font-mono font-bold uppercase tracking-widest text-slate-500 dark:text-slate-400">{label}</span>
+      <span className={`text-right text-sm font-heading font-black ${tone === "orange" ? "text-orange-500 dark:text-orange-400" : "text-blue-500 dark:text-blue-400"}`}>
+        {value}
+      </span>
+    </div>
+  );
+
+  const renderPlayerPanel = (stats: PlayerStats, side: "left" | "right") => {
+    const tone = side === "left" ? "orange" : "blue";
+    const won = (side === "left" && winner === 1) || (side === "right" && winner === 2);
+    const borderClass = side === "left"
+      ? "border-orange-200 dark:border-orange-500/30"
+      : "border-blue-200 dark:border-blue-500/30";
+    const glowClass = side === "left"
+      ? "shadow-[0_16px_40px_rgba(249,115,22,0.12)] dark:shadow-[0_16px_45px_rgba(249,115,22,0.18)]"
+      : "shadow-[0_16px_40px_rgba(59,130,246,0.12)] dark:shadow-[0_16px_45px_rgba(59,130,246,0.18)]";
+    const headingClass = side === "left" ? "text-orange-500 dark:text-orange-400" : "text-blue-500 dark:text-blue-400";
+    const iconClass = side === "left" ? "text-orange-500" : "text-blue-500";
+    const topBarClass = side === "left" ? "bg-gradient-to-r from-orange-500 to-red-500" : "bg-gradient-to-r from-blue-500 to-cyan-500";
+    const winnerBg = side === "left" ? "bg-orange-50 dark:bg-orange-500/10" : "bg-blue-50 dark:bg-blue-500/10";
+    const totalContestCount = totalContests(stats);
 
     return (
-      <div className="flex flex-col justify-center items-center p-3 sm:p-5 rounded-2xl bg-slate-50 dark:bg-white/5 border border-slate-100 dark:border-white/10 relative overflow-hidden transition-transform hover:scale-[1.02]">
-        <div className="text-center font-heading font-semibold text-xs text-slate-500 dark:text-slate-400 uppercase tracking-widest mb-4">
-          {label}
-        </div>
-        <div className="flex items-center justify-between w-full px-2">
-          <div className={`text-center font-mono font-bold text-xl ${p1Wins ? 'text-orange-500 dark:text-orange-400 drop-shadow-[0_0_8px_rgba(249,115,22,0.8)]' : 'text-slate-400 dark:text-slate-500'}`}>
-            {val1}{suffix}
+      <div className={`relative overflow-hidden rounded-3xl bg-white dark:bg-[#111113] border ${borderClass} p-5 sm:p-6 ${glowClass}`}>
+        <div className={`absolute inset-x-0 top-0 h-1 ${topBarClass}`} />
+        <div className="mb-6 flex items-start justify-between gap-4">
+          <div className="min-w-0">
+            <h3 className={`mt-1 truncate text-2xl font-heading font-black tracking-tight ${headingClass}`}>
+              {stats.username}
+            </h3>
           </div>
-          <div className="w-px h-8 bg-slate-200 dark:bg-white/10 mx-2" />
-          <div className={`text-center font-mono font-bold text-xl ${p2Wins ? 'text-blue-500 dark:text-blue-400 drop-shadow-[0_0_8px_rgba(59,130,246,0.8)]' : 'text-slate-400 dark:text-slate-500'}`}>
-            {val2}{suffix}
+          {won && (
+            <div className={`shrink-0 rounded-full p-2 ${winnerBg}`}>
+              <Trophy className={`h-5 w-5 ${headingClass}`} />
+            </div>
+          )}
+        </div>
+
+        <div className="mb-5 grid grid-cols-2 gap-3">
+          <div className="rounded-2xl border border-slate-100 dark:border-white/10 bg-slate-50 dark:bg-white/5 p-4">
+            <div className="flex items-center gap-2 text-slate-500 dark:text-slate-400">
+              <Code2 className="h-4 w-4" />
+              <span className="text-[10px] font-mono font-bold uppercase tracking-widest">Total Problems</span>
+            </div>
+            <p className={`mt-3 text-3xl font-heading font-black ${headingClass}`}>
+              {stats.problemsSolved.toLocaleString()}
+            </p>
+          </div>
+          <div className="rounded-2xl border border-slate-100 dark:border-white/10 bg-slate-50 dark:bg-white/5 p-4">
+            <div className="flex items-center gap-2 text-slate-500 dark:text-slate-400">
+              <Medal className="h-4 w-4" />
+              <span className="text-[10px] font-mono font-bold uppercase tracking-widest">Contests</span>
+            </div>
+            <p className={`mt-3 text-3xl font-heading font-black ${headingClass}`}>
+              {totalContestCount.toLocaleString()}
+            </p>
+          </div>
+        </div>
+
+        <div className="space-y-5">
+          <div>
+            <div className="mb-3 flex items-center gap-2 text-slate-600 dark:text-slate-300">
+              <TrendingUp className={`h-4 w-4 ${iconClass}`} />
+              <h4 className="text-xs font-heading font-black uppercase tracking-widest">All Platform Rating</h4>
+            </div>
+            <div className="space-y-2">
+              {renderStatLine("LeetCode", displayNumber(stats.leetcodeRating), tone)}
+              {renderStatLine("Codeforces", displayNumber(stats.codeforcesRating), tone)}
+              {renderStatLine("CodeChef", displayNumber(stats.codechefRating), tone)}
+            </div>
+          </div>
+
+          <div>
+            <div className="mb-3 flex items-center gap-2 text-slate-600 dark:text-slate-300">
+              <Star className={`h-4 w-4 ${iconClass}`} />
+              <h4 className="text-xs font-heading font-black uppercase tracking-widest">Ranking</h4>
+            </div>
+            <div className="space-y-2">
+              {renderStatLine("LeetCode Badge", displayRank(stats.leetcodeRank), tone)}
+              {renderStatLine("Codeforces", displayRank(stats.codeforcesRank), tone)}
+              {renderStatLine("CodeChef Stars", displayRank(stats.codechefRank), tone)}
+            </div>
           </div>
         </div>
       </div>
@@ -307,8 +406,8 @@ export default function BattleArena() {
                 </div>
               </div>
 
-              {/* Comparison Table */}
-              <div className="bg-white dark:bg-[#1A1A1E] border border-slate-200 dark:border-white/10 rounded-3xl px-8 pt-3 pb-8 shadow-xl dark:shadow-[0_20px_50px_rgba(0,0,0,0.5),inset_0_1px_1px_rgba(255,255,255,0.1)] relative overflow-hidden">
+              {/* Side-by-side Player Stats */}
+              <div className="bg-white dark:bg-[#1A1A1E] border border-slate-200 dark:border-white/10 rounded-3xl px-5 sm:px-8 pt-3 pb-8 shadow-xl dark:shadow-[0_20px_50px_rgba(0,0,0,0.5),inset_0_1px_1px_rgba(255,255,255,0.1)] relative overflow-hidden">
                 <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full max-w-md h-px bg-gradient-to-r from-transparent via-slate-300 dark:via-white/30 to-transparent" />
 
                 <div className="flex flex-col sm:flex-row justify-between items-center gap-4 mb-6 px-2 sm:px-4">
@@ -317,18 +416,12 @@ export default function BattleArena() {
                   <div className="text-center font-heading font-black text-xl sm:text-2xl text-blue-500 dark:text-blue-400 drop-shadow-[0_0_10px_rgba(59,130,246,0.5)]">{stats2.username}</div>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                  {renderMetricRow("Problems Solved", stats1.problemsSolved, stats2.problemsSolved)}
-                  {renderMetricRow("Max Streak", stats1.maxStreak, stats2.maxStreak)}
-                  {renderMetricRow("Badges Earned", stats1.badges, stats2.badges)}
-
-                  {renderMetricRow("LeetCode Solved", stats1.leetcodeSolved, stats2.leetcodeSolved)}
-                  {renderMetricRow("LeetCode Rating", stats1.leetcodeRating, stats2.leetcodeRating)}
-                  {renderMetricRow("Codeforces Solved", stats1.codeforcesSolved, stats2.codeforcesSolved)}
-                  
-                  {renderMetricRow("Codeforces Rating", stats1.codeforcesRating, stats2.codeforcesRating)}
-                  {renderMetricRow("CodeChef Solved", stats1.codechefSolved, stats2.codechefSolved)}
-                  {renderMetricRow("CodeChef Rating", stats1.codechefRating, stats2.codechefRating)}
+                <div className="grid grid-cols-1 lg:grid-cols-[1fr_auto_1fr] gap-5 items-stretch">
+                  {renderPlayerPanel(stats1, "left")}
+                  <div className="hidden lg:flex items-center justify-center">
+                    <div className="h-full w-px bg-gradient-to-b from-transparent via-slate-200 dark:via-white/15 to-transparent" />
+                  </div>
+                  {renderPlayerPanel(stats2, "right")}
                 </div>
               </div>
             </motion.div>

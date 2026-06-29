@@ -1,5 +1,5 @@
 import { DashboardLayout } from "@/components/DashboardLayout";
-import { Activity, Link2, RefreshCw, Info, Clock, Search, Hash, TrendingUp, Award } from "lucide-react";
+import { Activity, Link2, RefreshCw, Info, Clock, Search, Hash, TrendingUp, Award, X } from "lucide-react";
 import { PageHeader } from "@/components/PageHeader";
 import { HeroStats } from "@/components/dashboard/HeroStats";
 import { PlatformCards } from "@/components/dashboard/PlatformCards";
@@ -12,6 +12,7 @@ import { useState, useEffect, useRef } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { api } from "@/lib/apiClient";
 import { motion, AnimatePresence } from "framer-motion";
+import { useQueryClient } from "@tanstack/react-query";
 
 // ── Recent-username history helpers (localStorage, max 5 per platform) ────────
 const HISTORY_KEY = (p: string) => `codetrack_recent_${p}`;
@@ -287,10 +288,12 @@ function LookupStatBox({ label, value, colorClass }: { label: string; value: str
 // ── LookupPreviewCard component ──────────────────────────────────────────────
 function LookupPreviewCard({
   platform,
-  data
+  data,
+  onClose,
 }: {
   platform: "leetcode" | "codeforces" | "codechef";
   data: any;
+  onClose?: () => void;
 }) {
   const name = platform === "leetcode" ? "LeetCode" : platform === "codeforces" ? "Codeforces" : "CodeChef";
   const Icon = platform === "leetcode" ? Hash : platform === "codeforces" ? TrendingUp : Award;
@@ -340,8 +343,19 @@ function LookupPreviewCard({
             </div>
           </div>
 
-          <div className="px-2.5 py-1 rounded-full text-[9px] font-mono font-bold tracking-wide bg-primary/10 border border-primary/20 text-primary">
-            LIVE PREVIEW
+          <div className="flex items-center gap-2">
+            <div className="px-2.5 py-1 rounded-full text-[9px] font-mono font-bold tracking-wide bg-primary/10 border border-primary/20 text-primary select-none">
+              LIVE PREVIEW
+            </div>
+            {onClose && (
+              <button
+                onClick={onClose}
+                className="p-1 rounded-lg hover:bg-slate-100 dark:hover:bg-white/10 text-muted-foreground hover:text-foreground transition-colors cursor-pointer border border-transparent hover:border-slate-200 dark:hover:border-white/15 flex items-center justify-center"
+                title="Clear profile"
+              >
+                <X className="h-3.5 w-3.5" />
+              </button>
+            )}
           </div>
         </div>
 
@@ -369,6 +383,7 @@ function LookupPreviewCard({
 
 const Index = () => {
   const { userId } = useParams();
+  const queryClient = useQueryClient();
   const { data: dash, isLoading, refetch } = useDashboard(userId);
   const isOwnDashboard = !userId;
   const { toast } = useToast();
@@ -424,6 +439,9 @@ const Index = () => {
       if (codechefInput.trim())   pushHistory("codechef",   codechefInput.trim());
       setHistoryTick((t) => t + 1);
       await refetch();
+      queryClient.invalidateQueries({ queryKey: ["leaderboard"] });
+      queryClient.invalidateQueries({ queryKey: ["friends-leaderboard"] });
+      queryClient.invalidateQueries({ queryKey: ["friends"] });
       toast({
         title: "Sync Successful",
         description: res.data.message || "Successfully synchronized coding profiles.",
@@ -507,7 +525,7 @@ const Index = () => {
         </div>
 
         {isOwnDashboard && (
-          <div className="rounded-[2.5rem] border border-slate-200 dark:border-white/10 bg-white dark:bg-[#161618] px-6 pt-6 pb-6 md:px-8 md:pt-6 md:pb-7 shadow-lg dark:shadow-[0_20px_50px_rgba(0,0,0,0.5)] relative overflow-visible card-hover group/connection text-left">
+          <div className="rounded-[2.5rem] border border-slate-200 dark:border-white/10 bg-white dark:bg-[#161618] px-6 pt-6 pb-6 md:px-8 md:pt-6 md:pb-7 backdrop-blur-none dark:backdrop-blur-3xl shadow-lg dark:shadow-[0_20px_50px_rgba(0,0,0,0.5),inset_0_1px_1px_rgba(255,255,255,0.1)] ring-0 dark:ring-1 dark:ring-white/5 relative overflow-visible premium-border card-hover group/connection text-left">
             <div className="absolute inset-0 rounded-[2.5rem] bg-gradient-to-br from-primary/5 via-transparent to-transparent opacity-50 pointer-events-none" />
 
             <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
@@ -572,8 +590,38 @@ const Index = () => {
           </div>
         )}
 
+        {/* ── Platform Performance (User Platform Data) ────────────────────── */}
+        <div className="rounded-[2.5rem] border border-slate-200 dark:border-white/10 bg-white dark:bg-[#161618] px-6 pt-3 pb-6 md:px-8 md:pt-4 md:pb-7 backdrop-blur-none dark:backdrop-blur-3xl shadow-lg dark:shadow-[0_20px_50px_rgba(0,0,0,0.5),inset_0_1px_1px_rgba(255,255,255,0.1)] ring-0 dark:ring-1 dark:ring-white/5 relative overflow-hidden premium-border space-y-6 mt-4 card-hover group/platform">
+          <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-transparent opacity-50 pointer-events-none group-hover/platform:opacity-70 transition-opacity" />
+
+          <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-4 mb-4 text-left">
+            <div className="flex items-center gap-4">
+              <div className="p-3 rounded-2xl bg-primary/10 border border-primary/20 shadow-inner">
+                <Activity className="h-6 w-6 text-primary" />
+              </div>
+              <div>
+                <h3 className="text-2xl font-heading font-black text-foreground tracking-tight text-left">
+                  {isOwnDashboard ? "Your Platform Performance" : `${dash?.profile?.username}'s Platform Performance`}
+                </h3>
+                <p className="text-sm text-muted-foreground font-mono mt-0.5 flex items-center gap-2 text-left">
+                  <span className="flex h-1.5 w-1.5 rounded-full bg-emerald-500" />
+                  {isOwnDashboard ? "Personal platform data (connect your own accounts)" : "Personal platform data of this user"}
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <div className="relative z-10" id="tour-platforms">
+            <PlatformCards
+              leetcodeStats={dash?.leetcodeStats}
+              codeforcesStats={dash?.codeforcesStats}
+              codechefStats={dash?.codechefStats}
+            />
+          </div>
+        </div>
+
         {/* ── Search Platform Profiles (Standalone) ─────────────────────────── */}
-        <div className="rounded-[2.5rem] border border-slate-200 dark:border-white/10 bg-white dark:bg-[#161618] px-6 pt-6 pb-6 md:px-8 md:pt-6 md:pb-7 shadow-lg dark:shadow-[0_20px_50px_rgba(0,0,0,0.5)] relative overflow-visible card-hover group/search-profile text-left mt-4">
+        <div className="rounded-[2.5rem] border border-slate-200 dark:border-white/10 bg-white dark:bg-[#161618] px-6 pt-6 pb-6 md:px-8 md:pt-6 md:pb-7 backdrop-blur-none dark:backdrop-blur-3xl shadow-lg dark:shadow-[0_20px_50px_rgba(0,0,0,0.5),inset_0_1px_1px_rgba(255,255,255,0.1)] ring-0 dark:ring-1 dark:ring-white/5 relative overflow-visible premium-border card-hover group/search-profile text-left mt-4">
           <div className="absolute inset-0 rounded-[2.5rem] bg-gradient-to-br from-primary/5 via-transparent to-transparent opacity-50 pointer-events-none" />
 
           <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
@@ -690,34 +738,17 @@ const Index = () => {
               )}
 
               {!isSearchingProfile && searchedProfileData && (
-                <LookupPreviewCard platform={searchPlatform} data={searchedProfileData} />
+                <LookupPreviewCard
+                  platform={searchPlatform}
+                  data={searchedProfileData}
+                  onClose={() => {
+                    setSearchedProfileData(null);
+                    setSearchUsername("");
+                    setSearchError(null);
+                  }}
+                />
               )}
             </div>
-          </div>
-        </div>
-
-        <div className="rounded-[2.5rem] border border-slate-200 dark:border-white/10 bg-white dark:bg-[#161618] px-6 pt-3 pb-6 md:px-8 md:pt-4 md:pb-7 backdrop-blur-none dark:backdrop-blur-3xl shadow-lg dark:shadow-[0_20px_50px_rgba(0,0,0,0.5),inset_0_1px_1px_rgba(255,255,255,0.1)] ring-0 dark:ring-1 dark:ring-white/5 relative overflow-hidden premium-border space-y-6 mt-4 card-hover group/platform">
-          <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-transparent opacity-50 pointer-events-none group-hover/platform:opacity-70 transition-opacity" />
-
-          <div className="relative z-10 flex items-center gap-4 mb-4 text-left">
-            <div className="p-3 rounded-2xl bg-primary/10 border border-primary/20 shadow-inner">
-              <Activity className="h-6 w-6 text-primary" />
-            </div>
-            <div>
-              <h3 className="text-2xl font-heading font-black text-foreground tracking-tight text-left">Platform Performance</h3>
-              <p className="text-sm text-muted-foreground font-mono mt-0.5 flex items-center gap-2 text-left">
-                <span className="flex h-1.5 w-1.5 rounded-full bg-muted-foreground/30" />
-                Detailed breakdown across coding platforms
-              </p>
-            </div>
-          </div>
-
-          <div className="relative z-10" id="tour-platforms">
-            <PlatformCards
-              leetcodeStats={dash?.leetcodeStats}
-              codeforcesStats={dash?.codeforcesStats}
-              codechefStats={dash?.codechefStats}
-            />
           </div>
         </div>
       </div>

@@ -6,6 +6,14 @@ const userSchema = new mongoose.Schema({
   password: { type: String, required: false },
   googleId: { type: String, unique: true, sparse: true },
   profileImage: { type: String },
+  profileLinks: {
+    github: { type: String, default: "" },
+    linkedin: { type: String, default: "" },
+    leetcode: { type: String, default: "" },
+    codeforces: { type: String, default: "" },
+    codechef: { type: String, default: "" }
+  },
+  skills: [{ type: String }],
   platformStats: {
     leetcode: { type: Number, default: 0 },
     codeforces: { type: Number, default: 0 },
@@ -48,8 +56,10 @@ const userSchema = new mongoose.Schema({
   }],
   streak: { type: Number, default: 0 },
   problemsSolved: { type: Number, default: 0 },
-  friends: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }]
+  friends: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }],
+  friendRequestsSent: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }],
+  friendRequestsReceived: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }]
 }, { timestamps: true });
 
 const User = mongoose.model("User", userSchema, "users");
-export default User;
+export default User;
