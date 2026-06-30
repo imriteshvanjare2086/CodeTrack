@@ -583,6 +583,178 @@ app.get("/api/public/platform-stats", async (req, res) => {
 });
 
 
+// 🔥 FETCH CONTESTS FROM LEETCODE, CODEFORCES, AND CODECHEF
+app.get("/api/contests", async (req, res) => {
+  try {
+    // 1. Fetch Codeforces Contests
+    let codeforcesContests = [];
+    try {
+      const cfRes = await fetch("https://codeforces.com/api/contest.list");
+      const cfData = await cfRes.json();
+      if (cfData.status === "OK" && Array.isArray(cfData.result)) {
+        codeforcesContests = cfData.result.map(c => {
+          const startTimeMs = c.startTimeSeconds * 1000;
+          const endTimeMs = startTimeMs + (c.durationSeconds * 1000);
+          const now = Date.now();
+          
+          let status = "past";
+          if (c.phase === "BEFORE") {
+            status = "upcoming";
+          } else if (c.phase === "CODING" || (now >= startTimeMs && now < endTimeMs)) {
+            status = "live";
+          }
+          
+          return {
+            id: `cf-${c.id}`,
+            title: c.name,
+            platform: "codeforces",
+            url: `https://codeforces.com/contest/${c.id}`,
+            startTime: startTimeMs,
+            duration: c.durationSeconds, // in seconds
+            status
+          };
+        });
+      }
+    } catch (err) {
+      console.error("Failed to fetch Codeforces contests:", err.message);
+    }
+
+    // 2. Fetch LeetCode Contests
+    let leetcodeContests = [];
+    try {
+      const query = `
+        query {
+          topTwoContests {
+            title
+            titleSlug
+            startTime
+            duration
+          }
+          allContests {
+            title
+            titleSlug
+            startTime
+            duration
+          }
+        }
+      `;
+      const lcRes = await fetch("https://leetcode.com/graphql", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Referer": "https://leetcode.com",
+          "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36"
+        },
+        body: JSON.stringify({ query })
+      });
+      const lcData = await lcRes.json();
+      if (lcData.data) {
+        const topTwo = lcData.data.topTwoContests || [];
+        const all = lcData.data.allContests || [];
+        
+        // Merge them, avoiding duplicates
+        const contestMap = new Map();
+        [...topTwo, ...all].forEach(c => {
+          if (c.titleSlug) {
+            contestMap.set(c.titleSlug, c);
+          }
+        });
+        
+        leetcodeContests = Array.from(contestMap.values()).map(c => {
+          const startTimeMs = c.startTime * 1000;
+          const endTimeMs = startTimeMs + (c.duration * 1000);
+          const now = Date.now();
+          
+          let status = "past";
+          if (now < startTimeMs) {
+            status = "upcoming";
+          } else if (now >= startTimeMs && now < endTimeMs) {
+            status = "live";
+          }
+          
+          return {
+            id: `lc-${c.titleSlug}`,
+            title: c.title,
+            platform: "leetcode",
+            url: `https://leetcode.com/contest/${c.titleSlug}`,
+            startTime: startTimeMs,
+            duration: c.duration, // in seconds
+            status
+          };
+        });
+      }
+    } catch (err) {
+      console.error("Failed to fetch LeetCode contests:", err.message);
+    }
+
+    // 3. Fetch CodeChef Contests
+    let codechefContests = [];
+    try {
+      const ccRes = await fetch("https://www.codechef.com/api/list/contests/all?page=1&limit=50", {
+        headers: {
+          "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36"
+        }
+      });
+      const ccData = await ccRes.json();
+      if (ccData) {
+        const future = ccData.future_contests || [];
+        const present = ccData.present_contests || [];
+        const past = ccData.past_contests || [];
+
+        const parseCC = (c, status) => {
+          const startTimeMs = new Date(c.contest_start_date_iso || c.contest_start_date).getTime();
+          const endTimeMs = new Date(c.contest_end_date_iso || c.contest_end_date).getTime();
+          const durationSeconds = (parseInt(c.contest_duration) || 0) * 60;
+
+          return {
+            id: `cc-${c.contest_code}`,
+            title: c.contest_name,
+            platform: "codechef",
+            url: `https://www.codechef.com/${c.contest_code}`,
+            startTime: startTimeMs,
+            duration: durationSeconds,
+            status
+          };
+        };
+
+        const now = Date.now();
+        const mapCC = (c) => {
+          const startTimeMs = new Date(c.contest_start_date_iso || c.contest_start_date).getTime();
+          const endTimeMs = new Date(c.contest_end_date_iso || c.contest_end_date).getTime();
+          let status = "past";
+          if (now < startTimeMs) {
+            status = "upcoming";
+          } else if (now >= startTimeMs && now < endTimeMs) {
+            status = "live";
+          }
+          return parseCC(c, status);
+        };
+
+        codechefContests = [
+          ...present.map(mapCC),
+          ...future.map(mapCC),
+          ...past.map(mapCC)
+        ];
+      }
+    } catch (err) {
+      console.error("Failed to fetch CodeChef contests:", err.message);
+    }
+
+    // Merge and sort
+    const allMerged = [...codeforcesContests, ...leetcodeContests, ...codechefContests];
+    
+    // Split into categories
+    const live = allMerged.filter(c => c.status === "live");
+    const upcoming = allMerged.filter(c => c.status === "upcoming").sort((a, b) => a.startTime - b.startTime);
+    const past = allMerged.filter(c => c.status === "past").sort((a, b) => b.startTime - a.startTime); // most recent past first
+
+    res.json({ live, upcoming, past });
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+});
+
+
 // 🔥 DISCONNECT PLATFORM
 app.post("/api/user/disconnect-platform", auth, async (req, res) => {
   try {

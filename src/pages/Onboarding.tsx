@@ -61,7 +61,7 @@ export default function Onboarding() {
           <div className="inline-flex items-center justify-center h-14 w-14 rounded-2xl bg-gradient-to-br from-primary to-primary/70 shadow-lg shadow-primary/20 mb-4">
             <Flame className="h-7 w-7 text-primary-foreground" />
           </div>
-          <h1 className="text-2xl font-bold font-heading text-white">Welcome to CodeTrack</h1>
+          <h1 className="text-2xl font-bold font-heading text-white">Welcome to CodeVerse</h1>
           <p className="text-sm text-gray-400 font-mono mt-1">Let's set up your profile</p>
         </div>
 

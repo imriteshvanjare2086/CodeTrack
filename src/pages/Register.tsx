@@ -40,7 +40,7 @@ export default function Register() {
       >
         <div>
           <h1 className="text-2xl font-heading font-bold text-white tracking-tight">Create Account</h1>
-          <p className="text-xs font-mono text-gray-400 mt-1.5">Join the CodeTrack community</p>
+          <p className="text-xs font-mono text-gray-400 mt-1.5">Join the CodeVerse community</p>
         </div>
 
         <div className="space-y-1.5">

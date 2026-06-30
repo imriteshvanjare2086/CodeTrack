@@ -52,7 +52,7 @@ export default function Login() {
       >
         <div>
           <h1 className="text-2xl font-heading font-bold text-white tracking-tight">Welcome Back</h1>
-          <p className="text-xs font-mono text-gray-400 mt-1.5">Sign in to your CodeTrack account</p>
+          <p className="text-xs font-mono text-gray-400 mt-1.5">Sign in to your CodeVerse account</p>
         </div>
 
         <div className="space-y-1.5">

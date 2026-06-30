@@ -36,6 +36,7 @@ type NavItem = { title: string; url: string; icon: typeof LayoutDashboard };
 
 const primaryNav: NavItem[] = [
   { title: "Dashboard", url: "/", icon: LayoutDashboard },
+  { title: "Problems & Contests", url: "/problems", icon: Code2 },
   { title: "Battle Arena", url: "/battle", icon: Swords },
   { title: "CodeT Assistant", url: "/codet", icon: Bot },
   { title: "Focus Mode", url: "/focus", icon: Focus },
@@ -103,7 +104,7 @@ export function AppSidebar() {
           </div>
           {!collapsed && (
             <div className="flex flex-col">
-              <span className="text-lg font-black font-heading text-foreground tracking-tight leading-none text-gradient">CodeTrack</span>
+              <span className="text-lg font-black font-heading text-foreground tracking-tight leading-none text-gradient">CodeVerse</span>
               <span className="text-[10px] font-mono text-foreground/60 uppercase tracking-[0.2em] font-bold mt-1.5">v2.4.0 (Stable)</span>
             </div>
           )}
