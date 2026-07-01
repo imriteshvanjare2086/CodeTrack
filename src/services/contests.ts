@@ -7,6 +7,7 @@ export type Contest = {
   title: string;
   platform: ContestPlatform;
   url: string;
+  problemsUrl?: string;
   startTime: number; // timestamp in ms
   duration: number; // in seconds
   status: "live" | "upcoming" | "past";

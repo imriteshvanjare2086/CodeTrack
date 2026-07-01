@@ -18,7 +18,7 @@ interface AddGoalModalProps {
   onSave: (goal: Goal) => void;
 }
 
-const CATEGORIES = ["DSA", "Web Dev", "OOPs", "SQL"] as const;
+const CATEGORIES = ["DSA", "Competitive Programming", "LeetCode", "Codeforces", "CodeChef", "Web Dev", "OOPs", "SQL"] as const;
 
 export function AddGoalModal({ onClose, onSave }: AddGoalModalProps) {
   const [title, setTitle] = useState("");

@@ -1,18 +1,23 @@
 import { DashboardLayout } from "@/components/DashboardLayout";
-import { Activity, Link2, RefreshCw, Info, Clock, Search, Hash, TrendingUp, Award, X } from "lucide-react";
+import { Activity, Link2, RefreshCw, Info, Clock, Search, Hash, TrendingUp, Trophy, ExternalLink, X, Award } from "lucide-react";
 import { PageHeader } from "@/components/PageHeader";
 import { HeroStats } from "@/components/dashboard/HeroStats";
 import { PlatformCards } from "@/components/dashboard/PlatformCards";
 import { RatingGraph } from "@/components/dashboard/RatingGraph";
+import { useDashboard } from "@/hooks/useDashboard";
+import { useAchievements, getRecentAchievements } from "@/lib/achievements";
+import { PremiumBadge, BadgeDetailModal, BadgeGalleryModal } from "@/components/dashboard/PremiumBadge";
 
 import { useParams } from "react-router-dom";
-import { useDashboard } from "@/hooks/useDashboard";
 import { WebsiteTour } from "@/components/WebsiteTour";
 import { useState, useEffect, useRef } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { api } from "@/lib/apiClient";
 import { motion, AnimatePresence } from "framer-motion";
 import { useQueryClient } from "@tanstack/react-query";
+import { cn } from "@/lib/utils";
+
+
 
 // ── Recent-username history helpers (localStorage, max 5 per platform) ────────
 const HISTORY_KEY = (p: string) => `codetrack_recent_${p}`;
@@ -385,9 +390,14 @@ const Index = () => {
   const { userId } = useParams();
   const queryClient = useQueryClient();
   const { data: dash, isLoading, refetch } = useDashboard(userId);
+  const achievements = useAchievements(dash);
+  const recent = getRecentAchievements(achievements, 3);
+  const earned = achievements.filter((a) => a.earned);
   const isOwnDashboard = !userId;
   const { toast } = useToast();
   const [showTour, setShowTour] = useState(false);
+  const [selectedBadge, setSelectedBadge] = useState<any>(null);
+  const [isGalleryOpen, setIsGalleryOpen] = useState(false);
 
   const [leetcodeInput, setLeetcodeInput] = useState("");
   const [codeforcesInput, setCodeforcesInput] = useState("");
@@ -523,6 +533,82 @@ const Index = () => {
         <div id="tour-stats">
           <HeroStats stats={dash?.heroStats} />
         </div>
+
+        {/* Badge Summary Section */}
+        {isOwnDashboard && (
+          <div className="glass rounded-3xl border border-white/10 p-8 shadow-xl mt-6">
+            <div className="flex items-center justify-between mb-8">
+              <div className="flex items-center gap-3">
+                <Trophy className="h-7 w-7 text-primary" />
+                <h2 className="text-2xl font-black font-heading text-white">Badge Summary</h2>
+              </div>
+              <button
+                onClick={() => setIsGalleryOpen(true)}
+                className="flex items-center gap-2 px-5 py-2.5 rounded-xl border border-white/10 bg-white/5 hover:bg-white/15 transition-all text-sm font-bold text-white cursor-pointer"
+              >
+                View All
+                <ExternalLink className="h-4 w-4" />
+              </button>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
+              <div className="text-left space-y-5">
+                <div>
+                  <p className="text-muted-foreground font-mono text-xs uppercase tracking-widest">Badges</p>
+                  <p className="text-5xl font-black font-heading text-white mt-1">
+                    {earned.length}
+                  </p>
+                </div>
+                {recent.length > 0 && (
+                  <div className="space-y-1 font-mono text-left pt-3 border-t border-white/5">
+                    <p className="text-[10px] text-muted-foreground uppercase tracking-wider font-bold">Most Recent Badge</p>
+                    <p className="text-sm text-primary font-bold">{recent[0].title}</p>
+                  </div>
+                )}
+              </div>
+
+              <div className="flex items-center justify-center md:justify-end gap-4 md:gap-6">
+                {recent.length > 0 && recent[2] && (
+                  <div className="scale-90 opacity-80">
+                    <PremiumBadge
+                      achievement={recent[2]}
+                      size="lg"
+                      onClick={() => setSelectedBadge(recent[2])}
+                    />
+                  </div>
+                )}
+                {recent.length > 0 && recent[0] && (
+                  <div className="scale-110 z-10 filter drop-shadow-[0_0_15px_rgba(251,191,36,0.15)]">
+                    <PremiumBadge
+                      achievement={recent[0]}
+                      size="xl"
+                      onClick={() => setSelectedBadge(recent[0])}
+                    />
+                  </div>
+                )}
+                {recent.length > 1 && recent[1] && (
+                  <div className="scale-90 opacity-80">
+                    <PremiumBadge
+                      achievement={recent[1]}
+                      size="lg"
+                      onClick={() => setSelectedBadge(recent[1])}
+                    />
+                  </div>
+                )}
+                {recent.length === 0 &&
+                  Array.from({ length: 3 }).map((_, i) => (
+                    <div
+                      key={i}
+                      className={cn(
+                        "h-28 w-28 rounded-full border border-dashed border-white/10 bg-white/[0.01]",
+                        i === 1 && "h-32 w-32"
+                      )}
+                    />
+                  ))}
+              </div>
+            </div>
+          </div>
+        )}
 
         {isOwnDashboard && (
           <div className="rounded-[2.5rem] border border-slate-200 dark:border-white/10 bg-white dark:bg-[#161618] px-6 pt-6 pb-6 md:px-8 md:pt-6 md:pb-7 backdrop-blur-none dark:backdrop-blur-3xl shadow-lg dark:shadow-[0_20px_50px_rgba(0,0,0,0.5),inset_0_1px_1px_rgba(255,255,255,0.1)] ring-0 dark:ring-1 dark:ring-white/5 relative overflow-visible premium-border card-hover group/connection text-left">
@@ -753,6 +839,17 @@ const Index = () => {
         </div>
       </div>
       {showTour && <WebsiteTour onComplete={handleTourComplete} />}
+      <BadgeDetailModal
+        isOpen={!!selectedBadge}
+        onClose={() => setSelectedBadge(null)}
+        achievement={selectedBadge}
+      />
+      <BadgeGalleryModal
+        isOpen={isGalleryOpen}
+        onClose={() => setIsGalleryOpen(false)}
+        achievements={achievements}
+        onBadgeClick={(a) => setSelectedBadge(a)}
+      />
     </DashboardLayout>
   );
 };

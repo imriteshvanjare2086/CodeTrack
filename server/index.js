@@ -609,6 +609,7 @@ app.get("/api/contests", async (req, res) => {
             title: c.name,
             platform: "codeforces",
             url: `https://codeforces.com/contest/${c.id}`,
+            problemsUrl: `https://codeforces.com/contest/${c.id}/problems`,
             startTime: startTimeMs,
             duration: c.durationSeconds, // in seconds
             status
@@ -677,6 +678,7 @@ app.get("/api/contests", async (req, res) => {
             title: c.title,
             platform: "leetcode",
             url: `https://leetcode.com/contest/${c.titleSlug}`,
+            problemsUrl: `https://leetcode.com/contest/${c.titleSlug}/problems`,
             startTime: startTimeMs,
             duration: c.duration, // in seconds
             status
@@ -711,6 +713,7 @@ app.get("/api/contests", async (req, res) => {
             title: c.contest_name,
             platform: "codechef",
             url: `https://www.codechef.com/${c.contest_code}`,
+            problemsUrl: `https://www.codechef.com/${c.contest_code}/problems`,
             startTime: startTimeMs,
             duration: durationSeconds,
             status
@@ -1176,6 +1179,43 @@ app.post("/api/temp/clear-data", auth, async (req, res) => {
   } catch (err) {
     console.error("Error clearing data:", err);
     res.status(500).json({ message: "Failed to clear data" });
+  }
+});
+
+// -------------------- TEMP: SEED SAMPLE USERS --------------------
+app.post("/api/temp/seed-users", auth, async (req, res) => {
+  console.log("Received TEMP seed-users request from user:", req.user.userId);
+  try {
+    const sampleUsers = [
+      { username: "CompetitiveCoder", email: "competitive@example.com", streak: 45, problemsSolved: 850, platformStats: { leetcode: 380, codeforces: 300, codechef: 170 }, leetcodeUsername: "competitive123", leetcodeStats: { problemsSolved: 380, contestRating: 2100, ranking: 450, contestCount: 40, badge: "Guardian" }, codeforcesUsername: "competitive_cf", codeforcesStats: { currentRating: 2050, maxRating: 2200, rank: "Candidate Master", contestCount: 35, problemsSolved: 300 }, codechefUsername: "competitive_cc", codechefStats: { currentRating: 2000, stars: "5★", contestCount: 30, problemsSolved: 170 } },
+      { username: "CodeNinja", email: "ninja@example.com", streak: 60, problemsSolved: 1100, platformStats: { leetcode: 500, codeforces: 400, codechef: 200 }, leetcodeUsername: "codeninja1", leetcodeStats: { problemsSolved: 500, contestRating: 2250, ranking: 200, contestCount: 50, badge: "Guardian" }, codeforcesUsername: "code_ninja", codeforcesStats: { currentRating: 2300, maxRating: 2400, rank: "International Master", contestCount: 45, problemsSolved: 400 }, codechefUsername: "codeninja_cc", codechefStats: { currentRating: 2200, stars: "6★", contestCount: 40, problemsSolved: 200 } },
+      { username: "LeetCodePro", email: "leetcoder@example.com", streak: 30, problemsSolved: 700, platformStats: { leetcode: 500, codeforces: 100, codechef: 100 }, leetcodeUsername: "lc_pro", leetcodeStats: { problemsSolved: 500, contestRating: 1800, ranking: 1200, contestCount: 30, badge: "Knight" }, codeforcesUsername: "lc_pro_cf", codeforcesStats: { currentRating: 1500, maxRating: 1600, rank: "Expert", contestCount: 15, problemsSolved: 100 }, codechefUsername: "lc_pro_cc", codechefStats: { currentRating: 1700, stars: "4★", contestCount: 20, problemsSolved: 100 } },
+      { username: "PythonMaster", email: "python@example.com", streak: 25, problemsSolved: 500, platformStats: { leetcode: 350, codeforces: 80, codechef: 70 }, leetcodeUsername: "python_master", leetcodeStats: { problemsSolved: 350, contestRating: 1500, ranking: 5000, contestCount: 20, badge: "None" }, codeforcesUsername: "python_master_cf", codeforcesStats: { currentRating: 1300, maxRating: 1400, rank: "Specialist", contestCount: 12, problemsSolved: 80 }, codechefUsername: "python_master_cc", codechefStats: { currentRating: 1500, stars: "3★", contestCount: 15, problemsSolved: 70 } },
+      { username: "AlgorithmKing", email: "algoking@example.com", streak: 75, problemsSolved: 1300, platformStats: { leetcode: 600, codeforces: 450, codechef: 250 }, leetcodeUsername: "algo_king", leetcodeStats: { problemsSolved: 600, contestRating: 2400, ranking: 50, contestCount: 60, badge: "Guardian" }, codeforcesUsername: "algo_king_cf", codeforcesStats: { currentRating: 2500, maxRating: 2600, rank: "Grandmaster", contestCount: 55, problemsSolved: 450 }, codechefUsername: "algo_king_cc", codechefStats: { currentRating: 2400, stars: "7★", contestCount: 50, problemsSolved: 250 } },
+      { username: "NewbieCoder", email: "newbie@example.com", streak: 10, problemsSolved: 150, platformStats: { leetcode: 100, codeforces: 30, codechef: 20 }, leetcodeUsername: "newbie_coder", leetcodeStats: { problemsSolved: 100, contestRating: 0, ranking: 0, contestCount: 0, badge: "None" }, codeforcesUsername: "newbie_cf", codeforcesStats: { currentRating: 1100, maxRating: 1150, rank: "Newbie", contestCount: 5, problemsSolved: 30 }, codechefUsername: "newbie_cc", codechefStats: { currentRating: 1200, stars: "2★", contestCount: 5, problemsSolved: 20 } },
+      { username: "ContestAddict", email: "addict@example.com", streak: 55, problemsSolved: 950, platformStats: { leetcode: 420, codeforces: 330, codechef: 200 }, leetcodeUsername: "contest_addict", leetcodeStats: { problemsSolved: 420, contestRating: 1950, ranking: 800, contestCount: 45, badge: "Knight" }, codeforcesUsername: "contest_addict_cf", codeforcesStats: { currentRating: 1900, maxRating: 2000, rank: "Expert", contestCount: 40, problemsSolved: 330 }, codechefUsername: "contest_addict_cc", codechefStats: { currentRating: 1850, stars: "4★", contestCount: 38, problemsSolved: 200 } },
+      { username: "CodeForcesFan", email: "cf_fan@example.com", streak: 35, problemsSolved: 600, platformStats: { leetcode: 150, codeforces: 400, codechef: 50 }, leetcodeUsername: "cf_fan", leetcodeStats: { problemsSolved: 150, contestRating: 1300, ranking: 10000, contestCount: 10, badge: "None" }, codeforcesUsername: "cf_fan_cf", codeforcesStats: { currentRating: 1800, maxRating: 1900, rank: "Expert", contestCount: 35, problemsSolved: 400 }, codechefUsername: "cf_fan_cc", codechefStats: { currentRating: 1400, stars: "3★", contestCount: 8, problemsSolved: 50 } },
+      { username: "CodeChefStar", email: "cc_star@example.com", streak: 40, problemsSolved: 750, platformStats: { leetcode: 180, codeforces: 120, codechef: 450 }, leetcodeUsername: "cc_star", leetcodeStats: { problemsSolved: 180, contestRating: 1400, ranking: 8000, contestCount: 12, badge: "None" }, codeforcesUsername: "cc_star_cf", codeforcesStats: { currentRating: 1450, maxRating: 1500, rank: "Specialist", contestCount: 18, problemsSolved: 120 }, codechefUsername: "cc_star_cc", codechefStats: { currentRating: 2050, stars: "5★", contestCount: 42, problemsSolved: 450 } },
+      { username: "FullStackCP", email: "fullstack@example.com", streak: 20, problemsSolved: 400, platformStats: { leetcode: 200, codeforces: 100, codechef: 100 }, leetcodeUsername: "fullstack_cp", leetcodeStats: { problemsSolved: 200, contestRating: 1600, ranking: 4000, contestCount: 18, badge: "None" }, codeforcesUsername: "fullstack_cf", codeforcesStats: { currentRating: 1650, maxRating: 1700, rank: "Specialist", contestCount: 20, problemsSolved: 100 }, codechefUsername: "fullstack_cc", codechefStats: { currentRating: 1600, stars: "3★", contestCount: 22, problemsSolved: 100 } },
+      { username: "SwiftSolver", email: "swiftsolver@example.com", streak: 50, problemsSolved: 900, platformStats: { leetcode: 400, codeforces: 320, codechef: 180 }, leetcodeUsername: "swift_solver", leetcodeStats: { problemsSolved: 400, contestRating: 2050, ranking: 500, contestCount: 42, badge: "Knight" }, codeforcesUsername: "swift_solver_cf", codeforcesStats: { currentRating: 2100, maxRating: 2200, rank: "Candidate Master", contestCount: 38, problemsSolved: 320 }, codechefUsername: "swift_solver_cc", codechefStats: { currentRating: 1950, stars: "5★", contestCount: 35, problemsSolved: 180 } },
+      { username: "CodingBeginner", email: "beginner@example.com", streak: 5, problemsSolved: 80, platformStats: { leetcode: 50, codeforces: 20, codechef: 10 }, leetcodeUsername: "coding_beginner", leetcodeStats: { problemsSolved: 50, contestRating: 0, ranking: 0, contestCount: 0, badge: "None" }, codeforcesUsername: "beginner_cf", codeforcesStats: { currentRating: 1000, maxRating: 1050, rank: "Newbie", contestCount: 2, problemsSolved: 20 }, codechefUsername: "beginner_cc", codechefStats: { currentRating: 1100, stars: "1★", contestCount: 3, problemsSolved: 10 } },
+      { username: "DSExpert", email: "ds_expert@example.com", streak: 65, problemsSolved: 1200, platformStats: { leetcode: 550, codeforces: 420, codechef: 230 }, leetcodeUsername: "ds_expert", leetcodeStats: { problemsSolved: 550, contestRating: 2300, ranking: 150, contestCount: 58, badge: "Guardian" }, codeforcesUsername: "ds_expert_cf", codeforcesStats: { currentRating: 2400, maxRating: 2500, rank: "Grandmaster", contestCount: 52, problemsSolved: 420 }, codechefUsername: "ds_expert_cc", codechefStats: { currentRating: 2300, stars: "6★", contestCount: 48, problemsSolved: 230 } },
+      { username: "RisingStar", email: "risingstar@example.com", streak: 38, problemsSolved: 650, platformStats: { leetcode: 280, codeforces: 230, codechef: 140 }, leetcodeUsername: "rising_star", leetcodeStats: { problemsSolved: 280, contestRating: 1700, ranking: 2500, contestCount: 25, badge: "None" }, codeforcesUsername: "rising_star_cf", codeforcesStats: { currentRating: 1750, maxRating: 1800, rank: "Expert", contestCount: 28, problemsSolved: 230 }, codechefUsername: "rising_star_cc", codechefStats: { currentRating: 1650, stars: "4★", contestCount: 22, problemsSolved: 140 } }
+    ];
+
+    for (const userData of sampleUsers) {
+      const existing = await User.findOne({ email: userData.email });
+      if (!existing) {
+        await User.create(userData);
+      }
+    }
+
+    res.json({
+      message: "Sample users seeded successfully! There are now " + sampleUsers.length + " new users in the database!"
+    });
+  } catch (err) {
+    console.error("Error seeding users:", err);
+    res.status(500).json({ message: "Failed to seed users" });
   }
 });
 

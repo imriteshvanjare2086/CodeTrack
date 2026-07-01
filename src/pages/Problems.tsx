@@ -4,9 +4,10 @@ import { DashboardLayout } from "@/components/DashboardLayout";
 import { PageHeader } from "@/components/PageHeader";
 import { useContests } from "@/hooks/useContests";
 import { ContestCountdown } from "@/components/problems/ContestCountdown";
-import { ExternalLink, Flame, Trophy, Calendar, Code, Clock, Search, Code2 } from "lucide-react";
+import { ExternalLink, Flame, Trophy, Calendar, Code, Clock, Search, Code2, History } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import type { Contest } from "@/services/contests";
 
 export default function Problems() {
   const [activeTab, setActiveTab] = useState<"problems" | "contests">("problems");
@@ -79,6 +80,19 @@ export default function Problems() {
       past: (contests.past || []).filter(filterFn),
     };
   }, [contests, contestPlatform, contestSearch]);
+
+  const recentPastContests = useMemo(() => {
+    const latestByPlatform = new Map<string, Contest>();
+
+    filteredContests.past.forEach((contest) => {
+      const current = latestByPlatform.get(contest.platform);
+      if (!current || contest.startTime > current.startTime) {
+        latestByPlatform.set(contest.platform, contest);
+      }
+    });
+
+    return Array.from(latestByPlatform.values()).sort((a, b) => b.startTime - a.startTime);
+  }, [filteredContests.past]);
 
   const formatDuration = (seconds: number) => {
     const hrs = Math.floor(seconds / 3600);
@@ -168,12 +182,12 @@ export default function Problems() {
               transition={{ duration: 0.3 }}
               className="space-y-6"
             >
-              <div className="glass rounded-3xl p-8 space-y-8 relative overflow-hidden premium-border shadow-xl">
+              <div className="glass rounded-3xl p-7 space-y-7 relative overflow-hidden premium-border shadow-xl">
                 <div className="space-y-2">
-                  <h3 className="text-2xl font-heading font-black tracking-tight text-foreground">
+                  <h3 className="text-xl font-heading font-black tracking-tight text-foreground">
                     Problem Pages
                   </h3>
-                  <p className="text-muted-foreground text-sm max-w-xl">
+                  <p className="text-muted-foreground text-xs max-w-xl">
                     Choose a platform and jump straight to its official problem page.
                   </p>
                 </div>
@@ -185,24 +199,24 @@ export default function Problems() {
                     return (
                       <div
                         key={page.platform}
-                        className={`glass-strong rounded-2xl p-6 border ${pStyle.border} bg-[#252535] flex flex-col justify-between gap-6 relative overflow-hidden group transition-all duration-300 hover:scale-[1.02] hover:shadow-xl`}
+                        className={`glass-strong rounded-2xl p-5 border ${pStyle.border} bg-[#252535] flex flex-col justify-between gap-5 relative overflow-hidden group transition-all duration-300 hover:scale-[1.02] hover:shadow-xl`}
                       >
-                        <div className="space-y-4">
-                          <Badge className={`${pStyle.badge} px-3 py-1.5 rounded-xl text-[11px] font-black uppercase tracking-widest`}>
+                        <div className="space-y-3">
+                          <Badge className={`${pStyle.badge} px-2.5 py-1 rounded-xl text-[10px] font-black uppercase tracking-widest`}>
                             {pStyle.icon}
                             {page.name}
                           </Badge>
 
                           <div className="space-y-2">
-                            <h4 className="font-heading text-lg font-black tracking-tight text-white">{page.title}</h4>
-                            <p className="text-sm text-slate-300 leading-relaxed">{page.description}</p>
+                            <h4 className="font-heading text-base font-black tracking-tight text-white">{page.title}</h4>
+                            <p className="text-xs text-slate-300 leading-relaxed">{page.description}</p>
                           </div>
                         </div>
 
                         <Button
                           asChild
                           variant="premium"
-                          className="h-12 w-full justify-center gap-2 font-black text-xs uppercase tracking-widest shadow-lg shadow-primary/10 hover:shadow-primary/20 active:scale-[0.98] transition-all"
+                          className="h-11 w-full justify-center gap-2 font-black text-[11px] uppercase tracking-widest shadow-lg shadow-primary/10 hover:shadow-primary/20 active:scale-[0.98] transition-all"
                         >
                           <a href={page.url} target="_blank" rel="noreferrer">
                             Problem Page
@@ -288,22 +302,25 @@ export default function Problems() {
               {/* Contest Display */}
               {!isLoading && !isError && (
                 <div className="space-y-8">
-                  {/* Live Contests (only show if any exist) */}
-                  {filteredContests.live.length > 0 && (
-                    <div className="space-y-4">
-                      <div className="flex items-center justify-between px-2">
-                        <div className="flex items-center gap-2">
-                          <span className="relative flex h-2 w-2">
-                            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-rose-400 opacity-75"></span>
-                            <span className="relative inline-flex rounded-full h-2 w-2 bg-rose-500"></span>
-                          </span>
-                          <h4 className="font-heading font-black tracking-tight text-foreground uppercase text-xs">Live Contests</h4>
-                        </div>
-                        <Badge variant="outline" className="font-mono text-[9px] bg-rose-500/5 text-rose-400 border-rose-500/10">
-                          {filteredContests.live.length}
-                        </Badge>
+                  <div className="space-y-4">
+                    <div className="flex items-center justify-between px-2">
+                      <div className="flex items-center gap-2">
+                        <span className="relative flex h-2 w-2">
+                          <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-rose-400 opacity-75"></span>
+                          <span className="relative inline-flex rounded-full h-2 w-2 bg-rose-500"></span>
+                        </span>
+                        <h4 className="font-heading font-black tracking-tight text-foreground uppercase text-xs">Live Contests</h4>
                       </div>
+                      <Badge variant="outline" className="font-mono text-[9px] bg-rose-500/5 text-rose-400 border-rose-500/10">
+                        {filteredContests.live.length}
+                      </Badge>
+                    </div>
 
+                    {filteredContests.live.length === 0 ? (
+                      <div className="glass rounded-2xl p-8 text-center text-xs text-muted-foreground border border-white/5">
+                        No contests are live right now.
+                      </div>
+                    ) : (
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         {filteredContests.live.map((c) => {
                           const pStyle = getPlatformStyle(c.platform);
@@ -336,8 +353,8 @@ export default function Problems() {
                           );
                         })}
                       </div>
-                    </div>
-                  )}
+                    )}
+                  </div>
 
                   {/* Upcoming Contests (full width) */}
                   <div className="space-y-4">
@@ -403,6 +420,62 @@ export default function Problems() {
                                     </span>
                                   </div>
                                 </div>
+                              </div>
+                            </a>
+                          );
+                        })}
+                      </div>
+                    )}
+                  </div>
+
+                  <div className="space-y-4">
+                    <div className="flex items-center justify-between px-2">
+                      <div className="flex items-center gap-2">
+                        <History className="h-4 w-4 text-primary" />
+                        <h4 className="font-heading font-black tracking-tight text-foreground uppercase text-xs">Recent Past Contests</h4>
+                      </div>
+                      <Badge variant="outline" className="font-mono text-[9px] bg-primary/5 text-primary border-primary/10">
+                        {recentPastContests.length}
+                      </Badge>
+                    </div>
+
+                    {recentPastContests.length === 0 ? (
+                      <div className="glass rounded-2xl p-8 text-center text-xs text-muted-foreground border border-white/5">
+                        No recent past contests found.
+                      </div>
+                    ) : (
+                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                        {recentPastContests.map((c) => {
+                          const pStyle = getPlatformStyle(c.platform);
+                          return (
+                            <a
+                              key={c.id}
+                              href={c.problemsUrl || c.url}
+                              target="_blank"
+                              rel="noreferrer"
+                              className={`glass-strong rounded-2xl p-5 border ${pStyle.border} flex flex-col justify-between gap-4 group hover:scale-[1.02] transition-all duration-300 relative hover:shadow-xl bg-[#252535] block`}
+                            >
+                              <div className="space-y-3">
+                                <div className="flex items-center justify-between gap-3">
+                                  <Badge className={`${pStyle.badge} px-2.5 py-1 text-xs`}>
+                                    {pStyle.icon}
+                                    {c.platform}
+                                  </Badge>
+                                  <ExternalLink className="h-4 w-4 text-muted-foreground group-hover:text-primary transition-colors" />
+                                </div>
+
+                                <h5 className="font-heading font-bold text-base leading-snug group-hover:text-primary transition-colors line-clamp-2 text-white">
+                                  {c.title}
+                                </h5>
+                              </div>
+
+                              <div className="flex items-center justify-between text-sm text-muted-foreground/90 pt-3 border-t border-white/10">
+                                <span className="text-[11px] font-mono uppercase tracking-widest">
+                                  {new Date(c.startTime).toLocaleDateString([], { month: "short", day: "numeric" })}
+                                </span>
+                                <span className="font-bold uppercase tracking-wider text-primary text-xs">
+                                  Open Problems
+                                </span>
                               </div>
                             </a>
                           );

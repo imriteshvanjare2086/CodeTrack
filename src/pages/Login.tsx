@@ -52,7 +52,7 @@ export default function Login() {
       >
         <div>
           <h1 className="text-2xl font-heading font-bold text-white tracking-tight">Welcome Back</h1>
-          <p className="text-xs font-mono text-gray-400 mt-1.5">Sign in to your CodeVerse account</p>
+          <p className="text-xs font-mono text-gray-400 mt-1.5">Sign in to your CodeTrack account</p>
         </div>
 
         <div className="space-y-1.5">
@@ -81,6 +81,14 @@ export default function Login() {
 
         <Button type="submit" className="w-full rounded-xl font-mono text-xs bg-white text-black hover:bg-gray-200 transition-all font-bold mt-2" disabled={submitting}>
           {submitting ? "Signing in…" : "Sign in"}
+        </Button>
+
+        <Button
+          type="button"
+          className="w-full rounded-xl font-mono text-xs bg-green-600 hover:bg-green-500 text-white transition-all font-bold mt-2"
+          onClick={handleMockGoogleLogin}
+        >
+          Quick Mock Login (For Testing)
         </Button>
 
         <div className="relative my-5">

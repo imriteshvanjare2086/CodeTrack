@@ -4,18 +4,14 @@ import {
   LayoutDashboard,
   Code2,
   Trophy,
-  StickyNote,
   Target,
   User,
   Flame,
-  GraduationCap,
-  Route,
-  CalendarRange,
-  Focus,
   Users,
   Bot,
   Swords,
   Award,
+  BookOpen,
 } from "lucide-react";
 import { NavLink } from "@/components/NavLink";
 import {
@@ -39,12 +35,13 @@ const primaryNav: NavItem[] = [
   { title: "Problems & Contests", url: "/problems", icon: Code2 },
   { title: "Battle Arena", url: "/battle", icon: Swords },
   { title: "CodeT Assistant", url: "/codet", icon: Bot },
-  { title: "Focus Mode", url: "/focus", icon: Focus },
+  { title: "Study Hub", url: "/study-hub", icon: BookOpen },
 ];
 
 const restNav: NavItem[] = [
   { title: "Friends", url: "/friends", icon: Users },
   { title: "Leaderboard", url: "/leaderboard", icon: Trophy },
+  { title: "Achievements", url: "/achievements", icon: Award },
   { title: "Goals", url: "/goals", icon: Target },
   { title: "Profile", url: "/profile", icon: User },
 ];
@@ -104,7 +101,7 @@ export function AppSidebar() {
           </div>
           {!collapsed && (
             <div className="flex flex-col">
-              <span className="text-lg font-black font-heading text-foreground tracking-tight leading-none text-gradient">CodeVerse</span>
+              <span className="text-lg font-black font-heading text-foreground tracking-tight leading-none text-gradient">CodeTrack</span>
               <span className="text-[10px] font-mono text-foreground/60 uppercase tracking-[0.2em] font-bold mt-1.5">v2.4.0 (Stable)</span>
             </div>
           )}

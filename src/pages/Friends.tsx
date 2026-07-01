@@ -13,7 +13,6 @@ import {
   Loader2,
   Target,
   Medal,
-  LayoutGrid,
   List,
   UserMinus,
   Check,
@@ -45,7 +44,6 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
-import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 
 function initials(name: string) {
   return name
@@ -62,7 +60,8 @@ function profilePath(userId: string) {
 
 export default function Friends() {
   const [search, setSearch] = useState("");
-  const [viewMode, setViewMode] = useState<"grid" | "leaderboard">("grid");
+  const [friendListSearch, setFriendListSearch] = useState("");
+  const [activeSection, setActiveSection] = useState<"discover" | "friends" | "leaderboard">("discover");
   const queryClient = useQueryClient();
 
   const { data: friends, isLoading: isLoadingFriends } = useQuery({
@@ -152,18 +151,14 @@ export default function Friends() {
   });
 
   const filteredFriends = friends?.filter((f) =>
-    f.username.toLowerCase().includes(search.toLowerCase())
+    f.username.toLowerCase().includes(friendListSearch.toLowerCase())
   ) || [];
 
   const globalResults = searchResults?.filter(
     (u) => u.friendStatus !== "friends"
   ) || [];
 
-  const leaderboardData = search.length < 2
-    ? (friendsLeaderboard || [])
-    : (friendsLeaderboard || []).filter((u) =>
-        u.username.toLowerCase().includes(search.toLowerCase())
-      );
+  const leaderboardData = friendsLeaderboard || [];
 
   const hasPendingRequests =
     (friendRequests?.received?.length || 0) > 0 ||
@@ -177,17 +172,48 @@ export default function Friends() {
           description="Find other members and track your coding streaks together."
         />
 
-        <div className="max-w-xl relative group">
-          <div className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground group-focus-within:text-primary transition-colors">
-            {isSearching ? <Loader2 className="h-4 w-4 animate-spin" /> : <Search className="h-4 w-4" />}
-          </div>
-          <input
-            type="text"
-            placeholder="Search by username..."
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            className="w-full rounded-2xl border border-border/60 bg-card/40 pl-11 pr-4 py-3 font-mono text-sm text-foreground backdrop-blur-sm transition-all focus:bg-card/80 focus:ring-2 focus:ring-primary/20 outline-none border-dashed"
-          />
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
+          <button
+            onClick={() => setActiveSection("discover")}
+            className={cn(
+              "rounded-2xl border p-4 text-left transition-all hover:-translate-y-0.5",
+              activeSection === "discover"
+                ? "border-primary/30 bg-primary/10 shadow-lg shadow-primary/10"
+                : "border-border/50 bg-card/30 hover:bg-card/50"
+            )}
+          >
+            <UserPlus className="mb-3 h-5 w-5 text-primary" />
+            <p className="font-heading text-sm font-black">Find Friends</p>
+            <p className="mt-1 font-mono text-[11px] text-muted-foreground">Search users and send requests</p>
+          </button>
+
+          <button
+            onClick={() => setActiveSection("friends")}
+            className={cn(
+              "rounded-2xl border p-4 text-left transition-all hover:-translate-y-0.5",
+              activeSection === "friends"
+                ? "border-primary/30 bg-primary/10 shadow-lg shadow-primary/10"
+                : "border-border/50 bg-card/30 hover:bg-card/50"
+            )}
+          >
+            <List className="mb-3 h-5 w-5 text-primary" />
+            <p className="font-heading text-sm font-black">Friend List</p>
+            <p className="mt-1 font-mono text-[11px] text-muted-foreground">{friends?.length || 0} connected members</p>
+          </button>
+
+          <button
+            onClick={() => setActiveSection("leaderboard")}
+            className={cn(
+              "rounded-2xl border p-4 text-left transition-all hover:-translate-y-0.5",
+              activeSection === "leaderboard"
+                ? "border-primary/30 bg-primary/10 shadow-lg shadow-primary/10"
+                : "border-border/50 bg-card/30 hover:bg-card/50"
+            )}
+          >
+            <Trophy className="mb-3 h-5 w-5 text-primary" />
+            <p className="font-heading text-sm font-black">Leaderboard</p>
+            <p className="mt-1 font-mono text-[11px] text-muted-foreground">Compare your circle</p>
+          </button>
         </div>
 
         {hasPendingRequests && (
@@ -203,96 +229,100 @@ export default function Friends() {
           />
         )}
 
-        <AnimatePresence>
-          {search.length >= 2 && globalResults.length > 0 && (
+        <AnimatePresence mode="wait">
+          {activeSection === "discover" && (
             <motion.div
+              key="discover"
               initial={{ opacity: 0, height: 0 }}
               animate={{ opacity: 1, height: "auto" }}
               exit={{ opacity: 0, height: 0 }}
-              className="space-y-4 pt-4 border-t border-dashed border-border/40"
+              className="space-y-5"
             >
-              <h3 className="font-heading text-xs font-bold uppercase tracking-widest text-primary/80 px-1">Global Results</h3>
-              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-                {globalResults.map((user) => (
-                  <UserCard
-                    key={user._id}
-                    user={user}
-                    isFriend={false}
-                    friendStatus={user.friendStatus}
-                    onAdd={() => requestMutation.mutate(user._id)}
-                    onAccept={() => acceptMutation.mutate(user._id)}
-                    onCancel={() => cancelMutation.mutate(user._id)}
-                    isAdding={requestMutation.isPending && requestMutation.variables === user._id}
-                    isAccepting={acceptMutation.isPending && acceptMutation.variables === user._id}
-                  />
-                ))}
+              <div className="max-w-xl relative group">
+                <div className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground group-focus-within:text-primary transition-colors">
+                  {isSearching ? <Loader2 className="h-4 w-4 animate-spin" /> : <Search className="h-4 w-4" />}
+                </div>
+                <input
+                  type="text"
+                  placeholder="Search username to add..."
+                  value={search}
+                  onChange={(e) => setSearch(e.target.value)}
+                  className="w-full rounded-2xl border border-border/60 bg-card/40 pl-11 pr-4 py-3 font-mono text-sm text-foreground backdrop-blur-sm transition-all focus:bg-card/80 focus:ring-2 focus:ring-primary/20 outline-none border-dashed"
+                />
               </div>
+
+              {search.length < 2 ? (
+                <EmptyDiscover />
+              ) : globalResults.length > 0 ? (
+                <div className="space-y-4 pt-4 border-t border-dashed border-border/40">
+                  <h3 className="font-heading text-xs font-bold uppercase tracking-widest text-primary/80 px-1">Global Results</h3>
+                  <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                    {globalResults.map((user) => (
+                      <UserCard
+                        key={user._id}
+                        user={user}
+                        isFriend={false}
+                        friendStatus={user.friendStatus}
+                        onAdd={() => requestMutation.mutate(user._id)}
+                        onAccept={() => acceptMutation.mutate(user._id)}
+                        onCancel={() => cancelMutation.mutate(user._id)}
+                        isAdding={requestMutation.isPending && requestMutation.variables === user._id}
+                        isAccepting={acceptMutation.isPending && acceptMutation.variables === user._id}
+                      />
+                    ))}
+                  </div>
+                </div>
+              ) : (
+                <div className="rounded-3xl border border-dashed border-border/60 bg-muted/5 px-4 py-12 text-center">
+                  <p className="font-mono text-sm font-bold text-foreground">No matching users found</p>
+                  <p className="mt-2 font-mono text-[11px] text-muted-foreground">Try a different username.</p>
+                </div>
+              )}
+            </motion.div>
+          )}
+
+          {activeSection === "friends" && (
+            <motion.div
+              key="friend-list"
+              initial={{ opacity: 0, y: 12 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -12 }}
+              className="space-y-4"
+            >
+              <FriendListPanel
+                friends={filteredFriends}
+                totalFriends={friends?.length || 0}
+                search={friendListSearch}
+                onSearch={setFriendListSearch}
+                isLoading={isLoadingFriends}
+                onRemove={(id) => removeMutation.mutate(id)}
+                removingId={removeMutation.isPending ? removeMutation.variables : undefined}
+              />
+            </motion.div>
+          )}
+
+          {activeSection === "leaderboard" && (
+            <motion.div
+              key="leaderboard"
+              initial={{ opacity: 0, y: 12 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -12 }}
+              className="space-y-4"
+            >
+              {isLoadingLeaderboard ? (
+                <div className="space-y-4">
+                  {Array.from({ length: 5 }).map((_, i) => (
+                    <div key={i} className="h-16 w-full animate-pulse rounded-xl bg-muted/20" />
+                  ))}
+                </div>
+              ) : leaderboardData.length > 0 ? (
+                <FriendsLeaderboard users={leaderboardData} />
+              ) : (
+                <EmptyCircle />
+              )}
             </motion.div>
           )}
         </AnimatePresence>
-
-        <Tabs value={viewMode} onValueChange={(v) => setViewMode(v as "grid" | "leaderboard")} className="space-y-6">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 px-1">
-            <h3 className="font-heading text-xs font-bold uppercase tracking-widest text-muted-foreground flex items-center gap-2">
-              Your Circle
-              <span className="font-mono text-[10px] text-muted-foreground/60 normal-case tracking-normal">({friends?.length || 0} members)</span>
-            </h3>
-
-            <TabsList className="bg-muted/30 border border-border/40 p-1 rounded-xl h-10 w-fit">
-              <TabsTrigger
-                value="grid"
-                className="rounded-lg px-3 text-[10px] font-bold uppercase tracking-wider data-[state=active]:bg-primary/20 data-[state=active]:text-primary"
-              >
-                <LayoutGrid className="h-3.5 w-3.5 mr-2" />
-                Grid
-              </TabsTrigger>
-              <TabsTrigger
-                value="leaderboard"
-                className="rounded-lg px-3 text-[10px] font-bold uppercase tracking-wider data-[state=active]:bg-primary/20 data-[state=active]:text-primary"
-              >
-                <List className="h-3.5 w-3.5 mr-2" />
-                Leaderboard
-              </TabsTrigger>
-            </TabsList>
-          </div>
-
-          <TabsContent value="grid" className="mt-0 space-y-4 outline-none">
-            {isLoadingFriends ? (
-              <div className="flex h-40 items-center justify-center rounded-2xl border border-dashed border-border/40 bg-muted/5">
-                <Loader2 className="h-6 w-6 animate-spin text-primary/40" />
-              </div>
-            ) : friends && friends.length > 0 ? (
-              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-                {(search.length < 2 ? friends : filteredFriends).map((user, i) => (
-                  <UserCard
-                    key={user._id}
-                    user={user}
-                    isFriend={true}
-                    delay={i * 0.05}
-                    onRemove={() => removeMutation.mutate(user._id)}
-                    isRemoving={removeMutation.isPending && removeMutation.variables === user._id}
-                  />
-                ))}
-              </div>
-            ) : (
-              <EmptyCircle />
-            )}
-          </TabsContent>
-
-          <TabsContent value="leaderboard" className="mt-0 outline-none">
-            {isLoadingLeaderboard ? (
-              <div className="space-y-4">
-                {Array.from({ length: 5 }).map((_, i) => (
-                  <div key={i} className="h-16 w-full animate-pulse rounded-xl bg-muted/20" />
-                ))}
-              </div>
-            ) : leaderboardData.length > 0 ? (
-              <FriendsLeaderboard users={leaderboardData} />
-            ) : (
-              <EmptyCircle />
-            )}
-          </TabsContent>
-        </Tabs>
       </div>
     </DashboardLayout>
   );
@@ -394,6 +424,109 @@ function EmptyCircle() {
       <p className="mt-2 font-mono text-[11px] text-muted-foreground max-w-xs mx-auto">
         Search for your friends by username and send them a friend request.
       </p>
+    </div>
+  );
+}
+
+function EmptyDiscover() {
+  return (
+    <div className="rounded-3xl border border-dashed border-border/60 bg-muted/5 px-4 py-16 text-center">
+      <div className="mx-auto w-12 h-12 rounded-2xl bg-primary/5 flex items-center justify-center mb-4 border border-primary/10">
+        <UserPlus className="h-6 w-6 text-primary/40" />
+      </div>
+      <p className="font-mono text-sm text-foreground font-bold">Search to find people</p>
+      <p className="mt-2 font-mono text-[11px] text-muted-foreground max-w-xs mx-auto">
+        Type at least two characters to discover members and send friend requests.
+      </p>
+    </div>
+  );
+}
+
+function FriendListPanel({
+  friends,
+  totalFriends,
+  search,
+  onSearch,
+  isLoading,
+  onRemove,
+  removingId,
+}: {
+  friends: FriendUser[];
+  totalFriends: number;
+  search: string;
+  onSearch: (value: string) => void;
+  isLoading: boolean;
+  onRemove: (id: string) => void;
+  removingId?: string;
+}) {
+  return (
+    <div className="rounded-[2rem] border border-foreground/10 bg-card/30 backdrop-blur-3xl overflow-hidden shadow-xl premium-border">
+      <div className="flex flex-col gap-4 border-b border-foreground/5 p-5 sm:flex-row sm:items-center sm:justify-between">
+        <div>
+          <h3 className="font-heading text-sm font-black uppercase tracking-widest text-foreground">Friend List</h3>
+          <p className="mt-1 font-mono text-[11px] text-muted-foreground">
+            {totalFriends} {totalFriends === 1 ? "friend" : "friends"} connected
+          </p>
+        </div>
+
+        <div className="relative w-full sm:w-80">
+          <Search className="absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+          <input
+            type="text"
+            placeholder="Search friend list..."
+            value={search}
+            onChange={(e) => onSearch(e.target.value)}
+            className="w-full rounded-2xl border border-border/60 bg-background/40 py-2.5 pl-10 pr-4 font-mono text-xs text-foreground outline-none transition-all focus:bg-background/70 focus:ring-2 focus:ring-primary/20"
+          />
+        </div>
+      </div>
+
+      {isLoading ? (
+        <div className="flex h-44 items-center justify-center">
+          <Loader2 className="h-6 w-6 animate-spin text-primary/40" />
+        </div>
+      ) : totalFriends === 0 ? (
+        <div className="p-5">
+          <EmptyCircle />
+        </div>
+      ) : friends.length === 0 ? (
+        <div className="px-5 py-14 text-center">
+          <p className="font-mono text-sm font-bold text-foreground">No friends matched</p>
+          <p className="mt-2 font-mono text-[11px] text-muted-foreground">Try a different name.</p>
+        </div>
+      ) : (
+        <div className="divide-y divide-foreground/5">
+          {friends.map((user) => (
+            <div key={user._id} className="flex items-center justify-between gap-3 px-5 py-4 transition-colors hover:bg-muted/10">
+              <Link to={profilePath(user._id)} className="flex min-w-0 items-center gap-3 hover:opacity-80">
+                <Avatar className="h-11 w-11 rounded-2xl border border-foreground/10">
+                  {user.profileImage && <AvatarImage src={user.profileImage} className="object-cover" />}
+                  <AvatarFallback className="rounded-2xl bg-primary/10 text-xs font-black uppercase text-primary">
+                    {initials(user.username)}
+                  </AvatarFallback>
+                </Avatar>
+
+                <div className="min-w-0">
+                  <p className="truncate font-heading text-sm font-black text-foreground">{user.username}</p>
+                  <p className="truncate font-mono text-[10px] text-muted-foreground">{user.email}</p>
+                </div>
+              </Link>
+
+              <button
+                onClick={() => onRemove(user._id)}
+                disabled={removingId === user._id}
+                className="shrink-0 rounded-xl border border-red-500/20 bg-red-500/10 px-3 py-2 font-mono text-[10px] font-black uppercase tracking-wider text-red-400 transition-all hover:bg-red-500 hover:text-white disabled:opacity-60"
+              >
+                {removingId === user._id ? (
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                ) : (
+                  "Remove"
+                )}
+              </button>
+            </div>
+          ))}
+        </div>
+      )}
     </div>
   );
 }
