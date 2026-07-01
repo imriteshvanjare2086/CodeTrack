@@ -34,15 +34,6 @@ export default function Login() {
     }
   }
 
-  const handleMockGoogleLogin = () => {
-    const user = {
-      username: "Sahil",
-      email: "sahil@gmail.com"
-    };
-    localStorage.setItem("user", JSON.stringify(user));
-    localStorage.setItem("token", "mock-google-oauth-token");
-    navigate("/");
-  };
 
   return (
     <div className="min-h-screen bg-[#050505] text-gray-100 flex items-center justify-center p-4 sm:p-6">
@@ -83,13 +74,6 @@ export default function Login() {
           {submitting ? "Signing in…" : "Sign in"}
         </Button>
 
-        <Button
-          type="button"
-          className="w-full rounded-xl font-mono text-xs bg-green-600 hover:bg-green-500 text-white transition-all font-bold mt-2"
-          onClick={handleMockGoogleLogin}
-        >
-          Quick Mock Login (For Testing)
-        </Button>
 
         <div className="relative my-5">
           <div className="absolute inset-0 flex items-center">

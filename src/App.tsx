@@ -20,6 +20,7 @@ import BattleArena from "./pages/BattleArena.tsx";
 import Problems from "./pages/Problems.tsx";
 import Achievements from "./pages/Achievements.tsx";
 import StudyHub from "./pages/StudyHub.tsx";
+import Courses from "./pages/Courses.tsx";
 
 const queryClient = new QueryClient();
 
@@ -62,6 +63,7 @@ const App = () => {
               <Route path="/battle" element={<ProtectedRoute><BattleArena /></ProtectedRoute>} />
               <Route path="/problems" element={<ProtectedRoute><Problems /></ProtectedRoute>} />
               <Route path="/study-hub" element={<ProtectedRoute><StudyHub /></ProtectedRoute>} />
+              <Route path="/courses" element={<ProtectedRoute><Courses /></ProtectedRoute>} />
 
               {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
               <Route path="*" element={<NotFound />} />

@@ -11,8 +11,6 @@ import {
   UserPlus,
   Search,
   Loader2,
-  Target,
-  Medal,
   List,
   UserMinus,
   Check,
@@ -35,14 +33,6 @@ import {
 } from "@/services/friends";
 import { toast } from "sonner";
 import { Link } from "react-router-dom";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 
 function initials(name: string) {
@@ -166,53 +156,59 @@ export default function Friends() {
 
   return (
     <DashboardLayout>
-      <div className="mx-auto max-w-6xl space-y-8 pb-20">
+      <div className="mx-auto max-w-6xl space-y-8 pb-20 px-4">
         <PageHeader
           title="Study Circle"
           description="Find other members and track your coding streaks together."
         />
 
-        <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
+        {/* ── Premium Section Nav ── */}
+        <div className="flex flex-wrap gap-2 p-1.5 bg-white/[0.03] rounded-2xl border border-white/8 backdrop-blur-xl">
           <button
             onClick={() => setActiveSection("discover")}
             className={cn(
-              "rounded-2xl border p-4 text-left transition-all hover:-translate-y-0.5",
+              "flex items-center gap-2.5 px-5 py-2.5 rounded-xl font-mono text-sm font-bold transition-all duration-300",
               activeSection === "discover"
-                ? "border-primary/30 bg-primary/10 shadow-lg shadow-primary/10"
-                : "border-border/50 bg-card/30 hover:bg-card/50"
+                ? "bg-primary text-primary-foreground shadow-lg shadow-primary/30 scale-[1.02]"
+                : "text-muted-foreground hover:text-foreground hover:bg-white/5"
             )}
           >
-            <UserPlus className="mb-3 h-5 w-5 text-primary" />
-            <p className="font-heading text-sm font-black">Find Friends</p>
-            <p className="mt-1 font-mono text-[11px] text-muted-foreground">Search users and send requests</p>
+            <UserPlus className="h-4 w-4" />
+            Discover
           </button>
 
           <button
             onClick={() => setActiveSection("friends")}
             className={cn(
-              "rounded-2xl border p-4 text-left transition-all hover:-translate-y-0.5",
+              "flex items-center gap-2.5 px-5 py-2.5 rounded-xl font-mono text-sm font-bold transition-all duration-300",
               activeSection === "friends"
-                ? "border-primary/30 bg-primary/10 shadow-lg shadow-primary/10"
-                : "border-border/50 bg-card/30 hover:bg-card/50"
+                ? "bg-primary text-primary-foreground shadow-lg shadow-primary/30 scale-[1.02]"
+                : "text-muted-foreground hover:text-foreground hover:bg-white/5"
             )}
           >
-            <List className="mb-3 h-5 w-5 text-primary" />
-            <p className="font-heading text-sm font-black">Friend List</p>
-            <p className="mt-1 font-mono text-[11px] text-muted-foreground">{friends?.length || 0} connected members</p>
+            <List className="h-4 w-4" />
+            My Friends
+            {(friends?.length ?? 0) > 0 && (
+              <span className={cn(
+                "ml-1 min-w-[20px] h-5 px-1.5 rounded-full text-[10px] font-black flex items-center justify-center",
+                activeSection === "friends" ? "bg-white/20 text-white" : "bg-primary/10 text-primary"
+              )}>
+                {friends?.length}
+              </span>
+            )}
           </button>
 
           <button
             onClick={() => setActiveSection("leaderboard")}
             className={cn(
-              "rounded-2xl border p-4 text-left transition-all hover:-translate-y-0.5",
+              "flex items-center gap-2.5 px-5 py-2.5 rounded-xl font-mono text-sm font-bold transition-all duration-300",
               activeSection === "leaderboard"
-                ? "border-primary/30 bg-primary/10 shadow-lg shadow-primary/10"
-                : "border-border/50 bg-card/30 hover:bg-card/50"
+                ? "bg-primary text-primary-foreground shadow-lg shadow-primary/30 scale-[1.02]"
+                : "text-muted-foreground hover:text-foreground hover:bg-white/5"
             )}
           >
-            <Trophy className="mb-3 h-5 w-5 text-primary" />
-            <p className="font-heading text-sm font-black">Leaderboard</p>
-            <p className="mt-1 font-mono text-[11px] text-muted-foreground">Compare your circle</p>
+            <Trophy className="h-4 w-4" />
+            Circle Board
           </button>
         </div>
 
@@ -233,9 +229,9 @@ export default function Friends() {
           {activeSection === "discover" && (
             <motion.div
               key="discover"
-              initial={{ opacity: 0, height: 0 }}
-              animate={{ opacity: 1, height: "auto" }}
-              exit={{ opacity: 0, height: 0 }}
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -10 }}
               className="space-y-5"
             >
               <div className="max-w-xl relative group">
@@ -247,14 +243,14 @@ export default function Friends() {
                   placeholder="Search username to add..."
                   value={search}
                   onChange={(e) => setSearch(e.target.value)}
-                  className="w-full rounded-2xl border border-border/60 bg-card/40 pl-11 pr-4 py-3 font-mono text-sm text-foreground backdrop-blur-sm transition-all focus:bg-card/80 focus:ring-2 focus:ring-primary/20 outline-none border-dashed"
+                  className="w-full rounded-2xl border border-white/10 bg-white/5 pl-11 pr-4 py-3 font-mono text-sm text-white backdrop-blur-sm transition-all focus:bg-white/10 focus:ring-2 focus:ring-primary/20 outline-none"
                 />
               </div>
 
               {search.length < 2 ? (
                 <EmptyDiscover />
               ) : globalResults.length > 0 ? (
-                <div className="space-y-4 pt-4 border-t border-dashed border-border/40">
+                <div className="space-y-4 pt-4 border-t border-dashed border-white/10">
                   <h3 className="font-heading text-xs font-bold uppercase tracking-widest text-primary/80 px-1">Global Results</h3>
                   <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
                     {globalResults.map((user) => (
@@ -273,8 +269,8 @@ export default function Friends() {
                   </div>
                 </div>
               ) : (
-                <div className="rounded-3xl border border-dashed border-border/60 bg-muted/5 px-4 py-12 text-center">
-                  <p className="font-mono text-sm font-bold text-foreground">No matching users found</p>
+                <div className="rounded-3xl border border-dashed border-white/10 bg-white/5 px-4 py-12 text-center">
+                  <p className="font-mono text-sm font-bold text-white">No matching users found</p>
                   <p className="mt-2 font-mono text-[11px] text-muted-foreground">Try a different username.</p>
                 </div>
               )}
@@ -284,9 +280,9 @@ export default function Friends() {
           {activeSection === "friends" && (
             <motion.div
               key="friend-list"
-              initial={{ opacity: 0, y: 12 }}
+              initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -12 }}
+              exit={{ opacity: 0, y: -10 }}
               className="space-y-4"
             >
               <FriendListPanel
@@ -304,15 +300,15 @@ export default function Friends() {
           {activeSection === "leaderboard" && (
             <motion.div
               key="leaderboard"
-              initial={{ opacity: 0, y: 12 }}
+              initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -12 }}
+              exit={{ opacity: 0, y: -10 }}
               className="space-y-4"
             >
               {isLoadingLeaderboard ? (
                 <div className="space-y-4">
                   {Array.from({ length: 5 }).map((_, i) => (
-                    <div key={i} className="h-16 w-full animate-pulse rounded-xl bg-muted/20" />
+                    <div key={i} className="h-16 w-full animate-pulse rounded-xl bg-white/5" />
                   ))}
                 </div>
               ) : leaderboardData.length > 0 ? (
@@ -348,7 +344,7 @@ function FriendRequestsPanel({
   isCancelling: boolean;
 }) {
   return (
-    <div className="rounded-[2rem] border border-foreground/10 bg-card/30 backdrop-blur-3xl overflow-hidden shadow-xl premium-border p-5 space-y-4">
+    <div className="rounded-[2rem] border border-white/10 bg-white/5 backdrop-blur-xl overflow-hidden shadow-xl p-5 space-y-4">
       <h3 className="font-heading text-xs font-bold uppercase tracking-widest text-primary/80 flex items-center gap-2">
         <Clock className="h-3.5 w-3.5" />
         Friend Requests
@@ -358,9 +354,9 @@ function FriendRequestsPanel({
         <div className="space-y-2">
           <p className="text-[10px] font-mono uppercase tracking-widest text-muted-foreground">Incoming</p>
           {received.map((user) => (
-            <div key={user._id} className="flex items-center justify-between gap-3 rounded-xl border border-foreground/5 bg-muted/10 px-3 py-2">
+            <div key={user._id} className="flex items-center justify-between gap-3 rounded-xl border border-white/5 bg-white/5 px-3 py-2">
               <Link to={profilePath(user._id)} className="flex items-center gap-3 min-w-0 hover:opacity-80">
-                <Avatar className="h-9 w-9 rounded-xl border border-foreground/5">
+                <Avatar className="h-9 w-9 rounded-xl border border-white/5">
                   {user.profileImage && <AvatarImage src={user.profileImage} className="object-cover" />}
                   <AvatarFallback className="text-[10px] font-black uppercase">{initials(user.username)}</AvatarFallback>
                 </Avatar>
@@ -391,9 +387,9 @@ function FriendRequestsPanel({
         <div className="space-y-2">
           <p className="text-[10px] font-mono uppercase tracking-widest text-muted-foreground">Sent</p>
           {sent.map((user) => (
-            <div key={user._id} className="flex items-center justify-between gap-3 rounded-xl border border-foreground/5 bg-muted/10 px-3 py-2">
+            <div key={user._id} className="flex items-center justify-between gap-3 rounded-xl border border-white/5 bg-white/5 px-3 py-2">
               <Link to={profilePath(user._id)} className="flex items-center gap-3 min-w-0 hover:opacity-80">
-                <Avatar className="h-9 w-9 rounded-xl border border-foreground/5">
+                <Avatar className="h-9 w-9 rounded-xl border border-white/5">
                   {user.profileImage && <AvatarImage src={user.profileImage} className="object-cover" />}
                   <AvatarFallback className="text-[10px] font-black uppercase">{initials(user.username)}</AvatarFallback>
                 </Avatar>
@@ -402,7 +398,7 @@ function FriendRequestsPanel({
               <button
                 onClick={() => onCancel(user._id)}
                 disabled={isCancelling}
-                className="text-[10px] font-mono font-bold uppercase tracking-wider px-3 py-1.5 rounded-lg bg-muted/30 border border-foreground/10 text-muted-foreground hover:text-foreground transition-colors"
+                className="text-[10px] font-mono font-bold uppercase tracking-wider px-3 py-1.5 rounded-lg bg-white/5 border border-white/10 text-muted-foreground hover:text-white transition-colors"
               >
                 Cancel
               </button>
@@ -416,11 +412,11 @@ function FriendRequestsPanel({
 
 function EmptyCircle() {
   return (
-    <div className="rounded-3xl border border-dashed border-border/60 bg-muted/5 px-4 py-16 text-center">
+    <div className="rounded-3xl border border-dashed border-white/10 bg-white/5 px-4 py-16 text-center">
       <div className="mx-auto w-12 h-12 rounded-2xl bg-primary/5 flex items-center justify-center mb-4 border border-primary/10">
         <Search className="h-6 w-6 text-primary/40" />
       </div>
-      <p className="font-mono text-sm text-foreground font-bold">Your circle is empty</p>
+      <p className="font-mono text-sm text-white font-bold">Your circle is empty</p>
       <p className="mt-2 font-mono text-[11px] text-muted-foreground max-w-xs mx-auto">
         Search for your friends by username and send them a friend request.
       </p>
@@ -430,11 +426,11 @@ function EmptyCircle() {
 
 function EmptyDiscover() {
   return (
-    <div className="rounded-3xl border border-dashed border-border/60 bg-muted/5 px-4 py-16 text-center">
+    <div className="rounded-3xl border border-dashed border-white/10 bg-white/5 px-4 py-16 text-center">
       <div className="mx-auto w-12 h-12 rounded-2xl bg-primary/5 flex items-center justify-center mb-4 border border-primary/10">
         <UserPlus className="h-6 w-6 text-primary/40" />
       </div>
-      <p className="font-mono text-sm text-foreground font-bold">Search to find people</p>
+      <p className="font-mono text-sm text-white font-bold">Search to find people</p>
       <p className="mt-2 font-mono text-[11px] text-muted-foreground max-w-xs mx-auto">
         Type at least two characters to discover members and send friend requests.
       </p>
@@ -460,10 +456,10 @@ function FriendListPanel({
   removingId?: string;
 }) {
   return (
-    <div className="rounded-[2rem] border border-foreground/10 bg-card/30 backdrop-blur-3xl overflow-hidden shadow-xl premium-border">
-      <div className="flex flex-col gap-4 border-b border-foreground/5 p-5 sm:flex-row sm:items-center sm:justify-between">
+    <div className="rounded-[2rem] border border-white/10 bg-white/5 backdrop-blur-xl overflow-hidden shadow-xl">
+      <div className="flex flex-col gap-4 border-b border-white/5 p-5 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h3 className="font-heading text-sm font-black uppercase tracking-widest text-foreground">Friend List</h3>
+          <h3 className="font-heading text-sm font-black uppercase tracking-widest text-white">Friend List</h3>
           <p className="mt-1 font-mono text-[11px] text-muted-foreground">
             {totalFriends} {totalFriends === 1 ? "friend" : "friends"} connected
           </p>
@@ -476,7 +472,7 @@ function FriendListPanel({
             placeholder="Search friend list..."
             value={search}
             onChange={(e) => onSearch(e.target.value)}
-            className="w-full rounded-2xl border border-border/60 bg-background/40 py-2.5 pl-10 pr-4 font-mono text-xs text-foreground outline-none transition-all focus:bg-background/70 focus:ring-2 focus:ring-primary/20"
+            className="w-full rounded-2xl border border-white/10 bg-white/5 py-2.5 pl-10 pr-4 font-mono text-xs text-white outline-none transition-all focus:bg-white/10 focus:ring-2 focus:ring-primary/20"
           />
         </div>
       </div>
@@ -491,15 +487,15 @@ function FriendListPanel({
         </div>
       ) : friends.length === 0 ? (
         <div className="px-5 py-14 text-center">
-          <p className="font-mono text-sm font-bold text-foreground">No friends matched</p>
+          <p className="font-mono text-sm font-bold text-white">No friends matched</p>
           <p className="mt-2 font-mono text-[11px] text-muted-foreground">Try a different name.</p>
         </div>
       ) : (
-        <div className="divide-y divide-foreground/5">
+        <div className="divide-y divide-white/5">
           {friends.map((user) => (
-            <div key={user._id} className="flex items-center justify-between gap-3 px-5 py-4 transition-colors hover:bg-muted/10">
+            <div key={user._id} className="flex items-center justify-between gap-3 px-5 py-4 transition-colors hover:bg-white/5">
               <Link to={profilePath(user._id)} className="flex min-w-0 items-center gap-3 hover:opacity-80">
-                <Avatar className="h-11 w-11 rounded-2xl border border-foreground/10">
+                <Avatar className="h-11 w-11 rounded-2xl border border-white/10">
                   {user.profileImage && <AvatarImage src={user.profileImage} className="object-cover" />}
                   <AvatarFallback className="rounded-2xl bg-primary/10 text-xs font-black uppercase text-primary">
                     {initials(user.username)}
@@ -507,7 +503,7 @@ function FriendListPanel({
                 </Avatar>
 
                 <div className="min-w-0">
-                  <p className="truncate font-heading text-sm font-black text-foreground">{user.username}</p>
+                  <p className="truncate font-heading text-sm font-black text-white">{user.username}</p>
                   <p className="truncate font-mono text-[10px] text-muted-foreground">{user.email}</p>
                 </div>
               </Link>
@@ -532,128 +528,102 @@ function FriendListPanel({
 }
 
 function FriendsLeaderboard({ users }: { users: FriendUser[] }) {
-  const getRankIcon = (rank: number) => {
-    switch (rank) {
-      case 1: return <Trophy className="h-6 w-6 text-yellow-400 drop-shadow-[0_0_8px_rgba(250,204,21,0.5)]" />;
-      case 2: return <Medal className="h-6 w-6 text-slate-300 drop-shadow-[0_0_8px_rgba(203,213,225,0.5)]" />;
-      case 3: return <Medal className="h-6 w-6 text-amber-600 drop-shadow-[0_0_8px_rgba(180,83,9,0.5)]" />;
-      default: return <span className="text-muted-foreground font-mono font-black text-sm">{rank}</span>;
-    }
-  };
+  const podium = users.slice(0, 3);
+  const rest = users.slice(3);
 
-  const getRankStyle = (rank: number, isMe?: boolean) => {
-    if (isMe) return "bg-primary/5 hover:bg-primary/10 border-l-2 border-l-primary";
-    switch (rank) {
-      case 1: return "bg-yellow-400/5 hover:bg-yellow-400/10 border-yellow-400/20";
-      case 2: return "bg-slate-300/5 hover:bg-slate-300/10 border-slate-300/20";
-      case 3: return "bg-amber-600/5 hover:bg-amber-600/10 border-amber-600/20";
-      default: return "hover:bg-muted/30";
-    }
-  };
-
-  const getRankLabel = (index: number) => {
-    if (index === 0) return "Circuit Leader";
-    if (index === 1) return "Elite";
-    if (index === 2) return "Advanced";
-    return "Rising";
-  };
+  const podiumColors = [
+    { color: "text-yellow-400", border: "border-yellow-400/30", bg: "bg-yellow-400/5", glow: "shadow-[0_0_30px_rgba(250,204,21,0.2)]" },
+    { color: "text-slate-300",  border: "border-slate-300/30",  bg: "bg-slate-300/5",  glow: "shadow-[0_0_20px_rgba(203,213,225,0.1)]" },
+    { color: "text-amber-600",  border: "border-amber-600/30",  bg: "bg-amber-600/5",  glow: "shadow-[0_0_20px_rgba(180,83,9,0.1)]" },
+  ];
+  const podiumOrder = [1, 0, 2]; // visual order: 2nd left, 1st center, 3rd right
+  const podiumHeights = ["pt-8", "pt-4", "pt-8"];
 
   return (
-    <motion.div
-      initial={{ opacity: 0, scale: 0.98 }}
-      animate={{ opacity: 1, scale: 1 }}
-      transition={{ duration: 0.7, ease: [0.23, 1, 0.32, 1] }}
-      className="rounded-[2rem] border border-foreground/10 bg-card/30 backdrop-blur-3xl overflow-hidden shadow-2xl premium-border"
-    >
-      <div className="absolute inset-0 bg-gradient-to-b from-foreground/[0.02] to-transparent pointer-events-none" />
-
-      <div className="w-full overflow-x-auto pb-4">
-        <Table className="min-w-[560px] lg:min-w-full">
-          <TableHeader className="bg-muted/10">
-            <TableRow className="hover:bg-transparent border-foreground/5 uppercase tracking-[0.2em] font-mono text-[10px]">
-              <TableHead className="w-[80px] sm:w-[100px] text-center font-black">Rank</TableHead>
-              <TableHead className="font-black">Coder</TableHead>
-              <TableHead className="text-right font-black">Score</TableHead>
-              <TableHead className="text-right font-black">Rank Label</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            <AnimatePresence mode="popLayout">
-              {users.map((user, index) => (
-                <motion.tr
-                  layout
-                  key={user._id}
-                  initial={{ opacity: 0, x: -10 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{ delay: index * 0.05 }}
-                  className={cn(
-                    "group border-foreground/5 transition-all duration-500 hover:-translate-y-0.5",
-                    getRankStyle(index + 1, user.isMe)
+    <div className="space-y-6">
+      {/* Top-3 podium */}
+      {podium.length > 0 && (
+        <div className="grid grid-cols-3 gap-3 items-end">
+          {podiumOrder.map((pos, visualIdx) => {
+            const user = podium[pos];
+            if (!user) return <div key={visualIdx} />;
+            const c = podiumColors[pos];
+            return (
+              <motion.div
+                key={user._id}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.1 * visualIdx }}
+                className={cn(
+                  "relative flex flex-col items-center gap-2 rounded-3xl border p-4 text-center transition-all hover:scale-[1.02]",
+                  c.border, c.bg, c.glow, podiumHeights[visualIdx]
+                )}
+              >
+                <div className={cn("absolute -top-3.5 left-1/2 -translate-x-1/2 flex h-7 w-7 items-center justify-center rounded-full bg-background border shadow-md", c.border)}>
+                  <span className={cn("font-black text-xs", c.color)}>{pos + 1}</span>
+                </div>
+                <Avatar className={cn("h-14 w-14 rounded-2xl border-2 shadow-xl", c.border)}>
+                  <AvatarImage src={user.profileImage} className="object-cover" />
+                  <AvatarFallback className={cn("rounded-2xl font-black text-sm uppercase", c.color)}>
+                    {initials(user.username)}
+                  </AvatarFallback>
+                </Avatar>
+                <div>
+                  <Link to={profilePath(user._id)} className={cn("font-black text-sm hover:underline", c.color)}>
+                    {user.username}
+                  </Link>
+                  {user.isMe && (
+                    <Badge className="ml-1.5 text-[8px] h-4 py-0 px-1.5 bg-primary/10 text-primary border-primary/20 font-black uppercase tracking-widest">YOU</Badge>
                   )}
-                >
-                  <TableCell className="text-center">
-                    <div className="flex items-center justify-center transition-transform duration-500 group-hover:scale-110">
-                      {getRankIcon(index + 1)}
-                    </div>
-                  </TableCell>
-                  <TableCell>
-                    <Link
-                      to={profilePath(user._id)}
-                      className="flex items-center gap-4 group/user py-2"
-                    >
-                      <div className="relative">
-                        <Avatar className="h-12 w-12 rounded-2xl border-2 border-foreground/5 shadow-xl transition-all duration-500 group-hover/user:border-primary/50 group-hover/user:scale-105 group-hover/user:shadow-primary/20">
-                          <AvatarImage src={user.profileImage} className="object-cover" />
-                          <AvatarFallback className="bg-gradient-to-br from-primary/20 to-primary/5 text-primary uppercase font-black text-xs">
-                            {initials(user.username)}
-                          </AvatarFallback>
-                        </Avatar>
-                        {index < 3 && (
-                          <div className="absolute -top-1.5 -right-1.5 h-5 w-5 bg-background rounded-full border border-foreground/10 flex items-center justify-center shadow-lg">
-                            <svg className={cn("h-2.5 w-2.5", index === 0 ? "text-yellow-400" : index === 1 ? "text-slate-300" : "text-amber-600")} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                              <path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z" />
-                            </svg>
-                          </div>
-                        )}
-                      </div>
-                      <div className="flex flex-col gap-0.5">
-                        <span className="font-black text-foreground group-hover/user:text-primary transition-colors tracking-tight text-base flex items-center gap-2">
-                          {user.username}
-                          {user.isMe && (
-                            <Badge className="text-[8px] h-4 py-0 px-1.5 bg-primary/10 text-primary border-primary/20 font-black tracking-widest uppercase">YOU</Badge>
-                          )}
-                        </span>
-                      </div>
-                    </Link>
-                  </TableCell>
-                  <TableCell className="text-right">
-                    <div className="flex items-center justify-end gap-2 pr-2">
-                      <Zap className="h-4 w-4 text-primary/50" />
-                      <span className="font-heading font-black text-xl text-foreground tabular-nums tracking-tighter transition-all group-hover:scale-110 group-hover:text-primary">
-                        {user.overallScore ?? 0}
-                      </span>
-                    </div>
-                  </TableCell>
-                  <TableCell className="text-right">
-                    <div className="flex items-center justify-end pr-2">
-                      <span className={cn(
-                        "text-[11px] sm:text-[12px] uppercase tracking-[0.2em] font-mono font-black py-1 px-3 rounded-full w-fit border transition-all duration-300 relative overflow-hidden",
-                        index < 3 ? "bg-primary/10 text-primary border-primary/20 shadow-[0_0_20px_hsla(var(--primary),0.5)]" : "bg-muted/30 text-muted-foreground border-foreground/5"
-                      )}>
-                        {index < 3 && (
-                          <span className="absolute inset-0 bg-gradient-to-r from-transparent via-primary/30 to-transparent animate-[shineline_2s_infinite] pointer-events-none" />
-                        )}
-                        {getRankLabel(index)}
-                      </span>
-                    </div>
-                  </TableCell>
-                </motion.tr>
-              ))}
-            </AnimatePresence>
-          </TableBody>
-        </Table>
-      </div>
-    </motion.div>
+                  <div className="flex items-center justify-center gap-1 mt-1">
+                    <Zap className={cn("h-3 w-3", c.color)} />
+                    <span className={cn("font-heading font-black text-lg tabular-nums", c.color)}>
+                      {user.overallScore ?? 0}
+                    </span>
+                  </div>
+                </div>
+              </motion.div>
+            );
+          })}
+        </div>
+      )}
+
+      {/* Remaining users */}
+      {rest.length > 0 && (
+        <div className="rounded-3xl border border-white/10 bg-white/5 backdrop-blur-xl overflow-hidden">
+          <div className="grid grid-cols-[48px_1fr_auto] gap-4 px-5 py-3 border-b border-white/5 bg-white/[0.02] uppercase tracking-[0.18em] font-mono text-[10px] text-muted-foreground font-black">
+            <span className="text-center">Rank</span>
+            <span>Coder</span>
+            <span className="text-right pr-2">Score</span>
+          </div>
+          <div className="divide-y divide-white/5">
+            {rest.map((user, i) => (
+              <motion.div
+                key={user._id}
+                initial={{ opacity: 0, x: -8 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ delay: 0.03 * i }}
+                className={cn("grid grid-cols-[48px_1fr_auto] gap-4 items-center px-5 py-3.5 transition-all hover:bg-white/5", user.isMe && "bg-primary/5 border-l-2 border-l-primary")}
+              >
+                <span className="text-center font-mono font-black text-sm text-muted-foreground tabular-nums">{i + 4}</span>
+                <Link to={profilePath(user._id)} className="flex items-center gap-3 group/u">
+                  <Avatar className="h-9 w-9 rounded-xl border border-white/10 transition group-hover/u:border-primary/30 group-hover/u:scale-105">
+                    <AvatarImage src={user.profileImage} className="object-cover" />
+                    <AvatarFallback className="bg-primary/10 text-primary text-xs font-black uppercase">{initials(user.username)}</AvatarFallback>
+                  </Avatar>
+                  <span className="font-black text-sm text-white group-hover/u:text-primary transition-colors">{user.username}</span>
+                  {user.isMe && <Badge className="text-[8px] h-4 py-0 px-1 bg-primary/10 text-primary border-primary/20 font-black uppercase">YOU</Badge>}
+                </Link>
+                <div className="flex items-center justify-end gap-1.5 pr-2">
+                  <Zap className="h-3.5 w-3.5 text-primary/40" />
+                  <span className="font-heading font-black text-base tabular-nums text-white">{user.overallScore ?? 0}</span>
+                </div>
+              </motion.div>
+            ))}
+          </div>
+        </div>
+      )}
+    </div>
   );
 }
 
@@ -689,12 +659,12 @@ function UserCard({
       transition={{ delay, duration: 0.6, ease: [0.23, 1, 0.32, 1] }}
       className="h-full"
     >
-      <Card className="h-full rounded-[2rem] border border-foreground/10 bg-card/30 backdrop-blur-2xl transition-all duration-500 hover:-translate-y-2 hover:shadow-2xl hover:shadow-primary/5 hover:border-primary/20 group tilt-card premium-border overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-br from-foreground/[0.04] to-transparent pointer-events-none" />
+      <Card className="h-full rounded-[2rem] border border-white/10 bg-white/5 backdrop-blur-2xl transition-all duration-500 hover:-translate-y-2 hover:shadow-2xl hover:shadow-primary/5 hover:border-primary/20 group tilt-card premium-border overflow-hidden">
+        <div className="absolute inset-0 bg-gradient-to-br from-white/[0.04] to-transparent pointer-events-none" />
 
         <CardHeader className="flex flex-row items-center gap-4 space-y-0 pb-4 relative z-10">
           <Link to={profilePath(user._id)} className="shrink-0 hover:opacity-80 transition-opacity">
-            <Avatar className="h-14 w-14 rounded-2xl border-2 border-foreground/10 shadow-2xl transition-all duration-500 group-hover:border-primary/50 group-hover:scale-105 group-hover:shadow-primary/20">
+            <Avatar className="h-14 w-14 rounded-2xl border-2 border-white/10 shadow-2xl transition-all duration-500 group-hover:border-primary/50 group-hover:scale-105 group-hover:shadow-primary/20">
               {user.profileImage && <AvatarImage src={user.profileImage} className="object-cover" />}
               <AvatarFallback className="rounded-2xl bg-gradient-to-br from-primary/20 to-primary/5 font-black text-sm text-primary uppercase">
                 {initials(user.username)}
@@ -704,7 +674,7 @@ function UserCard({
 
           <div className="min-w-0 flex-1">
             <Link to={profilePath(user._id)} className="block group/link">
-              <h4 className="truncate font-heading text-sm sm:text-base font-black text-foreground group-hover:text-primary transition-colors tracking-tight">
+              <h4 className="truncate font-heading text-sm sm:text-base font-black text-white group-hover:text-primary transition-colors tracking-tight">
                 {user.username}
               </h4>
             </Link>
@@ -715,7 +685,7 @@ function UserCard({
             <button
               onClick={onCancel}
               disabled={isAdding}
-              className="h-10 px-3 shrink-0 rounded-2xl bg-muted/30 border border-foreground/10 flex items-center justify-center text-[10px] font-mono font-bold uppercase text-muted-foreground hover:text-foreground transition-all"
+              className="h-10 px-3 shrink-0 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center text-[10px] font-mono font-bold uppercase text-muted-foreground hover:text-white transition-all"
             >
               Pending
             </button>
@@ -758,14 +728,14 @@ function UserCard({
 
         {isFriend && (
           <CardContent className="pt-2 relative z-10">
-            <div className="grid grid-cols-2 gap-3 rounded-2xl border border-foreground/5 bg-foreground/[0.03] p-4 transition-all duration-500 group-hover:bg-foreground/[0.05] group-hover:border-foreground/10">
+            <div className="grid grid-cols-2 gap-3 rounded-2xl border border-white/5 bg-white/5 p-4 transition-all duration-500 group-hover:bg-white/10 group-hover:border-white/10">
               <div className="flex items-center gap-3">
                 <div className="w-9 h-9 rounded-xl bg-orange-400/10 border border-orange-400/20 flex items-center justify-center shadow-inner">
                   <Flame className="h-4 w-4 text-orange-400" />
                 </div>
                 <div>
                   <p className="font-mono text-[9px] uppercase tracking-widest text-muted-foreground font-black opacity-60">Streak</p>
-                  <p className="font-mono text-xs font-black text-foreground tabular-nums">{user.streak || 0}</p>
+                  <p className="font-mono text-xs font-black text-white tabular-nums">{user.streak || 0}</p>
                 </div>
               </div>
               <div className="flex items-center gap-3">
@@ -774,7 +744,7 @@ function UserCard({
                 </div>
                 <div>
                   <p className="font-mono text-[9px] uppercase tracking-widest text-muted-foreground font-black opacity-60">Solved</p>
-                  <p className="font-mono text-xs font-black text-foreground tabular-nums">{user.problemsSolved || 0}</p>
+                  <p className="font-mono text-xs font-black text-white tabular-nums">{user.problemsSolved || 0}</p>
                 </div>
               </div>
             </div>

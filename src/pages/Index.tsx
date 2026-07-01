@@ -19,8 +19,20 @@ import { cn } from "@/lib/utils";
 
 
 
+// ── User-scoped storage key helpers ─────────────────────────────────────────
+function getCurrentUserId(): string {
+  try {
+    const raw = localStorage.getItem("user");
+    if (!raw) return "guest";
+    const parsed = JSON.parse(raw);
+    return parsed?.email || parsed?.username || "guest";
+  } catch {
+    return "guest";
+  }
+}
+
 // ── Recent-username history helpers (localStorage, max 5 per platform) ────────
-const HISTORY_KEY = (p: string) => `codetrack_recent_${p}`;
+const HISTORY_KEY = (p: string) => `codetrack_recent_${getCurrentUserId()}_${p}`;
 
 function getHistory(platform: string): string[] {
   try { return JSON.parse(localStorage.getItem(HISTORY_KEY(platform)) || "[]"); }
@@ -38,7 +50,7 @@ function clearHistory(platform: string) {
 }
 
 // ── Lookup search history helpers ────────────────────────────────────────────
-const LOOKUP_HISTORY_KEY = (p: string) => `codetrack_lookup_recent_${p}`;
+const LOOKUP_HISTORY_KEY = (p: string) => `codetrack_lookup_recent_${getCurrentUserId()}_${p}`;
 
 function getLookupHistory(platform: string): string[] {
   try { return JSON.parse(localStorage.getItem(LOOKUP_HISTORY_KEY(platform)) || "[]"); }

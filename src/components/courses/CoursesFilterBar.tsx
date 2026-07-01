@@ -8,7 +8,23 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 
-const CATEGORIES = ["All", "DSA", "Web Development", "OOPs", "SQL", "Game Development", "UI/UX", "C++", "C", "Python"] as const;
+const CATEGORIES = [
+  "All", 
+  "DSA", 
+  "Web Development", 
+  "System Design",
+  "DBMS", 
+  "Operating Systems", 
+  "Computer Networks",
+  "OOPs", 
+  "SQL", 
+  "C++", 
+  "C", 
+  "Python", 
+  "Git & GitHub",
+  "Game Development", 
+  "UI/UX"
+] as const;
 
 interface CoursesFilterBarProps {
   search: string;
