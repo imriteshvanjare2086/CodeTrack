@@ -6,27 +6,27 @@
 
 @layer base {
   :root, .light {
-    --bg: #F8FAFC;
-    --text: #1E293B;
-    --background: 210 40% 98.5%;
-    --foreground: 222 47% 11%;
+    --bg: #F1F5F9;
+    --text: #0F172A;
+    --background: 210 40% 96%;
+    --foreground: 222 47% 8%;
     --card: 0 0% 100%;
-    --card-foreground: 222 47% 11%;
+    --card-foreground: 222 47% 8%;
     --popover: 0 0% 100%;
-    --popover-foreground: 222 47% 11%;
-    --primary: 142 71% 45%;
+    --popover-foreground: 222 47% 8%;
+    --primary: 142 71% 42%;
     --primary-foreground: 0 0% 100%;
-    --secondary: 210 40% 96%;
-    --secondary-foreground: 215 19% 35%;
-    --muted: 210 40% 96%;
-    --muted-foreground: 215 14% 47%;
-    --accent: 142 71% 45%;
-    --accent-foreground: 222 47% 11%;
+    --secondary: 210 40% 94%;
+    --secondary-foreground: 215 19% 30%;
+    --muted: 210 40% 94%;
+    --muted-foreground: 215 14% 40%;
+    --accent: 142 71% 42%;
+    --accent-foreground: 222 47% 8%;
     --destructive: 0 84% 60%;
     --destructive-foreground: 0 0% 100%;
-    --border: 214 32% 91%;
-    --input: 214 32% 91%;
-    --ring: 142 71% 45%;
+    --border: 214 32% 88%;
+    --input: 214 32% 88%;
+    --ring: 142 71% 42%;
     --radius: 1rem;
 
     /* Platform Colors - Enhanced for Light Mode */
@@ -44,9 +44,9 @@
   }
 
   .dark {
-    --bg: #0B1120;
+    --bg: #000000;
     --text: #E2E8F0;
-    --background: 222 47% 6%;
+    --background: 0 0% 0%;
     --foreground: 0 0% 98%;
     --card: 240 10% 6.1%;
     --card-foreground: 0 0% 98%;
@@ -86,13 +86,9 @@
 
 @layer base {
   html {
-    @apply transition-all duration-200;
     background-color: var(--bg);
-  }
-  
-  * {
-    @apply border-border;
-    transition: background-color 0.2s ease-in-out, color 0.2s ease-in-out, border-color 0.2s ease-in-out;
+    transition: background-color 0.15s ease-out;
+    will-change: background-color;
   }
   
   body {
@@ -102,7 +98,10 @@
     font-family: 'Inter', sans-serif;
     font-weight: 450;
     -webkit-tap-highlight-color: transparent;
+    transition: background-color 0.15s ease-out, color 0.15s ease-out;
+    will-change: background-color, color;
   }
+  
   h1, h2, h3, h4, h5, h6 {
     font-family: var(--font-heading);
   }
@@ -281,9 +280,8 @@ body::before {
   content: '';
   position: fixed;
   inset: 0;
-  background: radial-gradient(ellipse at 20% 0%, hsl(var(--primary) / 0.04) 0%, transparent 50%),
-              radial-gradient(ellipse at 80% 100%, hsl(var(--codeforces) / 0.03) 0%, transparent 50%);
-  @apply dark:opacity-100 opacity-50 transition-opacity duration-500 ease-in-out;
+  background: radial-gradient(ellipse at 20% 0%, hsl(var(--primary) / 0.035) 0%, transparent 50%);
+  @apply dark:opacity-100 opacity-50 transition-opacity duration-150 ease-out;
   pointer-events: none;
   z-index: -1;
 }

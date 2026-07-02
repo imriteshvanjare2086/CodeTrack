@@ -141,7 +141,7 @@ export default function BattleArena() {
   };
 
   const renderStatLine = (label: string, value: string | number, tone: "orange" | "blue") => (
-    <div className="flex items-center justify-between gap-3 rounded-xl border border-slate-100 dark:border-white/10 bg-slate-50 dark:bg-white/5 px-3 py-2.5">
+    <div className="flex items-center justify-between gap-3 rounded-xl border border-slate-200 dark:border-white/10 bg-slate-100 dark:bg-white/5 px-3 py-2.5">
       <span className="text-[10px] font-mono font-bold uppercase tracking-widest text-slate-500 dark:text-slate-400">{label}</span>
       <span className={`text-right text-sm font-heading font-black ${tone === "orange" ? "text-orange-500 dark:text-orange-400" : "text-blue-500 dark:text-blue-400"}`}>
         {value}
@@ -181,7 +181,7 @@ export default function BattleArena() {
         </div>
 
         <div className="mb-5 grid grid-cols-2 gap-3">
-          <div className="rounded-2xl border border-slate-100 dark:border-white/10 bg-slate-50 dark:bg-white/5 p-4">
+          <div className="rounded-2xl border border-slate-200 dark:border-white/10 bg-slate-100 dark:bg-white/5 p-4">
             <div className="flex items-center gap-2 text-slate-500 dark:text-slate-400">
               <Code2 className="h-4 w-4" />
               <span className="text-[10px] font-mono font-bold uppercase tracking-widest">Total Problems</span>
@@ -190,7 +190,7 @@ export default function BattleArena() {
               {stats.problemsSolved.toLocaleString()}
             </p>
           </div>
-          <div className="rounded-2xl border border-slate-100 dark:border-white/10 bg-slate-50 dark:bg-white/5 p-4">
+          <div className="rounded-2xl border border-slate-200 dark:border-white/10 bg-slate-100 dark:bg-white/5 p-4">
             <div className="flex items-center gap-2 text-slate-500 dark:text-slate-400">
               <Medal className="h-4 w-4" />
               <span className="text-[10px] font-mono font-bold uppercase tracking-widest">Contests</span>
@@ -231,7 +231,7 @@ export default function BattleArena() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 dark:bg-[#0A0A0B] text-slate-900 dark:text-white p-4 sm:p-8 overflow-x-hidden w-full max-w-full relative">
+    <div className="min-h-screen bg-slate-100 dark:bg-[#0A0A0B] text-slate-900 dark:text-white p-4 sm:p-8 overflow-x-hidden w-full max-w-full relative">
       {/* Background decorations */}
       <div className="absolute top-1/4 left-0 w-96 h-96 bg-yellow-500/10 rounded-full blur-[120px] pointer-events-none" />
       <div className="absolute bottom-1/4 right-0 w-96 h-96 bg-blue-500/10 rounded-full blur-[120px] pointer-events-none" />
@@ -285,7 +285,7 @@ export default function BattleArena() {
             className="w-full md:w-80 group relative"
           >
             <div className="absolute -inset-0.5 bg-gradient-to-r from-yellow-500 to-orange-500 rounded-2xl blur opacity-20 dark:opacity-30 group-hover:opacity-60 dark:group-hover:opacity-70 transition duration-500" />
-            <div className="relative bg-white dark:bg-[#111113] border border-slate-200 dark:border-orange-500/20 p-6 rounded-2xl shadow-lg dark:shadow-[0_0_25px_rgba(249,115,22,0.15)] transition-all">
+            <div className="relative bg-white dark:bg-[#111113] border border-slate-300 dark:border-orange-500/20 p-6 rounded-2xl shadow-lg dark:shadow-[0_0_25px_rgba(249,115,22,0.15)] transition-all">
               <label className="block text-xs font-mono text-orange-500 dark:text-orange-400 font-bold uppercase tracking-widest mb-3">Player 1</label>
               <div className="relative">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 dark:text-slate-500" />
@@ -294,7 +294,7 @@ export default function BattleArena() {
                   value={player1}
                   onChange={(e) => setPlayer1(e.target.value)}
                   placeholder="Enter username"
-                  className="w-full bg-slate-50 dark:bg-black/50 border border-slate-200 dark:border-white/5 rounded-xl py-3 pl-10 pr-4 text-slate-900 dark:text-white font-mono placeholder:text-slate-400 dark:placeholder:text-slate-600 focus:outline-none focus:ring-2 focus:ring-orange-500/50 transition-all"
+                  className="w-full bg-slate-100 dark:bg-black/50 border border-slate-300 dark:border-white/5 rounded-xl py-3 pl-10 pr-4 text-slate-900 dark:text-white font-mono placeholder:text-slate-400 dark:placeholder:text-slate-600 focus:outline-none focus:ring-2 focus:ring-orange-500/50 transition-all"
                 />
               </div>
             </div>
@@ -307,8 +307,8 @@ export default function BattleArena() {
             transition={{ delay: 0.5, type: 'spring' }}
             className="relative z-10 flex-shrink-0 my-4 md:my-0"
           >
-            <div className="w-16 h-16 rounded-full bg-white dark:bg-gradient-to-br dark:from-slate-800 dark:to-black border-2 border-slate-100 dark:border-slate-700 flex items-center justify-center shadow-xl dark:shadow-[0_0_30px_rgba(255,255,255,0.1),inset_0_2px_10px_rgba(255,255,255,0.1)] relative">
-              <div className="absolute inset-0 rounded-full animate-ping bg-slate-200 dark:bg-white/5" />
+            <div className="w-16 h-16 rounded-full bg-white dark:bg-gradient-to-br dark:from-slate-800 dark:to-black border-2 border-slate-300 dark:border-slate-700 flex items-center justify-center shadow-xl dark:shadow-[0_0_30px_rgba(255,255,255,0.1),inset_0_2px_10px_rgba(255,255,255,0.1)] relative">
+              <div className="absolute inset-0 rounded-full animate-ping bg-slate-300 dark:bg-white/5" />
               <span className="font-black italic text-xl tracking-tighter text-transparent bg-clip-text bg-gradient-to-br from-slate-700 to-slate-400 dark:from-white dark:to-slate-500">VS</span>
             </div>
           </motion.div>
@@ -388,9 +388,9 @@ export default function BattleArena() {
             >
               {/* Winner Banner */}
               <div className="flex justify-center mb-12">
-                <div className={`px-8 py-4 rounded-2xl border ${winner === 1 ? 'bg-orange-50 dark:bg-orange-500/10 border-orange-200 dark:border-orange-500/50 shadow-[0_0_40px_rgba(249,115,22,0.15)] dark:shadow-[0_0_40px_rgba(249,115,22,0.3)]' :
-                    winner === 2 ? 'bg-blue-50 dark:bg-blue-500/10 border-blue-200 dark:border-blue-500/50 shadow-[0_0_40px_rgba(59,130,246,0.15)] dark:shadow-[0_0_40px_rgba(59,130,246,0.3)]' :
-                      'bg-slate-50 dark:bg-white/5 border-slate-200 dark:border-white/20'
+                <div className={`px-8 py-4 rounded-2xl border ${winner === 1 ? 'bg-orange-100 dark:bg-orange-500/10 border-orange-300 dark:border-orange-500/50 shadow-[0_0_40px_rgba(249,115,22,0.15)] dark:shadow-[0_0_40px_rgba(249,115,22,0.3)]' :
+                    winner === 2 ? 'bg-blue-100 dark:bg-blue-500/10 border-blue-300 dark:border-blue-500/50 shadow-[0_0_40px_rgba(59,130,246,0.15)] dark:shadow-[0_0_40px_rgba(59,130,246,0.3)]' :
+                      'bg-slate-100 dark:bg-white/5 border-slate-300 dark:border-white/20'
                   } backdrop-blur-md`}>
                   <h2 className="text-2xl md:text-3xl font-black font-heading tracking-tighter text-center flex items-center gap-3">
                     {winner === 1 && <Trophy className="w-8 h-8 text-orange-500 dark:text-orange-400" />}
@@ -407,12 +407,12 @@ export default function BattleArena() {
               </div>
 
               {/* Side-by-side Player Stats */}
-              <div className="bg-white dark:bg-[#1A1A1E] border border-slate-200 dark:border-white/10 rounded-3xl px-5 sm:px-8 pt-3 pb-8 shadow-xl dark:shadow-[0_20px_50px_rgba(0,0,0,0.5),inset_0_1px_1px_rgba(255,255,255,0.1)] relative overflow-hidden">
+              <div className="bg-white dark:bg-[#1A1A1E] border border-slate-300 dark:border-white/10 rounded-3xl px-5 sm:px-8 pt-3 pb-8 shadow-xl dark:shadow-[0_20px_50px_rgba(0,0,0,0.5),inset_0_1px_1px_rgba(255,255,255,0.1)] relative overflow-hidden">
                 <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full max-w-md h-px bg-gradient-to-r from-transparent via-slate-300 dark:via-white/30 to-transparent" />
 
                 <div className="flex flex-col sm:flex-row justify-between items-center gap-4 mb-6 px-2 sm:px-4">
                   <div className="text-center font-heading font-black text-xl sm:text-2xl text-orange-500 dark:text-orange-400 drop-shadow-[0_0_10px_rgba(249,115,22,0.5)]">{stats1.username}</div>
-                  <div className="text-center font-mono text-[10px] text-slate-500 uppercase tracking-widest font-bold flex items-center justify-center bg-slate-100 dark:bg-white/10 px-3 py-1 rounded-full">VS</div>
+                  <div className="text-center font-mono text-[10px] text-slate-500 uppercase tracking-widest font-bold flex items-center justify-center bg-slate-200 dark:bg-white/10 px-3 py-1 rounded-full">VS</div>
                   <div className="text-center font-heading font-black text-xl sm:text-2xl text-blue-500 dark:text-blue-400 drop-shadow-[0_0_10px_rgba(59,130,246,0.5)]">{stats2.username}</div>
                 </div>
 

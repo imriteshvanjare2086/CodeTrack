@@ -58,6 +58,85 @@ export interface DashboardData {
   stats: any;
 }
 
+function buildRecommendations(user: any) {
+  const recommendations: Array<{ text: string; gap: number }> = [];
+  const leetcode = user.leetcodeStats || {};
+  const codeforces = user.codeforcesStats || {};
+  const codechef = user.codechefStats || {};
+
+  if (!user.leetcodeUsername && !user.codeforcesUsername && !user.codechefUsername) {
+    return ["Connect at least one coding profile to unlock personalized recommendations."];
+  }
+
+  if (user.leetcodeUsername) {
+    if ((leetcode.problemsSolved || 0) < 75) {
+      recommendations.push({
+        text: "Build LeetCode volume: reach 75 solved problems with a balanced easy/medium mix.",
+        gap: (75 - (leetcode.problemsSolved || 0)) / 75,
+      });
+    }
+    if ((leetcode.contestRating || 0) > 0 && (leetcode.contestRating || 0) < 1500) {
+      recommendations.push({
+        text: "Improve LeetCode contest rating: practice timed medium problems until you cross 1500.",
+        gap: (1500 - (leetcode.contestRating || 0)) / 1500,
+      });
+    }
+    if ((leetcode.contestCount || 0) < 5) {
+      recommendations.push({
+        text: "Join more LeetCode contests: complete at least 5 contests to get reliable rating growth.",
+        gap: (5 - (leetcode.contestCount || 0)) / 5,
+      });
+    }
+  }
+
+  if (user.codeforcesUsername) {
+    if ((codeforces.problemsSolved || 0) < 100) {
+      recommendations.push({
+        text: "Grow Codeforces problem depth: solve 100 total problems before chasing harder ratings.",
+        gap: (100 - (codeforces.problemsSolved || 0)) / 100,
+      });
+    }
+    if ((codeforces.currentRating || 0) > 0 && (codeforces.currentRating || 0) < 1200) {
+      recommendations.push({
+        text: "Push Codeforces rating to Pupil: focus on 800-1100 rated implementation and math problems.",
+        gap: (1200 - (codeforces.currentRating || 0)) / 1200,
+      });
+    }
+    if ((codeforces.contestCount || 0) < 8) {
+      recommendations.push({
+        text: "Increase Codeforces contest reps: participate in 8 rated contests to stabilize performance.",
+        gap: (8 - (codeforces.contestCount || 0)) / 8,
+      });
+    }
+  }
+
+  if (user.codechefUsername) {
+    if ((codechef.problemsSolved || 0) < 50) {
+      recommendations.push({
+        text: "Strengthen CodeChef practice: reach 50 solved problems across starter-level topics.",
+        gap: (50 - (codechef.problemsSolved || 0)) / 50,
+      });
+    }
+    if ((codechef.currentRating || 0) > 0 && (codechef.currentRating || 0) < 1400) {
+      recommendations.push({
+        text: "Aim for CodeChef 2 star: practice rating-range problems until you pass 1400.",
+        gap: (1400 - (codechef.currentRating || 0)) / 1400,
+      });
+    }
+    if ((codechef.contestCount || 0) < 6) {
+      recommendations.push({
+        text: "Play more CodeChef contests: finish 6 contests to build speed and pattern recall.",
+        gap: (6 - (codechef.contestCount || 0)) / 6,
+      });
+    }
+  }
+
+  return recommendations
+    .sort((a, b) => b.gap - a.gap)
+    .slice(0, 4)
+    .map((recommendation) => recommendation.text);
+}
+
 export function useDashboard(userId?: string) {
   return useQuery<DashboardData>({
     queryKey: ["dashboard", userId],
@@ -247,13 +326,7 @@ export function useDashboard(userId?: string) {
           { rank: 2, name: "Sarah", avatar: "S", score: 23100 },
           { rank: 3, name: "You", avatar: "Y", score: totalProblems * 10 },
         ],
-        recommendations: isConnected ? [
-          "Try solving 2 more dynamic programming problems",
-          "Participate in the upcoming Codeforces Div 2 round",
-          "Review graph algorithms to improve your rating",
-        ] : [
-          "Connect your coding profiles to receive personalized recommendations."
-        ],
+        recommendations: buildRecommendations(user),
         stats: user
       };
     },

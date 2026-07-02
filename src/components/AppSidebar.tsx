@@ -114,7 +114,7 @@ export function AppSidebar() {
       >
         <SidebarGroup id="tour-sidebar-inner">
           <div className="px-3 mb-4 mt-2">
-             <SidebarGroupLabel className="text-[#64748B] dark:text-primary uppercase text-[10px] tracking-[0.3em] font-bold font-mono">
+             <SidebarGroupLabel className="text-slate-500 dark:text-primary uppercase text-[10px] tracking-[0.3em] font-bold font-mono">
                 System Interface
              </SidebarGroupLabel>
           </div>
@@ -123,7 +123,7 @@ export function AppSidebar() {
               {primaryNav.map(renderLink)}
               <div className="my-5 mx-3 h-px bg-gradient-to-r from-primary/30 via-primary/5 to-transparent" />
               <div className="px-3 mb-4">
-                 <SidebarGroupLabel className="text-[#64748B] dark:text-primary uppercase text-[10px] tracking-[0.3em] font-bold font-mono">
+                 <SidebarGroupLabel className="text-slate-500 dark:text-primary uppercase text-[10px] tracking-[0.3em] font-bold font-mono">
                     Personal Space
                  </SidebarGroupLabel>
               </div>

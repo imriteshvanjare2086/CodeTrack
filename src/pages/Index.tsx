@@ -520,7 +520,7 @@ const Index = () => {
 
   return (
     <DashboardLayout>
-      <div className="max-w-6xl mx-auto space-y-5">
+      <div className="max-w-6xl mx-auto space-y-5 px-4 sm:px-6">
         <PageHeader
           title={isOwnDashboard ? "Dashboard" : `${dash?.profile?.username}'s Dashboard`}
           description={isOwnDashboard ? "Track your competitive programming journey" : `Viewing ${dash?.profile?.username}'s coding profile and history`}
@@ -530,12 +530,12 @@ const Index = () => {
           <motion.div
             initial={{ opacity: 0, y: -10 }}
             animate={{ opacity: 1, y: 0 }}
-            className="flex items-center gap-3 p-4 rounded-2xl bg-amber-50 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-900/30 text-amber-800 dark:text-amber-300 text-sm font-sans"
+            className="flex items-center gap-3 p-4 rounded-2xl bg-white dark:bg-black border border-green-200 dark:border-green-500/25 text-green-700 dark:text-green-300 shadow-sm text-sm font-sans"
           >
-            <Info className="h-5 w-5 text-amber-600 dark:text-amber-400 shrink-0" />
+            <Info className="h-5 w-5 text-green-600 dark:text-green-400 shrink-0" />
             <div className="flex-1 text-left">
               <p className="font-semibold leading-none">Profile Connection Required</p>
-              <p className="text-xs text-amber-700/85 dark:text-amber-400/80 mt-1">
+              <p className="text-xs text-green-700/85 dark:text-green-400/80 mt-1">
                 Connect your coding profiles to sync your progress.
               </p>
             </div>
@@ -548,7 +548,7 @@ const Index = () => {
 
         {/* Badge Summary Section */}
         {isOwnDashboard && (
-          <div className="glass rounded-3xl border border-white/10 p-8 shadow-xl mt-6">
+          <div className="rounded-[2.5rem] border border-slate-200 dark:border-white/10 bg-white dark:bg-[#161618] p-8 backdrop-blur-none dark:backdrop-blur-3xl shadow-lg dark:shadow-[0_20px_50px_rgba(0,0,0,0.5),inset_0_1px_1px_rgba(255,255,255,0.1)] ring-0 dark:ring-1 dark:ring-white/5 relative overflow-visible premium-border card-hover mt-6">
             <div className="flex items-center justify-between mb-8">
               <div className="flex items-center gap-3">
                 <Trophy className="h-7 w-7 text-primary" />

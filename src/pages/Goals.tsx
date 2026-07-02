@@ -1,25 +1,19 @@
-import { useState, useEffect, useMemo, type ReactNode } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Target, Sparkles, Plus, Flag, Loader2, Trophy, TrendingUp } from "lucide-react";
+import { Target, Sparkles, Plus, Flag, Loader2, ListPlus, Check } from "lucide-react";
 import { DashboardLayout } from "@/components/DashboardLayout";
 import { PageHeader } from "@/components/PageHeader";
 import { Button } from "@/components/ui/button";
 import { Goal } from "@/components/goals/types";
 import { GoalCard } from "@/components/goals/GoalCard";
 import { AddGoalModal } from "@/components/goals/AddGoalModal";
-import { RecommendationCard, type GoalRecommendation } from "@/components/goals/RecommendationCard";
+import { type GoalRecommendation } from "@/components/goals/RecommendationCard";
 import { useDashboard, type DashboardData } from "@/hooks/useDashboard";
 
 type Tab = "goals" | "recommendations";
 
-function parseStars(stars?: string) {
-  const match = String(stars || "0").match(/[1-7]/);
-  return match ? Number(match[0]) : 0;
-}
-
 function priorityFromGap(current: number, target: number): GoalRecommendation["priority"] {
   const ratio = target > 0 ? current / target : 1;
-  if (ratio >= 1) return "Done";
   if (ratio < 0.5) return "High";
   if (ratio < 0.8) return "Medium";
   return "Low";
@@ -28,7 +22,7 @@ function priorityFromGap(current: number, target: number): GoalRecommendation["p
 function makeRecommendation(data?: DashboardData): GoalRecommendation[] {
   if (!data) return [];
 
-  const recs: GoalRecommendation[] = [];
+  const recs: Array<GoalRecommendation & { gap: number }> = [];
   const connectedPlatforms = [
     data.leetcodeStats.username,
     data.codeforcesStats.username,
@@ -46,49 +40,12 @@ function makeRecommendation(data?: DashboardData): GoalRecommendation[] {
         current: "0 connected",
         target: "3 connected",
         priority: "High",
-        actions: ["Connect at least one platform from your profile page.", "Sync again after connecting so goals can become personalized."],
+        actions: ["Connect at least one platform from your profile page."],
         goalTitle: "Connect coding profiles",
         goalCategory: "Competitive Programming",
         targetNumber: "3",
       },
     ];
-  }
-
-  const totalProblems = data.heroStats.totalProblems || 0;
-  const totalContests = data.heroStats.totalContests || 0;
-
-  if (totalProblems < 300) {
-    recs.push({
-      id: "overall-problems",
-      platform: "Overall",
-      metric: "Problems",
-      title: "Build a stronger solved-problem base",
-      description: "A 300-problem base is a practical threshold for stronger pattern recognition across arrays, graphs, DP, greedy, and trees.",
-      current: `${totalProblems}`,
-      target: "300",
-      priority: priorityFromGap(totalProblems, 300),
-      actions: ["Solve 25 mixed DSA problems this month.", "Keep a 60/30/10 split across medium, easy, and hard problems."],
-      goalTitle: "Reach 300 total solved problems",
-      goalCategory: "DSA",
-      targetNumber: String(Math.max(25, 300 - totalProblems)),
-    });
-  }
-
-  if (totalContests < 15) {
-    recs.push({
-      id: "overall-contests",
-      platform: "Overall",
-      metric: "Contests",
-      title: "Increase real contest exposure",
-      description: "Around 15 contests is a useful minimum before rating becomes stable enough to diagnose speed, accuracy, and topic gaps.",
-      current: `${totalContests}`,
-      target: "15",
-      priority: priorityFromGap(totalContests, 15),
-      actions: ["Join one rated contest every week.", "Upsolve at least two missed problems within 48 hours."],
-      goalTitle: "Participate in 15 total contests",
-      goalCategory: "Competitive Programming",
-      targetNumber: String(Math.max(1, 15 - totalContests)),
-    });
   }
 
   if (data.codeforcesStats.username) {
@@ -97,137 +54,117 @@ function makeRecommendation(data?: DashboardData): GoalRecommendation[] {
     const contests = data.codeforcesStats.contestCount || 0;
     const rank = data.codeforcesStats.rank || "Unrated";
 
-    if (rating < 1600) {
-      recs.push({
-        id: "codeforces-rating",
-        platform: "Codeforces",
-        metric: "Rating",
-        title: rating < 1200 ? "Move beyond Codeforces Newbie" : "Push toward Codeforces Expert",
-        description: "Codeforces Expert at 1600 is a strong threshold. If you are below it, prioritize speed on A/B/C and consistent upsolving.",
-        current: rating > 0 ? `${rating} (${rank})` : rank,
-        target: "1600 Expert",
-        priority: priorityFromGap(rating, 1600),
-        actions: ["Practice Div. 2 A-C problems under a 45-minute timer.", "After every contest, upsolve the first unsolved problem before starting new practice."],
-        goalTitle: "Reach Codeforces Expert",
-        goalCategory: "Codeforces",
-        targetNumber: String(Math.max(100, 1600 - rating)),
-      });
-    } else {
-      recs.push({
-        id: "codeforces-rating-done",
-        platform: "Codeforces",
-        metric: "Rating",
-        title: "Codeforces rank is in good standing",
-        description: "You are at Expert level or above, so rating improvement does not need to be the main focus right now.",
-        current: `${rating} (${rank})`,
-        target: "Expert+",
-        priority: "Done",
-        actions: ["Maintain contest consistency and focus on harder C/D upsolves."],
-        goalTitle: "Maintain Codeforces Expert level",
-        goalCategory: "Codeforces",
-      });
-    }
-
-    if (contests < 10) {
-      recs.push({
-        id: "codeforces-contests",
-        platform: "Codeforces",
-        metric: "Contests",
-        title: "Stabilize your Codeforces rating",
-        description: "Fewer than 10 Codeforces contests makes the rank noisy. More contests will make your rating and weaknesses clearer.",
-        current: `${contests}`,
-        target: "10",
-        priority: priorityFromGap(contests, 10),
-        actions: ["Enter the next 3 Div. 2 or Div. 3 rounds.", "Review wrong submissions immediately after the contest."],
-        goalTitle: "Complete 10 Codeforces contests",
-        goalCategory: "Codeforces",
-        targetNumber: String(Math.max(1, 10 - contests)),
-      });
-    }
-
-    if (solved < 200) {
+    if (solved < 100) {
       recs.push({
         id: "codeforces-problems",
         platform: "Codeforces",
         metric: "Problems",
-        title: "Grow your Codeforces problemset depth",
-        description: "A 200-problem Codeforces base is a sensible threshold before expecting stable rating jumps.",
+        title: "Grow Codeforces problem depth",
+        description: "Reach 100 solved Codeforces problems before expecting stable rating jumps.",
         current: `${solved}`,
-        target: "200",
-        priority: priorityFromGap(solved, 200),
-        actions: ["Solve 10 problems each from 800, 900, 1000, and 1100 rating bands.", "Tag mistakes by topic after every practice block."],
-        goalTitle: "Solve 200 Codeforces problems",
+        target: "100",
+        priority: priorityFromGap(solved, 100),
+        actions: ["Solve 800-1100 rated problems and tag mistakes by topic."],
+        goalTitle: "Solve 100 Codeforces problems",
         goalCategory: "Codeforces",
-        targetNumber: String(Math.max(20, 200 - solved)),
+        targetNumber: String(Math.max(10, 100 - solved)),
+        gap: (100 - solved) / 100,
       });
     }
-  } else {
-    recs.push({
-      id: "connect-codeforces",
-      platform: "Codeforces",
-      metric: "Rank",
-      title: "Connect Codeforces for rank recommendations",
-      description: "Codeforces data is the best signal for competitive programming rank, contest stability, and timed problem-solving speed.",
-      current: "Not connected",
-      target: "Connected",
-      priority: "Medium",
-      actions: ["Add your Codeforces handle in profile sync.", "Run a sync after connecting the account."],
-      goalTitle: "Connect Codeforces profile",
-      goalCategory: "Codeforces",
-      targetNumber: "1",
-    });
-  }
 
-  if (data.codechefStats.username) {
-    const stars = parseStars(data.codechefStats.stars);
-    const rating = data.codechefStats.currentRating || 0;
-    const contests = data.codechefStats.contestCount || 0;
-
-    if (stars < 3 && rating < 1600) {
+    if (rating > 0 && rating < 1200) {
       recs.push({
-        id: "codechef-stars",
-        platform: "CodeChef",
-        metric: "Rank",
-        title: "Climb to CodeChef 3 star",
-        description: "3 star, roughly 1600 rating, is a reasonable threshold. Below that, focus on Starters and clean implementation.",
-        current: stars > 0 ? `${stars} star (${rating})` : `${rating || "Unrated"}`,
-        target: "3 star / 1600",
-        priority: priorityFromGap(rating, 1600),
-        actions: ["Play recent Starters and upsolve the first unsolved problem.", "Practice implementation-heavy greedy and math problems."],
-        goalTitle: "Reach CodeChef 3 star",
-        goalCategory: "CodeChef",
-        targetNumber: String(Math.max(100, 1600 - rating)),
-      });
-    } else {
-      recs.push({
-        id: "codechef-stars-done",
-        platform: "CodeChef",
-        metric: "Rank",
-        title: "CodeChef star level is healthy",
-        description: "You are at 3 star or better, so CodeChef rank improvement is not urgent right now.",
-        current: `${stars} star (${rating})`,
-        target: "3 star+",
-        priority: "Done",
-        actions: ["Keep contests regular and move attention to harder upsolves."],
-        goalTitle: "Maintain CodeChef 3 star level",
-        goalCategory: "CodeChef",
+        id: "codeforces-rating",
+        platform: "Codeforces",
+        metric: "Rating",
+        title: "Push Codeforces rating to Pupil",
+        description: "1200 is a practical first rating threshold. Focus on clean A/B solves and first C upsolves.",
+        current: `${rating} (${rank})`,
+        target: "1200 Pupil",
+        priority: priorityFromGap(rating, 1200),
+        actions: ["Practice 800-1100 rated implementation, math, and greedy problems."],
+        goalTitle: "Reach Codeforces Pupil",
+        goalCategory: "Codeforces",
+        targetNumber: String(Math.max(50, 1200 - rating)),
+        gap: (1200 - rating) / 1200,
       });
     }
 
     if (contests < 8) {
       recs.push({
+        id: "codeforces-contests",
+        platform: "Codeforces",
+        metric: "Contests",
+        title: "Stabilize your Codeforces rating",
+        description: "Eight rated contests gives enough reps to understand speed, accuracy, and topic gaps.",
+        current: `${contests}`,
+        target: "8",
+        priority: priorityFromGap(contests, 8),
+        actions: ["Enter upcoming Div. 2 or Div. 3 rounds and upsolve one missed problem."],
+        goalTitle: "Complete 8 Codeforces contests",
+        goalCategory: "Codeforces",
+        targetNumber: String(Math.max(1, 8 - contests)),
+        gap: (8 - contests) / 8,
+      });
+    }
+  }
+
+  if (data.codechefStats.username) {
+    const rating = data.codechefStats.currentRating || 0;
+    const contests = data.codechefStats.contestCount || 0;
+    const solved = data.codechefStats.problemsSolved || 0;
+
+    if (solved < 50) {
+      recs.push({
+        id: "codechef-problems",
+        platform: "CodeChef",
+        metric: "Problems",
+        title: "Strengthen CodeChef practice",
+        description: "Reach 50 solved CodeChef problems before prioritizing harder contest pushes.",
+        current: `${solved}`,
+        target: "50",
+        priority: priorityFromGap(solved, 50),
+        actions: ["Practice starter-level greedy, implementation, and math problems."],
+        goalTitle: "Solve 50 CodeChef problems",
+        goalCategory: "CodeChef",
+        targetNumber: String(Math.max(10, 50 - solved)),
+        gap: (50 - solved) / 50,
+      });
+    }
+
+    if (rating > 0 && rating < 1400) {
+      recs.push({
+        id: "codechef-rating",
+        platform: "CodeChef",
+        metric: "Rating",
+        title: "Aim for CodeChef 2 star",
+        description: "1400 is a reasonable early CodeChef rating threshold for contest consistency.",
+        current: `${rating}`,
+        target: "1400",
+        priority: priorityFromGap(rating, 1400),
+        actions: ["Upsolve the first unsolved Starters problem after each contest."],
+        goalTitle: "Reach CodeChef 1400 rating",
+        goalCategory: "CodeChef",
+        targetNumber: String(Math.max(50, 1400 - rating)),
+        gap: (1400 - rating) / 1400,
+      });
+    }
+
+    if (contests < 6) {
+      recs.push({
         id: "codechef-contests",
         platform: "CodeChef",
         metric: "Contests",
         title: "Play more CodeChef Starters",
-        description: "At least 8 CodeChef contests gives enough data to judge speed and rating direction.",
+        description: "Six contests gives enough starter data to judge speed and rating direction.",
         current: `${contests}`,
-        target: "8",
-        priority: priorityFromGap(contests, 8),
-        actions: ["Join the next 4 Starters contests.", "Upsolve one additional problem after each contest."],
-        goalTitle: "Complete 8 CodeChef contests",
+        target: "6",
+        priority: priorityFromGap(contests, 6),
+        actions: ["Join upcoming Starters and upsolve one additional problem after each contest."],
+        goalTitle: "Complete 6 CodeChef contests",
         goalCategory: "CodeChef",
-        targetNumber: String(Math.max(1, 8 - contests)),
+        targetNumber: String(Math.max(1, 6 - contests)),
+        gap: (6 - contests) / 6,
       });
     }
   }
@@ -235,82 +172,67 @@ function makeRecommendation(data?: DashboardData): GoalRecommendation[] {
   if (data.leetcodeStats.username) {
     const solved = data.leetcodeStats.problemsSolved || 0;
     const rating = data.leetcodeStats.contestRating || 0;
-    const ranking = data.leetcodeStats.ranking || 0;
     const contests = data.leetcodeStats.contestCount || 0;
 
-    if (solved < 250) {
+    if (solved < 75) {
       recs.push({
         id: "leetcode-problems",
         platform: "LeetCode",
         metric: "Problems",
         title: "Strengthen LeetCode coverage",
-        description: "250 solved LeetCode problems is a sensible baseline for interviews and contest pattern coverage.",
+        description: "75 solved LeetCode problems is a sensible early base before spreading into harder contest goals.",
         current: `${solved}`,
-        target: "250",
-        priority: priorityFromGap(solved, 250),
-        actions: ["Solve 15 medium problems across arrays, graphs, DP, and binary search.", "Revisit failed problems after 7 days."],
-        goalTitle: "Solve 250 LeetCode problems",
+        target: "75",
+        priority: priorityFromGap(solved, 75),
+        actions: ["Solve a balanced easy/medium mix across arrays, strings, binary search, and DP."],
+        goalTitle: "Solve 75 LeetCode problems",
         goalCategory: "LeetCode",
-        targetNumber: String(Math.max(20, 250 - solved)),
+        targetNumber: String(Math.max(10, 75 - solved)),
+        gap: (75 - solved) / 75,
       });
     }
 
-    if (rating > 0 && rating < 1700) {
+    if (rating > 0 && rating < 1500) {
       recs.push({
         id: "leetcode-rating",
         platform: "LeetCode",
         metric: "Rating",
         title: "Improve LeetCode contest rating",
-        description: "A 1700 LeetCode contest rating is a practical threshold for consistent contest performance.",
+        description: "1500 is a reasonable first LeetCode contest threshold for timed problem solving.",
         current: `${rating}`,
-        target: "1700",
-        priority: priorityFromGap(rating, 1700),
-        actions: ["Attempt Weekly or Biweekly contests regularly.", "Upsolve the first unsolved contest question the same day."],
-        goalTitle: "Reach 1700 LeetCode rating",
+        target: "1500",
+        priority: priorityFromGap(rating, 1500),
+        actions: ["Attempt Weekly or Biweekly contests and upsolve the first unsolved question."],
+        goalTitle: "Reach 1500 LeetCode rating",
         goalCategory: "LeetCode",
-        targetNumber: String(Math.max(100, 1700 - rating)),
+        targetNumber: String(Math.max(50, 1500 - rating)),
+        gap: (1500 - rating) / 1500,
       });
     }
 
-    if (ranking > 200000) {
-      recs.push({
-        id: "leetcode-ranking",
-        platform: "LeetCode",
-        metric: "Ranking",
-        title: "Bring LeetCode global ranking under 200k",
-        description: "Lower ranking is better on LeetCode. Under 200k is a good near-term threshold for steady problem progress.",
-        current: `#${ranking.toLocaleString()}`,
-        target: "Top 200k",
-        priority: ranking > 500000 ? "High" : "Medium",
-        actions: ["Keep a weekly streak of 20 solved problems.", "Prioritize medium problems with high acceptance volume."],
-        goalTitle: "Reach top 200k LeetCode ranking",
-        goalCategory: "LeetCode",
-        targetNumber: String(Math.max(1, ranking - 200000)),
-      });
-    }
-
-    if (contests < 10) {
+    if (contests < 5) {
       recs.push({
         id: "leetcode-contests",
         platform: "LeetCode",
         metric: "Contests",
         title: "Build LeetCode contest consistency",
-        description: "Ten contests is a useful minimum before rating and ranking trends become meaningful.",
+        description: "Five contests is a useful minimum before rating trends become meaningful.",
         current: `${contests}`,
-        target: "10",
-        priority: priorityFromGap(contests, 10),
-        actions: ["Join the next Weekly or Biweekly contest.", "Write down why each missed question was missed."],
-        goalTitle: "Complete 10 LeetCode contests",
+        target: "5",
+        priority: priorityFromGap(contests, 5),
+        actions: ["Join upcoming Weekly or Biweekly contests and review misses afterward."],
+        goalTitle: "Complete 5 LeetCode contests",
         goalCategory: "LeetCode",
-        targetNumber: String(Math.max(1, 10 - contests)),
+        targetNumber: String(Math.max(1, 5 - contests)),
+        gap: (5 - contests) / 5,
       });
     }
   }
 
-  return recs.sort((a, b) => {
-    const order = { High: 0, Medium: 1, Low: 2, Done: 3 };
-    return order[a.priority] - order[b.priority];
-  }).slice(0, 9);
+  return recs
+    .sort((a, b) => b.gap - a.gap)
+    .slice(0, 5)
+    .map(({ gap, ...recommendation }) => recommendation);
 }
 
 function StatTile({ label, value }: { label: string; value: string | number }) {
@@ -322,39 +244,16 @@ function StatTile({ label, value }: { label: string; value: string | number }) {
   );
 }
 
-function SummaryCard({
-  icon,
-  title,
-  value,
-  detail,
-}: {
-  icon: ReactNode;
-  title: string;
-  value: number;
-  detail: string;
-}) {
-  return (
-    <div className="glass rounded-2xl border border-border/50 p-5">
-      <div className="flex items-center justify-between gap-4">
-        <div>
-          <p className="font-mono text-[10px] font-black uppercase tracking-widest text-muted-foreground">{title}</p>
-          <p className="mt-2 font-heading text-3xl font-black text-foreground">{value}</p>
-          <p className="mt-1 font-mono text-xs text-muted-foreground">{detail}</p>
-        </div>
-        <div className="flex h-11 w-11 items-center justify-center rounded-2xl border border-primary/20 bg-primary/10 text-primary">
-          {icon}
-        </div>
-      </div>
-    </div>
-  );
-}
-
 export default function Goals() {
   const [activeTab, setActiveTab] = useState<Tab>("goals");
   const [goals, setGoals] = useState<Goal[]>([]);
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const { data: dashboard, isLoading: isLoadingDashboard } = useDashboard();
   const recommendations = useMemo(() => makeRecommendation(dashboard), [dashboard]);
+  const addedRecommendationIds = useMemo(
+    () => new Set(goals.map((goal) => goal.id.split("-added-")[0])),
+    [goals]
+  );
 
   // Load from localStorage
   useEffect(() => {
@@ -379,8 +278,10 @@ export default function Goals() {
   };
 
   const handleAddRecommendationGoal = (recommendation: GoalRecommendation) => {
+    if (addedRecommendationIds.has(recommendation.id)) return;
+
     const newGoal: Goal = {
-      id: `${recommendation.id}-${Date.now()}`,
+      id: `${recommendation.id}-added-${Date.now()}`,
       title: recommendation.goalTitle,
       category: recommendation.goalCategory,
       targetNumber: recommendation.targetNumber,
@@ -389,7 +290,6 @@ export default function Goals() {
     };
 
     setGoals((prev) => [newGoal, ...prev]);
-    setActiveTab("goals");
   };
 
   const handleCompleteGoal = (id: string) => {
@@ -518,17 +418,17 @@ export default function Goals() {
                 </div>
               ) : (
                 <>
-                  <div className="glass rounded-3xl border border-border/50 p-6">
-                    <div className="flex flex-col gap-5 lg:flex-row lg:items-center lg:justify-between">
+                  <div className="glass overflow-hidden rounded-3xl border border-border/50">
+                    <div className="flex flex-col gap-5 border-b border-border/40 p-6 lg:flex-row lg:items-center lg:justify-between">
                       <div className="max-w-2xl">
                         <div className="mb-3 flex h-12 w-12 items-center justify-center rounded-2xl border border-primary/20 bg-primary/10">
                           <Sparkles className="h-6 w-6 text-primary" />
                         </div>
                         <h2 className="font-heading text-xl font-black text-foreground">
-                          Stats-based recommendations
+                          Recommendation List
                         </h2>
                         <p className="mt-2 font-mono text-sm leading-relaxed text-muted-foreground">
-                          These suggestions compare your current solved counts, contest counts, ratings, ranks, and stars against practical improvement thresholds.
+                          Only the biggest below-threshold gaps are shown, based on solved counts, ratings, and contest count.
                         </p>
                       </div>
 
@@ -539,47 +439,64 @@ export default function Goals() {
                         <StatTile label="Best Rank" value={dashboard?.heroStats.highestRank || "None"} />
                       </div>
                     </div>
-                  </div>
 
-                  <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
-                    <SummaryCard
-                      icon={<TrendingUp className="h-5 w-5" />}
-                      title="Improve First"
-                      value={recommendations.filter((r) => r.priority === "High").length}
-                      detail="High-priority gaps"
-                    />
-                    <SummaryCard
-                      icon={<Target className="h-5 w-5" />}
-                      title="Near Target"
-                      value={recommendations.filter((r) => r.priority === "Medium" || r.priority === "Low").length}
-                      detail="Useful next pushes"
-                    />
-                    <SummaryCard
-                      icon={<Trophy className="h-5 w-5" />}
-                      title="Already Healthy"
-                      value={recommendations.filter((r) => r.priority === "Done").length}
-                      detail="Thresholds cleared"
-                    />
-                  </div>
+                    {recommendations.length === 0 ? (
+                      <div className="p-12 text-center">
+                        <h3 className="font-heading text-lg font-bold text-foreground">No recommendations right now</h3>
+                        <p className="mt-2 font-mono text-sm text-muted-foreground">
+                          Your connected stats are above the current thresholds. Keep maintaining contest consistency.
+                        </p>
+                      </div>
+                    ) : (
+                      <div className="divide-y divide-border/35">
+                        {recommendations.map((recommendation) => {
+                          const isAdded = addedRecommendationIds.has(recommendation.id);
 
-                  {recommendations.length === 0 ? (
-                    <div className="glass rounded-3xl border border-dashed border-border/50 p-12 text-center">
-                      <h3 className="font-heading text-lg font-bold text-foreground">No gaps found right now</h3>
-                      <p className="mt-2 font-mono text-sm text-muted-foreground">
-                        Your connected stats are above the current thresholds. Keep maintaining contest consistency.
-                      </p>
-                    </div>
-                  ) : (
-                    <div className="grid grid-cols-1 gap-5 md:grid-cols-2 xl:grid-cols-3">
-                      {recommendations.map((recommendation) => (
-                        <RecommendationCard
-                          key={recommendation.id}
-                          recommendation={recommendation}
-                          onAddGoal={handleAddRecommendationGoal}
-                        />
-                      ))}
-                    </div>
-                  )}
+                          return (
+                            <motion.div
+                              key={recommendation.id}
+                              initial={{ opacity: 0, y: 8 }}
+                              animate={{ opacity: 1, y: 0 }}
+                              className="grid grid-cols-1 gap-4 p-5 transition-all hover:bg-white/[0.035] lg:grid-cols-[1fr_auto] lg:items-center"
+                            >
+                              <div className="min-w-0">
+                                <div className="mb-2 flex flex-wrap items-center gap-2">
+                                  <span className="rounded-full border border-border/50 bg-muted/20 px-2.5 py-1 font-mono text-[10px] font-black uppercase tracking-widest text-muted-foreground">
+                                    {recommendation.platform}
+                                  </span>
+                                  <span className="rounded-full border border-primary/20 bg-primary/10 px-2.5 py-1 font-mono text-[10px] font-black uppercase tracking-widest text-primary">
+                                    {recommendation.metric}
+                                  </span>
+                                  <span className="rounded-full border border-amber-500/25 bg-amber-500/10 px-2.5 py-1 font-mono text-[10px] font-black uppercase tracking-widest text-amber-300">
+                                    {recommendation.current} / {recommendation.target}
+                                  </span>
+                                </div>
+                                <h3 className="font-heading text-base font-black leading-snug text-foreground">
+                                  {recommendation.title}
+                                </h3>
+                                <p className="mt-1 max-w-3xl font-mono text-xs leading-relaxed text-muted-foreground">
+                                  {recommendation.description}
+                                </p>
+                                <p className="mt-2 font-mono text-[11px] leading-relaxed text-muted-foreground">
+                                  {recommendation.actions[0]}
+                                </p>
+                              </div>
+
+                              <button
+                                type="button"
+                                onClick={() => handleAddRecommendationGoal(recommendation)}
+                                disabled={isAdded}
+                                className="inline-flex h-11 w-fit items-center justify-center gap-2 rounded-xl border border-primary/20 bg-primary/10 px-4 font-mono text-[10px] font-black uppercase tracking-widest text-primary transition-all hover:bg-primary hover:text-primary-foreground disabled:border-green-400/25 disabled:bg-green-400/10 disabled:text-green-400"
+                              >
+                                {isAdded ? <Check className="h-4 w-4" /> : <ListPlus className="h-4 w-4" />}
+                                {isAdded ? "Added" : "Add to list"}
+                              </button>
+                            </motion.div>
+                          );
+                        })}
+                      </div>
+                    )}
+                  </div>
                 </>
               )}
             </motion.div>
