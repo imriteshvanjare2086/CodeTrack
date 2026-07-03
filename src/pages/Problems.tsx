@@ -199,7 +199,7 @@ export default function Problems() {
                     return (
                       <div
                         key={page.platform}
-                        className={`glass-strong rounded-2xl p-5 border ${pStyle.border} bg-[#252535] flex flex-col justify-between gap-5 relative overflow-hidden group transition-all duration-300 hover:scale-[1.02] hover:shadow-xl`}
+                        className={`rounded-2xl p-5 border ${pStyle.border} bg-card dark:bg-[#252535] flex flex-col justify-between gap-5 relative overflow-hidden group transition-all duration-300 hover:scale-[1.02] hover:shadow-xl`}
                       >
                         <div className="space-y-3">
                           <Badge className={`${pStyle.badge} px-2.5 py-1 rounded-xl text-[10px] font-black uppercase tracking-widest`}>
@@ -208,8 +208,8 @@ export default function Problems() {
                           </Badge>
 
                           <div className="space-y-2">
-                            <h4 className="font-heading text-base font-black tracking-tight text-white">{page.title}</h4>
-                            <p className="text-xs text-slate-300 leading-relaxed">{page.description}</p>
+                            <h4 className="font-heading text-base font-black tracking-tight text-foreground">{page.title}</h4>
+                            <p className="text-xs text-muted-foreground leading-relaxed">{page.description}</p>
                           </div>
                         </div>
 
@@ -330,11 +330,11 @@ export default function Problems() {
                               href={c.url} 
                               target="_blank" 
                               rel="noreferrer" 
-                              className={`glass-strong rounded-2xl p-5 border ${pStyle.border} space-y-4 relative overflow-hidden group hover:scale-[1.02] transition-all duration-300 hover:shadow-xl bg-[#252535] block`}
+                              className={`rounded-2xl p-5 border ${pStyle.border} space-y-4 relative overflow-hidden group hover:scale-[1.02] transition-all duration-300 hover:shadow-xl bg-card dark:bg-[#252535] block`}
                             >
                               <div className="flex items-start justify-between gap-4">
                                 <div className="space-y-2">
-                                  <h5 className="font-heading font-bold text-base leading-snug group-hover:text-primary transition-colors line-clamp-2 text-white">
+                                  <h5 className="font-heading font-bold text-base leading-snug group-hover:text-primary transition-colors line-clamp-2 text-foreground">
                                     {c.title}
                                   </h5>
                                 </div>
@@ -343,7 +343,7 @@ export default function Problems() {
                                   {c.platform}
                                 </Badge>
                               </div>
-                              <div className="flex items-center justify-between text-sm text-muted-foreground/90 pt-3 border-t border-white/10">
+                              <div className="flex items-center justify-between text-sm text-muted-foreground/90 pt-3 border-t border-border dark:border-white/10">
                                 <span className="flex items-center gap-2"><Clock className="h-4 w-4" /> {formatDuration(c.duration)}</span>
                                 <span className="font-bold uppercase tracking-wider text-rose-400 text-sm">
                                   Live Now
@@ -385,7 +385,7 @@ export default function Problems() {
                               href={c.url} 
                               target="_blank" 
                               rel="noreferrer"
-                              className={`glass-strong rounded-2xl p-5 border ${pStyle.border} flex flex-col justify-between gap-4 group hover:scale-[1.02] transition-all duration-300 relative hover:shadow-xl bg-[#252535] block`}
+                              className={`rounded-2xl p-5 border ${pStyle.border} flex flex-col justify-between gap-4 group hover:scale-[1.02] transition-all duration-300 relative hover:shadow-xl bg-card dark:bg-[#252535] block`}
                             >
                               <div className="space-y-3">
                                 <div className="flex items-center justify-between">
@@ -400,12 +400,12 @@ export default function Problems() {
                                   )}
                                 </div>
 
-                                <h5 className="font-heading font-bold text-base leading-snug group-hover:text-primary transition-colors line-clamp-2 text-white">
+                                <h5 className="font-heading font-bold text-base leading-snug group-hover:text-primary transition-colors line-clamp-2 text-foreground">
                                   {c.title}
                                 </h5>
                               </div>
 
-                              <div className="space-y-2 pt-3 border-t border-white/10">
+                              <div className="space-y-2 pt-3 border-t border-border dark:border-white/10">
                                 <div className="flex items-center justify-between">
                                   <div className="flex flex-col">
                                     <span className="text-[11px] font-mono text-muted-foreground/90 uppercase tracking-widest mb-1">Starts In</span>
@@ -415,7 +415,7 @@ export default function Problems() {
                                     <div className="text-[11px] font-mono text-muted-foreground/90 uppercase tracking-widest mb-1">
                                       {new Date(c.startTime).toLocaleDateString([], { month: "short", day: "numeric" })} @ {new Date(c.startTime).toLocaleTimeString([], { hour: '2-digit', minute:'2-digit' })}
                                     </div>
-                                    <span className="text-sm font-black text-white">
+                                    <span className="text-sm font-black text-foreground">
                                       {formatDuration(c.duration)}
                                     </span>
                                   </div>
@@ -453,7 +453,7 @@ export default function Problems() {
                               href={c.problemsUrl || c.url}
                               target="_blank"
                               rel="noreferrer"
-                              className={`glass-strong rounded-2xl p-5 border ${pStyle.border} flex flex-col justify-between gap-4 group hover:scale-[1.02] transition-all duration-300 relative hover:shadow-xl bg-[#252535] block`}
+                              className={`rounded-2xl p-5 border ${pStyle.border} flex flex-col justify-between gap-4 group hover:scale-[1.02] transition-all duration-300 relative hover:shadow-xl bg-card dark:bg-[#252535] block`}
                             >
                               <div className="space-y-3">
                                 <div className="flex items-center justify-between gap-3">
@@ -464,12 +464,12 @@ export default function Problems() {
                                   <ExternalLink className="h-4 w-4 text-muted-foreground group-hover:text-primary transition-colors" />
                                 </div>
 
-                                <h5 className="font-heading font-bold text-base leading-snug group-hover:text-primary transition-colors line-clamp-2 text-white">
+                                <h5 className="font-heading font-bold text-base leading-snug group-hover:text-primary transition-colors line-clamp-2 text-foreground">
                                   {c.title}
                                 </h5>
                               </div>
 
-                              <div className="flex items-center justify-between text-sm text-muted-foreground/90 pt-3 border-t border-white/10">
+                              <div className="flex items-center justify-between text-sm text-muted-foreground/90 pt-3 border-t border-border dark:border-white/10">
                                 <span className="text-[11px] font-mono uppercase tracking-widest">
                                   {new Date(c.startTime).toLocaleDateString([], { month: "short", day: "numeric" })}
                                 </span>

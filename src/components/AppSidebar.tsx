@@ -93,7 +93,7 @@ export function AppSidebar() {
   );
 
   return (
-    <Sidebar collapsible="icon" id="tour-sidebar" className="border-r border-white/5 bg-sidebar/50 backdrop-blur-3xl transition-all duration-200">
+    <Sidebar collapsible="icon" id="tour-sidebar" className="border-r border-border/40 dark:border-white/5 bg-sidebar/95 dark:bg-sidebar/50 backdrop-blur-3xl transition-all duration-200">
       <SidebarHeader className="p-6">
         <div className="flex items-center gap-3">
           <div className="flex h-10 w-10 items-center justify-center rounded-[1rem] bg-gradient-to-br from-primary to-primary/60 shadow-lg shadow-primary/20 ring-1 ring-white/20">

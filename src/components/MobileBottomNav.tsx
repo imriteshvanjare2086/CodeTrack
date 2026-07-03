@@ -17,7 +17,7 @@ export function MobileBottomNav() {
   return (
     <nav className="fixed bottom-0 left-0 right-0 z-40 md:hidden">
       {/* Frosted glass bar */}
-      <div className="flex items-center justify-around border-t border-white/10 bg-background/80 backdrop-blur-2xl px-2 py-1 safe-area-bottom">
+      <div className="flex items-center justify-around border-t border-border dark:border-white/10 bg-background/90 backdrop-blur-2xl px-2 py-1 safe-area-bottom shadow-[0_-1px_0_0_hsl(var(--border))]">
         {mobileNavItems.map((item) => {
           const isActive =
             item.url === "/"

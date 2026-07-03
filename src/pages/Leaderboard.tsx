@@ -4,7 +4,7 @@ import { useQuery } from "@tanstack/react-query";
 import { getLeaderboard } from "@/services/user";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
-import { Trophy, Zap, Target } from "lucide-react";
+import { Trophy, Zap, Target, Medal } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Link } from "react-router-dom";
 import { cn } from "@/lib/utils";
@@ -19,36 +19,40 @@ function initials(name: string) {
 
 const rankStyles = [
   {
-    chip: "border-yellow-400/35 bg-yellow-400/10 text-yellow-300",
-    row: "border-yellow-400/30 bg-gradient-to-r from-yellow-400/[0.14] via-yellow-400/[0.06] to-white/[0.025] shadow-[0_0_30px_rgba(250,204,21,0.12)]",
-    avatar: "border-yellow-400/35",
+    chip: "border-yellow-400/60 bg-gradient-to-br from-yellow-400/30 to-yellow-600/20 text-yellow-300 shadow-[0_0_14px_rgba(250,204,21,0.35)]",
+    row: "border-yellow-400/40 bg-gradient-to-r from-yellow-400/[0.18] via-yellow-400/[0.07] to-transparent shadow-[0_0_40px_rgba(250,204,21,0.16)] ring-1 ring-yellow-400/10",
+    avatar: "border-yellow-400/50 shadow-[0_0_18px_rgba(250,204,21,0.30)]",
     score: "text-yellow-300",
     tag: "Grandmaster",
-    tagClass: "border-yellow-400/35 bg-yellow-400/10 text-yellow-300 shadow-[0_0_18px_rgba(250,204,21,0.28)]",
+    tagClass: "border-yellow-400/50 bg-gradient-to-r from-yellow-400/20 to-yellow-600/10 text-yellow-300 shadow-[0_0_20px_rgba(250,204,21,0.35)]",
+    medal: "🥇",
   },
   {
-    chip: "border-slate-300/30 bg-slate-300/10 text-slate-200",
-    row: "border-slate-300/25 bg-gradient-to-r from-slate-200/[0.12] via-slate-300/[0.045] to-white/[0.025] shadow-[0_0_24px_rgba(203,213,225,0.1)]",
-    avatar: "border-slate-300/30",
+    chip: "border-slate-300/50 bg-gradient-to-br from-slate-300/25 to-slate-400/15 text-slate-200 shadow-[0_0_12px_rgba(203,213,225,0.25)]",
+    row: "border-slate-300/35 bg-gradient-to-r from-slate-200/[0.15] via-slate-300/[0.06] to-transparent shadow-[0_0_30px_rgba(203,213,225,0.13)] ring-1 ring-slate-300/10",
+    avatar: "border-slate-300/45 shadow-[0_0_14px_rgba(203,213,225,0.22)]",
     score: "text-slate-100",
     tag: "Expert",
-    tagClass: "border-slate-300/30 bg-slate-300/10 text-slate-100 shadow-[0_0_16px_rgba(203,213,225,0.22)]",
+    tagClass: "border-slate-300/40 bg-gradient-to-r from-slate-300/20 to-slate-400/10 text-slate-200 shadow-[0_0_16px_rgba(203,213,225,0.28)]",
+    medal: "🥈",
   },
   {
-    chip: "border-amber-500/30 bg-amber-500/10 text-amber-400",
-    row: "border-amber-500/25 bg-gradient-to-r from-amber-500/[0.12] via-amber-500/[0.045] to-white/[0.025] shadow-[0_0_24px_rgba(245,158,11,0.11)]",
-    avatar: "border-amber-500/30",
+    chip: "border-amber-500/50 bg-gradient-to-br from-amber-500/25 to-amber-700/15 text-amber-400 shadow-[0_0_12px_rgba(245,158,11,0.28)]",
+    row: "border-amber-500/35 bg-gradient-to-r from-amber-500/[0.15] via-amber-500/[0.06] to-transparent shadow-[0_0_30px_rgba(245,158,11,0.14)] ring-1 ring-amber-500/10",
+    avatar: "border-amber-500/45 shadow-[0_0_14px_rgba(245,158,11,0.25)]",
     score: "text-amber-400",
     tag: "Specialist",
-    tagClass: "border-amber-500/30 bg-amber-500/10 text-amber-400 shadow-[0_0_16px_rgba(245,158,11,0.22)]",
+    tagClass: "border-amber-500/40 bg-gradient-to-r from-amber-500/20 to-amber-700/10 text-amber-400 shadow-[0_0_16px_rgba(245,158,11,0.28)]",
+    medal: "🥉",
   },
   {
-    chip: "border-green-400/25 bg-green-400/10 text-green-400",
-    row: "border-green-400/20 bg-gradient-to-r from-green-400/[0.075] via-green-400/[0.028] to-white/[0.02] shadow-[0_0_18px_rgba(74,222,128,0.07)]",
-    avatar: "border-green-400/25",
-    score: "text-green-400",
+    chip: "border-primary/20 bg-primary/5 text-muted-foreground",
+    row: "border-border dark:border-white/8 bg-card dark:bg-white/[0.02]",
+    avatar: "border-border dark:border-white/10",
+    score: "text-foreground",
     tag: "Challenger",
-    tagClass: "border-green-400/25 bg-green-400/10 text-green-400 shadow-[0_0_14px_rgba(74,222,128,0.18)]",
+    tagClass: "border-primary/20 bg-primary/5 text-primary/70",
+    medal: null,
   },
 ];
 
@@ -76,7 +80,13 @@ export default function Leaderboard() {
         {isLoading ? (
           <div className="space-y-3">
             {Array.from({ length: 6 }).map((_, i) => (
-              <div key={i} className="h-20 w-full animate-pulse rounded-2xl border border-white/5 bg-white/5" />
+              <div key={i} className={cn(
+                "h-20 w-full animate-pulse rounded-2xl border bg-muted/30",
+                i === 0 ? "border-yellow-400/20 bg-yellow-400/5" :
+                i === 1 ? "border-slate-300/20 bg-slate-300/5" :
+                i === 2 ? "border-amber-500/20 bg-amber-500/5" :
+                "border-border"
+              )} />
             ))}
           </div>
         ) : (
@@ -86,28 +96,43 @@ export default function Leaderboard() {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.5 }}
-                className="overflow-hidden rounded-[2rem] border border-white/10 bg-card/35 shadow-2xl shadow-black/20 backdrop-blur-2xl"
+                className="overflow-hidden rounded-[2rem] border border-slate-200 dark:border-white/10 bg-card dark:bg-card/35 shadow-2xl shadow-black/20 backdrop-blur-2xl"
               >
-                <div className="flex flex-col gap-3 border-b border-white/10 bg-white/[0.025] px-4 py-4 sm:flex-row sm:items-center sm:justify-between sm:px-5">
-                  <div>
-                    <div className="flex items-center gap-2">
-                      <Trophy className="h-4 w-4 text-primary" />
-                      <h3 className="font-heading text-base font-black text-foreground">Global Standings</h3>
+                {/* Header with gradient banner */}
+                <div className="relative overflow-hidden border-b border-slate-200 dark:border-white/10">
+                  <div className="absolute inset-0 bg-gradient-to-br from-primary/8 via-yellow-400/5 to-transparent pointer-events-none" />
+                  <div className="relative flex flex-col gap-3 px-4 py-5 sm:flex-row sm:items-center sm:justify-between sm:px-6">
+                    <div>
+                      <div className="flex items-center gap-2.5">
+                        <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-gradient-to-br from-primary/20 to-yellow-400/10 border border-primary/20">
+                          <Trophy className="h-4 w-4 text-primary" />
+                        </div>
+                        <div>
+                          <h3 className="font-heading text-base font-black text-foreground">Global Standings</h3>
+                          <p className="font-mono text-[9px] font-bold uppercase tracking-[0.16em] text-muted-foreground">
+                            Every coder in one clean ranking strip
+                          </p>
+                        </div>
+                      </div>
                     </div>
-                    <p className="mt-1 font-mono text-[10px] font-bold uppercase tracking-[0.16em] text-muted-foreground">
-                      Every coder in one clean ranking strip
-                    </p>
-                  </div>
-                  <div className="font-mono text-[10px] font-black uppercase tracking-widest text-muted-foreground">
-                    {users.length} ranked
+                    <div className="flex items-center gap-3">
+                      <div className="flex items-center gap-1.5 rounded-full border border-primary/15 bg-primary/5 px-3 py-1.5">
+                        <Medal className="h-3 w-3 text-primary/60" />
+                        <span className="font-mono text-[10px] font-black uppercase tracking-widest text-primary/80">{users.length} ranked</span>
+                      </div>
+                      <div className="flex w-fit items-center gap-2 rounded-full border border-green-500/20 bg-green-500/10 px-3 py-1.5">
+                        <span className="h-2 w-2 rounded-full bg-green-500 shadow-[0_0_10px_rgba(34,197,94,0.75)] animate-pulse" />
+                        <span className="font-mono text-[10px] font-bold uppercase tracking-widest text-green-400">Live</span>
+                      </div>
+                    </div>
                   </div>
                 </div>
 
-                <div className="hidden grid-cols-[64px_minmax(0,1fr)_96px_128px] items-center gap-5 border-b border-white/5 px-5 py-3 font-mono text-[10px] font-black uppercase tracking-[0.18em] text-muted-foreground sm:grid">
+                <div className="hidden grid-cols-[64px_minmax(0,1fr)_96px_128px] items-center gap-5 border-b border-slate-100 dark:border-white/5 bg-muted/20 px-5 py-2.5 font-mono text-[9px] font-black uppercase tracking-[0.20em] text-muted-foreground sm:grid">
                   <span className="text-center">Rank</span>
                   <span>Coder</span>
                   <span className="text-right">Score</span>
-                  <span className="text-center">Tag</span>
+                  <span className="text-center">Title</span>
                 </div>
 
                 <div className="space-y-2 p-3 sm:p-4">
@@ -118,27 +143,41 @@ export default function Leaderboard() {
                     return (
                       <motion.div
                         key={user._id}
-                        initial={{ opacity: 0, y: 8 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ delay: 0.04 * i }}
+                        initial={{ opacity: 0, x: -12 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        transition={{ delay: 0.05 * i, ease: [0.23, 1, 0.32, 1] }}
                         className={cn(
-                          "group grid min-h-[76px] grid-cols-[44px_minmax(0,1fr)_auto] items-center gap-3 rounded-2xl border border-white/10 bg-white/[0.025] px-3 py-3 transition-all duration-300 hover:-translate-y-0.5 hover:border-primary/25 hover:bg-white/[0.055] sm:grid-cols-[64px_minmax(0,1fr)_96px_128px] sm:gap-5 sm:px-5",
-                          style?.row
+                          "group grid min-h-[76px] grid-cols-[44px_minmax(0,1fr)_auto] items-center gap-3 rounded-2xl border px-3 py-3 transition-all duration-300 hover:-translate-y-0.5 sm:grid-cols-[64px_minmax(0,1fr)_96px_128px] sm:gap-5 sm:px-5",
+                          i < 3
+                            ? style?.row
+                            : "border-border/60 dark:border-white/8 bg-card/60 dark:bg-white/[0.02] hover:border-primary/25 hover:bg-muted/50 dark:hover:bg-white/[0.045]",
+                          isMe && "ring-2 ring-primary/25 ring-offset-1 ring-offset-background"
                         )}
                       >
+                        {/* Rank chip */}
                         <div className="flex items-center justify-center">
-                          <span
-                            className={cn(
-                              "flex h-10 min-w-10 items-center justify-center rounded-xl border border-white/10 bg-white/5 font-mono text-sm font-black leading-none text-muted-foreground tabular-nums",
+                          {i < 3 && style?.medal ? (
+                            <div className={cn(
+                              "flex h-10 min-w-10 flex-col items-center justify-center rounded-xl border font-mono text-xl leading-none",
                               style?.chip
-                            )}
-                          >
-                            {i + 1}
-                          </span>
+                            )}>
+                              <span>{style.medal}</span>
+                            </div>
+                          ) : (
+                            <span
+                              className={cn(
+                                "flex h-10 min-w-10 items-center justify-center rounded-xl border font-mono text-sm font-black leading-none tabular-nums",
+                                i < 3 ? style?.chip : "border-border/50 dark:border-white/10 bg-muted/50 dark:bg-white/5 text-muted-foreground"
+                              )}
+                            >
+                              {i + 1}
+                            </span>
+                          )}
                         </div>
 
+                        {/* User info */}
                         <Link to={profilePath(user._id)} className="flex min-w-0 items-center gap-3">
-                          <Avatar className={cn("h-11 w-11 shrink-0 rounded-xl border border-white/10 transition-all duration-300 group-hover:scale-105 group-hover:border-primary/30 sm:h-12 sm:w-12", style?.avatar)}>
+                          <Avatar className={cn("h-11 w-11 shrink-0 rounded-xl border-2 transition-all duration-300 group-hover:scale-105 sm:h-12 sm:w-12", i < 3 ? style?.avatar : "border-border dark:border-white/10 group-hover:border-primary/40")}>
                             <AvatarImage src={(user as any).profileImage} className="object-cover" />
                             <AvatarFallback className="rounded-xl bg-primary/10 text-xs font-black uppercase text-primary">
                               {initials(user.username)}
@@ -147,40 +186,50 @@ export default function Leaderboard() {
 
                           <div className="min-w-0">
                             <div className="flex min-w-0 items-center gap-2">
-                              <span className="min-w-0 truncate font-heading text-sm font-black leading-tight text-foreground transition-colors group-hover:text-primary sm:text-base">
+                              <span className={cn(
+                                "min-w-0 truncate font-heading text-sm font-black leading-tight transition-colors group-hover:text-primary sm:text-base",
+                                i < 3 ? style?.score : "text-foreground"
+                              )}>
                                 {user.username}
                               </span>
                               {isMe && (
-                                <Badge className="h-4 shrink-0 border-primary/20 bg-primary/10 px-1.5 py-0 text-[8px] font-black uppercase tracking-widest text-primary">
+                                <Badge className="h-4 shrink-0 border-primary/30 bg-primary/15 px-1.5 py-0 text-[8px] font-black uppercase tracking-widest text-primary">
                                   YOU
                                 </Badge>
                               )}
                             </div>
+                            {i < 3 && (
+                              <span className="font-mono text-[9px] text-muted-foreground/60 uppercase tracking-wider">
+                                #{i + 1} worldwide
+                              </span>
+                            )}
                           </div>
                         </Link>
 
+                        {/* Score */}
                         <div className="flex min-w-[82px] flex-col items-end gap-1 sm:min-w-0 sm:flex-row sm:items-center sm:justify-end sm:gap-1.5">
-                          <div className="flex items-baseline justify-end gap-1.5">
-                            <Zap className={cn("h-3.5 w-3.5 text-primary/45", style?.score)} />
-                            <span className={cn("font-heading text-lg font-black leading-none tabular-nums text-foreground sm:text-xl", style?.score)}>
+                          <div className="flex items-baseline justify-end gap-1">
+                            <Zap className={cn("h-3 w-3", i < 3 ? style?.score : "text-muted-foreground/50")} />
+                            <span className={cn("font-heading text-lg font-black leading-none tabular-nums sm:text-xl", i < 3 ? style?.score : "text-foreground")}>
                               {(user as any).overallScore ?? 0}
                             </span>
                           </div>
                           <span
                             className={cn(
                               "inline-flex whitespace-nowrap rounded-full border px-2.5 py-1 font-mono text-[9px] font-black uppercase leading-none tracking-widest sm:hidden",
-                              style?.tagClass
+                              i < 3 ? style?.tagClass : "border-primary/20 bg-primary/5 text-primary/70"
                             )}
                           >
                             {style?.tag}
                           </span>
                         </div>
 
+                        {/* Tag (desktop) */}
                         <div className="hidden justify-center sm:flex">
                           <span
                             className={cn(
                               "inline-flex min-w-[108px] justify-center whitespace-nowrap rounded-full border px-3 py-1.5 font-mono text-[10px] font-black uppercase leading-none tracking-widest",
-                              style?.tagClass
+                              i < 3 ? style?.tagClass : "border-primary/20 bg-primary/5 text-primary/70"
                             )}
                           >
                             {style?.tag}

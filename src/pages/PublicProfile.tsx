@@ -67,11 +67,11 @@ export default function PublicProfile() {
           <div className="flex items-center justify-between mb-8">
             <div className="flex items-center gap-3">
               <Trophy className="h-7 w-7 text-primary" />
-              <h2 className="text-2xl font-black font-heading text-white">Badge Summary</h2>
+              <h2 className="text-2xl font-black font-heading text-foreground">Badge Summary</h2>
             </div>
             <button
               onClick={() => setIsGalleryOpen(true)}
-              className="flex items-center gap-2 px-5 py-2.5 rounded-xl border border-white/10 bg-white/5 hover:bg-white/15 transition-all text-sm font-bold text-white cursor-pointer"
+              className="flex items-center gap-2 px-5 py-2.5 rounded-xl border border-slate-200 dark:border-white/10 bg-slate-50 dark:bg-white/5 hover:bg-slate-100 dark:hover:bg-white/15 transition-all text-sm font-bold text-foreground dark:text-white cursor-pointer"
             >
               View All
               <ExternalLink className="h-4 w-4" />
@@ -82,12 +82,12 @@ export default function PublicProfile() {
             <div className="text-left space-y-5">
               <div>
                 <p className="text-muted-foreground font-mono text-xs uppercase tracking-widest">Badges</p>
-                <p className="text-5xl font-black font-heading text-white mt-1">
+                <p className="text-5xl font-black font-heading text-foreground mt-1">
                   {earned.length}
                 </p>
               </div>
               {recent.length > 0 && (
-                <div className="space-y-1 font-mono text-left pt-3 border-t border-white/5">
+                <div className="space-y-1 font-mono text-left pt-3 border-t border-slate-100 dark:border-white/5">
                   <p className="text-[10px] text-muted-foreground uppercase tracking-wider font-bold">Most Recent Badge</p>
                   <p className="text-sm text-primary font-bold">{recent[0].title}</p>
                 </div>

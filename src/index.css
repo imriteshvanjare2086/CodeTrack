@@ -29,6 +29,16 @@
     --ring: 142 71% 42%;
     --radius: 1rem;
 
+    /* Sidebar Variables - Light Mode */
+    --sidebar-background: 0 0% 100%;
+    --sidebar-foreground: 240 5.3% 26.1%;
+    --sidebar-primary: 142 71% 42%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 240 4.8% 95.9%;
+    --sidebar-accent-foreground: 240 5.9% 10%;
+    --sidebar-border: 214.3 31.8% 91.4%;
+    --sidebar-ring: 142 71% 42%;
+
     /* Platform Colors - Enhanced for Light Mode */
     --leetcode: 38 92% 50%;
     --codeforces: 217 91% 60%;
@@ -65,6 +75,16 @@
     --border: 240 3.7% 15.9%;
     --input: 240 3.7% 15.9%;
     --ring: 142.1 70.6% 45.3%;
+
+    /* Sidebar Variables - Dark Mode */
+    --sidebar-background: 240 10% 3.9%;
+    --sidebar-foreground: 240 5% 96.1%;
+    --sidebar-primary: 142.1 70.6% 45.3%;
+    --sidebar-primary-foreground: 144.4 61.4% 10.5%;
+    --sidebar-accent: 240 3.7% 15.9%;
+    --sidebar-accent-foreground: 240 5% 96.1%;
+    --sidebar-border: 240 3.7% 15.9%;
+    --sidebar-ring: 142.1 70.6% 45.3%;
 
     /* Platform Colors - Neon Edition */
     --leetcode: 35 100% 52%;
