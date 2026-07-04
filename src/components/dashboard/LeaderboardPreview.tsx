@@ -35,7 +35,7 @@ export function LeaderboardPreview() {
             transition={{ delay: 0.85 + i * 0.05 }}
             className={`group flex items-center gap-3 rounded-xl p-3 text-sm font-mono card-hover ${
               user.name === "You"
-                ? "bg-primary/10 border border-primary/20 shadow-sm shadow-primary/5"
+                ? "bg-violet-500/10 border border-violet-500/20 shadow-sm shadow-violet-500/5"
                 : ""
             }`}
           >
@@ -46,14 +46,14 @@ export function LeaderboardPreview() {
             </div>
             <div className={`h-8 w-8 rounded-full flex items-center justify-center text-xs font-bold ${
               user.name === "You"
-                ? "bg-primary/20 text-primary border border-primary/30"
+                ? "bg-violet-500/20 text-violet-400 border border-violet-500/30"
                 : user.rank <= 3
                   ? "bg-leetcode/15 text-leetcode border border-leetcode/20"
                   : "bg-secondary text-secondary-foreground border border-border/50"
             }`}>
               {user.avatar}
             </div>
-            <span className={`flex-1 ${user.name === "You" ? "text-primary font-semibold" : "text-foreground"}`}>
+            <span className={`flex-1 ${user.name === "You" ? "text-violet-400 font-semibold" : "text-foreground"}`}>
               {user.name}
             </span>
             <span className="text-xs text-muted-foreground font-mono tabular-nums">

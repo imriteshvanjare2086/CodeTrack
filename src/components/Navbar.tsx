@@ -167,7 +167,7 @@ export function Navbar() {
             <span className="absolute top-2 right-2 h-2 w-2 rounded-full bg-primary animate-pulse" />
           </button>
           {showNotifications && (
-            <div className="absolute right-0 mt-2 w-64 rounded-xl border border-border/60 bg-card/90 backdrop-blur-xl shadow-lg p-3 z-50">
+            <div className="absolute right-0 mt-2 w-64 rounded-xl border border-border bg-card/95 backdrop-blur-xl shadow-2xl dark:shadow-black/50 p-3 z-50">
               <div className="flex items-center justify-between mb-3 px-1">
                 <span className="text-xs font-bold font-heading text-foreground">Notifications</span>
               </div>
@@ -182,7 +182,7 @@ export function Navbar() {
           <div 
             id="tour-profile"
             onClick={() => { setShowDropdown(!showDropdown); setShowNotifications(false); }}
-            className="h-9 w-9 sm:h-8 sm:w-8 rounded-xl bg-gradient-to-br from-primary/30 to-primary/10 border border-primary/20 flex items-center justify-center text-xs font-bold text-primary font-mono cursor-pointer hover:bg-primary/20 transition-all overflow-hidden"
+            className="h-9 w-9 rounded-xl bg-gradient-to-br from-primary/30 to-primary/10 border border-primary/20 flex items-center justify-center text-xs font-bold text-primary font-mono cursor-pointer hover:bg-primary/20 transition-all overflow-hidden"
           >
             {profilePhoto ? (
               <img src={profilePhoto} alt="User" className="h-full w-full object-cover" />
@@ -191,7 +191,7 @@ export function Navbar() {
             )}
           </div>
           {showDropdown && (
-            <div className="absolute right-0 mt-2 w-48 rounded-xl border border-border/60 bg-card/90 backdrop-blur-xl shadow-lg p-1.5 z-50">
+            <div className="absolute right-0 mt-2 w-48 rounded-xl border border-border bg-card/95 backdrop-blur-xl shadow-2xl dark:shadow-black/50 p-1.5 z-50">
               <button 
                 onClick={() => { setShowDropdown(false); navigate("/profile"); }} 
                 className="w-full text-left px-3 py-2 text-sm text-foreground hover:bg-muted/50 rounded-lg flex items-center gap-2"

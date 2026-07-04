@@ -180,7 +180,7 @@ export default function BattleArena() {
           )}
         </div>
 
-        <div className="mb-5 grid grid-cols-2 gap-3">
+        <div className="mb-5 grid grid-cols-1 min-[360px]:grid-cols-2 gap-3">
           <div className="rounded-2xl border border-slate-200 dark:border-white/10 bg-slate-100 dark:bg-white/5 p-4">
             <div className="flex items-center gap-2 text-slate-500 dark:text-slate-400">
               <Code2 className="h-4 w-4" />

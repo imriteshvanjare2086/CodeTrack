@@ -23,6 +23,22 @@ export default function Achievements() {
   const [showGallery, setShowGallery] = useState(false);
   const [selectedBadge, setSelectedBadge] = useState<Achievement | null>(null);
 
+  const sortedEarned = useMemo(() => {
+    const rarityOrder = {
+      Common: 1,
+      Uncommon: 2,
+      Rare: 3,
+      Epic: 4,
+      Legendary: 5,
+    };
+    return [...earned].sort((a, b) => {
+      const rA = rarityOrder[a.rarity as keyof typeof rarityOrder] || 1;
+      const rB = rarityOrder[b.rarity as keyof typeof rarityOrder] || 1;
+      if (rA !== rB) return rA - rB;
+      return a.targetProgress - b.targetProgress;
+    });
+  }, [earned]);
+
   const pendingTasks = useMemo(() => {
     const grouped: Record<string, Achievement[]> = {};
     achievements.forEach((a) => {
@@ -35,11 +51,26 @@ export default function Achievements() {
       grouped[key].push(a);
     });
 
-    return Object.values(grouped).map((group) => {
+    const closest = Object.values(grouped).map((group) => {
       return group.sort((a, b) => {
         if (b.percent !== a.percent) return b.percent - a.percent;
         return a.remaining - b.remaining;
       })[0];
+    });
+
+    const rarityOrder = {
+      Common: 1,
+      Uncommon: 2,
+      Rare: 3,
+      Epic: 4,
+      Legendary: 5,
+    };
+
+    return closest.filter(Boolean).sort((a, b) => {
+      const rA = rarityOrder[a.rarity as keyof typeof rarityOrder] || 1;
+      const rB = rarityOrder[b.rarity as keyof typeof rarityOrder] || 1;
+      if (rA !== rB) return rA - rB;
+      return a.remaining - b.remaining;
     });
   }, [achievements]);
 
@@ -65,15 +96,15 @@ export default function Achievements() {
         />
 
         {/* Badge Summary Section */}
-        <section className="glass rounded-3xl border border-white/10 p-8 shadow-xl">
+        <section className="glass rounded-3xl border border-border/50 dark:border-white/10 p-8 shadow-xl">
           <div className="flex items-center justify-between mb-8">
             <div className="flex items-center gap-3">
               <Trophy className="h-7 w-7 text-primary" />
-              <h2 className="text-2xl font-black font-heading text-white">Badge Summary</h2>
+              <h2 className="text-2xl font-black font-heading text-foreground">Badge Summary</h2>
             </div>
             <button
               onClick={() => setShowGallery(true)}
-              className="flex items-center gap-2 px-5 py-2.5 rounded-xl border border-white/10 bg-white/5 hover:bg-white/15 transition-all text-sm font-bold text-white cursor-pointer"
+              className="flex items-center gap-2 px-5 py-2.5 rounded-xl border border-slate-200 dark:border-white/10 bg-slate-50 dark:bg-white/5 hover:bg-slate-100 dark:hover:bg-white/15 transition-all text-sm font-bold text-foreground cursor-pointer"
             >
               View All
               <ExternalLink className="h-4 w-4" />
@@ -84,12 +115,12 @@ export default function Achievements() {
             <div className="text-left space-y-5">
               <div>
                 <p className="text-muted-foreground font-mono text-xs uppercase tracking-widest">Badges</p>
-                <p className="text-5xl font-black font-heading text-white mt-1">
+                <p className="text-5xl font-black font-heading text-foreground mt-1">
                   {earned.length}
                 </p>
               </div>
               {recent.length > 0 && (
-                <div className="space-y-1 font-mono text-left pt-3 border-t border-white/5">
+                <div className="space-y-1 font-mono text-left pt-3 border-t border-slate-100 dark:border-white/5">
                   <p className="text-[10px] text-muted-foreground uppercase tracking-wider font-bold">Most Recent Badge</p>
                   <p className="text-sm text-primary font-bold">{recent[0].title}</p>
                 </div>
@@ -129,7 +160,7 @@ export default function Achievements() {
                   <div
                     key={i}
                     className={cn(
-                      "h-28 w-28 rounded-full border border-dashed border-white/10 bg-white/[0.01]",
+                      "h-28 w-28 rounded-full border border-dashed border-slate-200 dark:border-white/10 bg-slate-50/50 dark:bg-white/[0.01]",
                       i === 1 && "h-32 w-32"
                     )}
                   />
@@ -145,17 +176,17 @@ export default function Achievements() {
               <CheckCircle2 className="h-6 w-6 text-green-500" />
               Completed Tasks
             </h2>
-            <div className="glass rounded-3xl border border-white/10 p-6 min-h-[400px]">
+            <div className="glass rounded-3xl border border-border/50 dark:border-white/10 p-6 min-h-[400px]">
               {earned.length === 0 ? (
                 <p className="text-muted-foreground text-center py-12">
                   No achievements yet. Keep coding!
                 </p>
               ) : (
                 <div className="space-y-3">
-                  {earned.slice(0, 12).map((a) => (
+                  {sortedEarned.slice(0, 12).map((a) => (
                     <div
                       key={a.id}
-                      className="flex items-center gap-3 py-2 cursor-pointer hover:bg-white/5 rounded-lg px-2 transition-all"
+                      className="flex items-center gap-3 py-2 cursor-pointer hover:bg-slate-50 dark:hover:bg-white/5 rounded-lg px-2 transition-all"
                       onClick={() => setSelectedBadge(a)}
                     >
                       <CheckCircle2 className="h-5 w-5 text-green-500 flex-shrink-0" />
@@ -174,7 +205,7 @@ export default function Achievements() {
               <Target className="h-6 w-6 text-primary" />
               Pending Tasks
             </h2>
-            <div className="glass rounded-3xl border border-white/10 p-6 min-h-[400px]">
+            <div className="glass rounded-3xl border border-border/50 dark:border-white/10 p-6 min-h-[400px]">
               {pendingTasks.length === 0 ? (
                 <p className="text-muted-foreground text-center py-12">
                   All milestones reached! Great job!
@@ -184,7 +215,7 @@ export default function Achievements() {
                   {pendingTasks.filter(Boolean).map((a) => (
                     <div
                       key={(a as Achievement).id}
-                      className="flex items-center gap-3 py-2 cursor-pointer hover:bg-white/5 rounded-lg px-2 transition-all"
+                      className="flex items-center gap-3 py-2 cursor-pointer hover:bg-slate-50 dark:hover:bg-white/5 rounded-lg px-2 transition-all"
                       onClick={() => setSelectedBadge(a)}
                     >
                       <Circle className="h-5 w-5 text-muted-foreground flex-shrink-0" />

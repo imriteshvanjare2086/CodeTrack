@@ -70,7 +70,7 @@ export function AppSidebar() {
           to={item.url}
           end={item.url === "/"}
           className="relative group flex items-center rounded-xl transition-all duration-200 overflow-hidden px-4 hover:bg-primary/5 dark:hover:bg-primary/5 active:scale-95"
-          activeClassName="bg-[#E6F4EA] dark:bg-primary/10 font-bold text-[#15803D] dark:text-primary"
+          activeClassName="bg-primary/10 font-bold text-primary"
         >
           {/* Active Indicator Bar */}
           <div className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-0 bg-primary rounded-r-full transition-all duration-300 group-[.active]:h-6 group-hover:h-4 group-hover:shadow-[0_0_15px_hsla(var(--primary),0.5)]" />

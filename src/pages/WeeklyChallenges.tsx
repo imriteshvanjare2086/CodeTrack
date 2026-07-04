@@ -70,9 +70,9 @@ export default function WeeklyChallenges() {
   const tasks = challenges.filter((c) => c.type === "Task");
 
   const sections = [
-    { label: "📝 MCQ Quizzes", items: mcqs, accent: "from-violet-500/10 to-transparent" },
-    { label: "💻 Coding Challenges", items: coding, accent: "from-sky-500/10 to-transparent" },
-    { label: "📌 Tech Tasks", items: tasks, accent: "from-orange-500/10 to-transparent" },
+    { label: "📝 MCQ Quizzes", items: mcqs, accent: "bg-violet-50/40 dark:bg-gradient-to-r dark:from-violet-500/10 dark:to-transparent border border-violet-100/60 dark:border-transparent" },
+    { label: "💻 Coding Challenges", items: coding, accent: "bg-sky-50/40 dark:bg-gradient-to-r dark:from-sky-500/10 dark:to-transparent border border-sky-100/60 dark:border-transparent" },
+    { label: "📌 Tech Tasks", items: tasks, accent: "bg-orange-50/40 dark:bg-gradient-to-r dark:from-orange-500/10 dark:to-transparent border border-orange-100/60 dark:border-transparent" },
   ];
 
   return (
@@ -138,7 +138,7 @@ export default function WeeklyChallenges() {
             animate={{ opacity: 1, y: 0 }}
             className="space-y-4"
           >
-            <div className={`flex items-center gap-3 rounded-2xl bg-gradient-to-r ${accent} px-5 py-3`}>
+            <div className={`flex items-center gap-3 rounded-2xl ${accent} px-5 py-3`}>
               <h3 className="font-heading text-base font-bold text-foreground">{label}</h3>
               <span className="rounded-full bg-muted/30 px-2 py-0.5 font-mono text-xs text-muted-foreground">
                 {items.filter((c) => completed.has(c.id)).length}/{items.length} done

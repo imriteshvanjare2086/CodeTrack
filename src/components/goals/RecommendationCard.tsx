@@ -15,6 +15,7 @@ export type GoalRecommendation = {
   goalTitle: string;
   goalCategory: string;
   targetNumber?: string;
+  weakArea?: string;
 };
 
 const priorityStyles = {
@@ -71,6 +72,12 @@ export function RecommendationCard({
             <p className="mt-2 font-mono text-xs leading-relaxed text-muted-foreground">
               {recommendation.description}
             </p>
+            {recommendation.weakArea && (
+              <div className="mt-2.5 text-xs font-mono text-rose-500 dark:text-rose-400 font-bold flex items-center gap-1.5 bg-rose-500/5 dark:bg-rose-500/10 w-fit px-2.5 py-1 rounded-lg border border-rose-500/10">
+                <span className="h-1.5 w-1.5 rounded-full bg-rose-500 animate-pulse" />
+                Weak Area: {recommendation.weakArea}
+              </div>
+            )}
           </div>
         </div>
       </div>

@@ -278,9 +278,22 @@ export function getNextAchievement(achievements: Achievement[]) {
 }
 
 export function getRecentAchievements(achievements: Achievement[], limit = 3) {
+  const rarityOrder: Record<AchievementRarity, number> = {
+    Legendary: 5,
+    Epic: 4,
+    Rare: 3,
+    Uncommon: 2,
+    Common: 1,
+  };
   return achievements
     .filter((achievement) => achievement.earned && achievement.earnedDate)
-    .sort((a, b) => new Date(b.earnedDate || 0).getTime() - new Date(a.earnedDate || 0).getTime())
+    .sort((a, b) => {
+      const rA = rarityOrder[a.rarity] || 1;
+      const rB = rarityOrder[b.rarity] || 1;
+      if (rB !== rA) return rB - rA;
+      if (b.targetProgress !== a.targetProgress) return b.targetProgress - a.targetProgress;
+      return new Date(b.earnedDate || 0).getTime() - new Date(a.earnedDate || 0).getTime();
+    })
     .slice(0, limit);
 }
 

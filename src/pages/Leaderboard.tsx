@@ -37,12 +37,12 @@ const rankStyles = [
     medal: "🥈",
   },
   {
-    chip: "border-amber-500/50 bg-gradient-to-br from-amber-500/25 to-amber-700/15 text-amber-400 shadow-[0_0_12px_rgba(245,158,11,0.28)]",
-    row: "border-amber-500/35 bg-gradient-to-r from-amber-500/[0.15] via-amber-500/[0.06] to-transparent shadow-[0_0_30px_rgba(245,158,11,0.14)] ring-1 ring-amber-500/10",
-    avatar: "border-amber-500/45 shadow-[0_0_14px_rgba(245,158,11,0.25)]",
-    score: "text-amber-400",
+    chip: "border-orange-500/50 bg-gradient-to-br from-orange-500/25 to-orange-700/15 text-orange-400 shadow-[0_0_12px_rgba(249,115,22,0.28)]",
+    row: "border-orange-500/35 bg-gradient-to-r from-orange-500/[0.15] via-orange-500/[0.06] to-transparent shadow-[0_0_30px_rgba(249,115,22,0.14)] ring-1 ring-orange-500/10",
+    avatar: "border-orange-500/45 shadow-[0_0_14px_rgba(249,115,22,0.25)]",
+    score: "text-orange-400",
     tag: "Specialist",
-    tagClass: "border-amber-500/40 bg-gradient-to-r from-amber-500/20 to-amber-700/10 text-amber-400 shadow-[0_0_16px_rgba(245,158,11,0.28)]",
+    tagClass: "border-orange-500/40 bg-gradient-to-r from-orange-500/20 to-orange-700/10 text-orange-400 shadow-[0_0_16px_rgba(249,115,22,0.28)]",
     medal: "🥉",
   },
   {
@@ -84,7 +84,7 @@ export default function Leaderboard() {
                 "h-20 w-full animate-pulse rounded-2xl border bg-muted/30",
                 i === 0 ? "border-yellow-400/20 bg-yellow-400/5" :
                 i === 1 ? "border-slate-300/20 bg-slate-300/5" :
-                i === 2 ? "border-amber-500/20 bg-amber-500/5" :
+                i === 2 ? "border-orange-500/20 bg-orange-500/5" :
                 "border-border"
               )} />
             ))}
@@ -150,8 +150,10 @@ export default function Leaderboard() {
                           "group grid min-h-[76px] grid-cols-[44px_minmax(0,1fr)_auto] items-center gap-3 rounded-2xl border px-3 py-3 transition-all duration-300 hover:-translate-y-0.5 sm:grid-cols-[64px_minmax(0,1fr)_96px_128px] sm:gap-5 sm:px-5",
                           i < 3
                             ? style?.row
+                            : isMe
+                            ? "border-violet-500/40 dark:border-violet-500/30 shadow-[0_0_15px_rgba(139,92,246,0.12)] bg-violet-950/5 dark:bg-violet-500/[0.02]"
                             : "border-border/60 dark:border-white/8 bg-card/60 dark:bg-white/[0.02] hover:border-primary/25 hover:bg-muted/50 dark:hover:bg-white/[0.045]",
-                          isMe && "ring-2 ring-primary/25 ring-offset-1 ring-offset-background"
+                          isMe && "ring-2 ring-violet-500/25 ring-offset-1 ring-offset-background"
                         )}
                       >
                         {/* Rank chip */}
@@ -193,7 +195,7 @@ export default function Leaderboard() {
                                 {user.username}
                               </span>
                               {isMe && (
-                                <Badge className="h-4 shrink-0 border-primary/30 bg-primary/15 px-1.5 py-0 text-[8px] font-black uppercase tracking-widest text-primary">
+                                <Badge className="h-4 shrink-0 border-violet-500/30 bg-violet-500/15 px-1.5 py-0 text-[8px] font-black uppercase tracking-widest text-violet-400">
                                   YOU
                                 </Badge>
                               )}

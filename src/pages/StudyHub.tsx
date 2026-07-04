@@ -2,17 +2,20 @@ import { useState, useMemo } from "react";
 import { DashboardLayout } from "@/components/DashboardLayout";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { 
-  BookOpen, 
-  Video, 
-  TrendingUp, 
-  ExternalLink, 
-  ChevronDown 
+import {
+  BookOpen,
+  Video,
+  TrendingUp,
+  ExternalLink,
+  ChevronDown,
+  Clock,
+  ChevronRight,
 } from "lucide-react";
 import {
   DSA_SHEETS,
   COURSES,
   ROADMAPS,
+  ROADMAP_DOMAINS,
   COURSE_DOMAINS,
 } from "@/data/study-hub";
 import { motion, AnimatePresence } from "framer-motion";
@@ -22,6 +25,9 @@ export default function StudyHub() {
   const [selectedSection, setSelectedSection] = useState<string>("sheets");
   const [selectedDomain, setSelectedDomain] = useState<string>("All");
   const [isDomainDropdownOpen, setIsDomainDropdownOpen] = useState(false);
+  const [selectedRoadmapDomain, setSelectedRoadmapDomain] = useState<string>(ROADMAP_DOMAINS[0]);
+  const [isRoadmapDropdownOpen, setIsRoadmapDropdownOpen] = useState(false);
+  const [expandedStages, setExpandedStages] = useState<Set<number>>(new Set([0]));
 
   // Filter courses by selected domain
   const filteredCourses = useMemo(() => {
@@ -29,9 +35,23 @@ export default function StudyHub() {
     return COURSES.filter(course => course.category === selectedDomain);
   }, [selectedDomain]);
 
+  // Get selected roadmap
+  const selectedRoadmap = useMemo(() => {
+    return ROADMAPS.find(r => r.domain === selectedRoadmapDomain) ?? ROADMAPS[0];
+  }, [selectedRoadmapDomain]);
+
+  const toggleStage = (idx: number) => {
+    setExpandedStages(prev => {
+      const next = new Set(prev);
+      if (next.has(idx)) next.delete(idx);
+      else next.add(idx);
+      return next;
+    });
+  };
+
   // Helper for difficulty colors
   const getDifficultyColor = (difficulty: string) => {
-    switch(difficulty.toLowerCase()) {
+    switch (difficulty.toLowerCase()) {
       case "beginner":
         return "bg-green-500/10 text-green-400 border-green-500/30";
       case "intermediate":
@@ -42,6 +62,22 @@ export default function StudyHub() {
         return "bg-primary/10 text-primary border-primary/30";
     }
   };
+
+  const stageAccentColors = [
+    "border-emerald-500/40 bg-emerald-500/5",
+    "border-blue-500/40 bg-blue-500/5",
+    "border-violet-500/40 bg-violet-500/5",
+    "border-amber-500/40 bg-amber-500/5",
+    "border-rose-500/40 bg-rose-500/5",
+  ];
+
+  const stageNumberColors = [
+    "bg-emerald-500/20 text-emerald-400 ring-emerald-500/30",
+    "bg-blue-500/20 text-blue-400 ring-blue-500/30",
+    "bg-violet-500/20 text-violet-400 ring-violet-500/30",
+    "bg-amber-500/20 text-amber-400 ring-amber-500/30",
+    "bg-rose-500/20 text-rose-400 ring-rose-500/30",
+  ];
 
   return (
     <DashboardLayout>
@@ -129,10 +165,7 @@ export default function StudyHub() {
                       <p className="text-xs font-mono text-muted-foreground mb-3">By {sheet.author}</p>
                       <p className="text-sm text-muted-foreground mb-6 leading-relaxed">{sheet.description}</p>
                     </div>
-                    <Button
-                      asChild
-                      className="w-full h-11 justify-center gap-2 font-bold rounded-xl"
-                    >
+                    <Button asChild className="w-full h-11 justify-center gap-2 font-bold rounded-xl">
                       <a href={sheet.url} target="_blank" rel="noreferrer">
                         Open Sheet
                         <ExternalLink className="h-4 w-4" />
@@ -168,7 +201,7 @@ export default function StudyHub() {
                     <ChevronDown className={cn("h-4 w-4 transition-transform", isDomainDropdownOpen ? "rotate-180" : "")} />
                   </button>
                   {isDomainDropdownOpen && (
-                    <div className="absolute top-full right-0 mt-3 bg-card dark:bg-[#111115] border border-slate-200 dark:border-white/10 rounded-2xl p-2 z-10 min-w-[220px] max-h-[300px] overflow-y-auto shadow-2xl">
+                    <div className="absolute top-full right-0 mt-3 bg-card dark:bg-[#111115] border border-slate-300/80 dark:border-white/10 rounded-2xl p-2 z-10 min-w-[220px] max-h-[300px] overflow-y-auto shadow-2xl dark:shadow-black/50">
                       {COURSE_DOMAINS.map((domain) => (
                         <button
                           key={domain}
@@ -208,7 +241,7 @@ export default function StudyHub() {
                           <img
                             src={course.thumbnail}
                             alt={course.title}
-                            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                            className="w-full h-full object-cover transition-transform duration-500"
                             loading="lazy"
                             onError={(e) => {
                               (e.currentTarget as HTMLImageElement).src = "https://images.unsplash.com/photo-1461749280684-dccba630e2f6?q=80&w=1000&auto=format&fit=crop";
@@ -234,10 +267,7 @@ export default function StudyHub() {
                         </div>
                       </div>
                       <div className="p-6 pt-0">
-                        <Button
-                          asChild
-                          className="w-full h-11 justify-center gap-2 font-bold rounded-xl"
-                        >
+                        <Button asChild className="w-full h-11 justify-center gap-2 font-bold rounded-xl">
                           <a href={course.playlistUrl} target="_blank" rel="noreferrer">
                             Open Playlist
                             <ExternalLink className="h-4 w-4" />
@@ -258,47 +288,168 @@ export default function StudyHub() {
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -10 }}
-              className="space-y-6"
+              className="space-y-8"
             >
-              <div className="flex items-center gap-3">
-                <TrendingUp className="h-6 w-6 text-primary" />
-                <h2 className="text-2xl font-black font-heading text-foreground">Roadmaps</h2>
-              </div>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                {ROADMAPS.map((roadmap) => (
-                  <motion.div
-                    key={roadmap.id}
-                    whileHover={{ y: -4 }}
-                    className="rounded-3xl p-8 border border-slate-200 dark:border-white/10 bg-card dark:bg-white/5 backdrop-blur-none dark:backdrop-blur-xl hover:border-primary/20 transition-all duration-300"
+              <div className="flex flex-col sm:flex-row sm:items-end gap-4 justify-between">
+                <div className="space-y-1">
+                  <div className="flex items-center gap-3">
+                    <TrendingUp className="h-6 w-6 text-primary" />
+                    <h2 className="text-2xl font-black font-heading text-foreground">Roadmaps</h2>
+                  </div>
+                  <p className="text-sm text-muted-foreground">
+                    Pick a domain and follow the stages in order: learn, practice, build, then revise.
+                  </p>
+                </div>
+
+                {/* Domain Dropdown for Roadmaps */}
+                <div className="relative">
+                  <button
+                    onClick={() => setIsRoadmapDropdownOpen(!isRoadmapDropdownOpen)}
+                    className="flex items-center gap-2.5 pl-4 pr-3 py-2.5 rounded-xl border border-slate-200 dark:border-white/10 bg-card dark:bg-white/5 text-sm font-bold text-foreground hover:bg-slate-50 dark:hover:bg-white/10 transition-all min-w-[240px] justify-between"
                   >
-                    <h3 className="text-2xl font-black text-foreground mb-2 tracking-tight">{roadmap.title}</h3>
-                    <p className="text-muted-foreground text-sm mb-8">{roadmap.description}</p>
-                    <div className="space-y-8 relative">
-                      {roadmap.stages.map((stage, idx) => (
-                        <div key={stage.name} className="relative">
-                          <div className="flex items-center gap-4 mb-4">
-                            <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary text-primary-foreground font-black text-sm shadow-md shadow-primary/20">
-                              {idx + 1}
-                            </div>
-                            <h4 className="text-xl font-bold text-foreground">{stage.name}</h4>
-                          </div>
-                          {idx < roadmap.stages.length - 1 && (
-                            <div className="ml-5 border-l-2 border-slate-200 dark:border-white/10 h-8 absolute left-0 top-10" />
-                          )}
-                          <div className="ml-5 pl-8 space-y-2">
-                            {stage.items.map((item) => (
-                              <div key={item} className="flex items-center gap-3 text-muted-foreground">
-                                <div className="h-1.5 w-1.5 rounded-full bg-primary" />
-                                <span className="text-sm font-mono">{item}</span>
-                              </div>
-                            ))}
-                          </div>
-                        </div>
-                      ))}
+                    <div className="flex items-center gap-2">
+                      <span className="flex h-7 min-w-7 items-center justify-center rounded-md bg-primary/10 px-2 font-mono text-[11px] font-black text-primary">
+                        {selectedRoadmap?.icon}
+                      </span>
+                      <span className="truncate">{selectedRoadmapDomain}</span>
                     </div>
-                  </motion.div>
-                ))}
+                    <ChevronDown className={cn("h-4 w-4 shrink-0 transition-transform duration-200", isRoadmapDropdownOpen ? "rotate-180" : "")} />
+                  </button>
+                  <AnimatePresence>
+                    {isRoadmapDropdownOpen && (
+                      <motion.div
+                        initial={{ opacity: 0, y: -8, scale: 0.97 }}
+                        animate={{ opacity: 1, y: 0, scale: 1 }}
+                        exit={{ opacity: 0, y: -8, scale: 0.97 }}
+                        transition={{ duration: 0.15 }}
+                        className="absolute top-full right-0 mt-2 bg-card dark:bg-[#111115] border border-slate-300/80 dark:border-white/10 rounded-2xl p-2 z-30 min-w-[260px] max-h-[360px] overflow-y-auto shadow-2xl dark:shadow-black/60"
+                      >
+                        {ROADMAP_DOMAINS.map((domain) => {
+                          const rm = ROADMAPS.find(r => r.domain === domain);
+                          return (
+                            <button
+                              key={domain}
+                              onClick={() => {
+                                setSelectedRoadmapDomain(domain);
+                                setIsRoadmapDropdownOpen(false);
+                                setExpandedStages(new Set([0]));
+                              }}
+                              className={cn(
+                                "w-full text-left px-4 py-2.5 rounded-lg text-sm font-medium transition-all flex items-center gap-2.5",
+                                selectedRoadmapDomain === domain
+                                  ? "bg-primary text-primary-foreground font-bold"
+                                  : "text-muted-foreground hover:text-foreground dark:hover:text-white hover:bg-slate-50 dark:hover:bg-white/5"
+                              )}
+                            >
+                              <span className="flex h-6 min-w-6 items-center justify-center rounded-md bg-primary/10 px-1.5 font-mono text-[10px] font-black text-primary">
+                                {rm?.icon}
+                              </span>
+                              <span>{domain}</span>
+                            </button>
+                          );
+                        })}
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+                </div>
               </div>
+
+              {/* Selected Roadmap Detail */}
+              {selectedRoadmap && (
+                <motion.div
+                  key={selectedRoadmap.id}
+                  initial={{ opacity: 0, y: 12 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.25 }}
+                  className="space-y-6"
+                >
+                  <div className="rounded-2xl border border-slate-200 dark:border-white/10 bg-card dark:bg-white/[0.03] p-6 flex flex-col md:flex-row md:items-center gap-5">
+                    <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-xl border border-primary/20 bg-primary/10 font-mono text-base font-black text-primary">
+                      {selectedRoadmap.icon}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <h3 className="text-2xl md:text-3xl font-black font-heading text-foreground tracking-tight mb-2">{selectedRoadmap.title}</h3>
+                      <p className="text-muted-foreground text-sm md:text-base leading-7 mb-4 max-w-3xl">{selectedRoadmap.description}</p>
+                      <div className="flex flex-wrap gap-3">
+                        <div className="flex items-center gap-1.5 text-xs font-mono text-muted-foreground bg-muted/20 border border-border/40 rounded-full px-3 py-1.5">
+                          <Clock className="h-3.5 w-3.5" />
+                          {selectedRoadmap.totalDuration}
+                        </div>
+                        <div className="flex items-center gap-1.5 text-xs font-mono text-muted-foreground bg-muted/20 border border-border/40 rounded-full px-3 py-1.5">
+                          {selectedRoadmap.stages.length} Stages
+                        </div>
+                        <div className="flex items-center gap-1.5 text-xs font-mono text-muted-foreground bg-muted/20 border border-border/40 rounded-full px-3 py-1.5">
+                          {selectedRoadmap.stages.reduce((s, st) => s + st.items.length, 0)} Topics
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Stages accordion */}
+                  <div className="space-y-4">
+                    {selectedRoadmap.stages.map((stage, idx) => {
+                      const isExpanded = expandedStages.has(idx);
+                      const accent = stageAccentColors[idx % stageAccentColors.length];
+                      const numColor = stageNumberColors[idx % stageNumberColors.length];
+                      return (
+                        <motion.div
+                          key={stage.name}
+                          initial={{ opacity: 0, y: 8 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          transition={{ delay: idx * 0.06 }}
+                          className={cn("rounded-2xl border transition-all duration-300", accent)}
+                        >
+                          {/* Stage header — clickable to expand/collapse */}
+                          <button
+                            onClick={() => toggleStage(idx)}
+                            className="w-full flex items-center gap-4 p-5 text-left"
+                          >
+                            <div className={cn("flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl ring-1 font-black text-sm", numColor)}>
+                              {stage.emoji}
+                            </div>
+                            <div className="flex-1 min-w-0">
+                              <p className="font-heading font-black text-foreground text-base leading-tight">{stage.name}</p>
+                              <p className="font-mono text-xs text-muted-foreground mt-0.5">{stage.duration} · {stage.items.length} topics</p>
+                            </div>
+                            <ChevronRight className={cn("h-5 w-5 text-muted-foreground shrink-0 transition-transform duration-200", isExpanded ? "rotate-90" : "")} />
+                          </button>
+
+                          {/* Stage items */}
+                          <AnimatePresence>
+                            {isExpanded && (
+                              <motion.div
+                                initial={{ height: 0, opacity: 0 }}
+                                animate={{ height: "auto", opacity: 1 }}
+                                exit={{ height: 0, opacity: 0 }}
+                                transition={{ duration: 0.22 }}
+                                className="overflow-hidden"
+                              >
+                                <div className="px-5 pb-5 space-y-3 border-t border-white/10">
+                                  {stage.items.map((item, itemIdx) => (
+                                    <motion.div
+                                      key={item.topic}
+                                      initial={{ opacity: 0, x: -8 }}
+                                      animate={{ opacity: 1, x: 0 }}
+                                      transition={{ delay: itemIdx * 0.04 }}
+                                      className="flex items-start gap-3 pt-3"
+                                    >
+                                      <div className="mt-1.5 h-2 w-2 rounded-full bg-primary shrink-0" />
+                                      <div className="min-w-0">
+                                        <p className="text-sm font-bold text-foreground">{item.topic}</p>
+                                        <p className="text-xs font-mono text-muted-foreground mt-0.5 leading-relaxed">{item.detail}</p>
+                                      </div>
+                                    </motion.div>
+                                  ))}
+                                </div>
+                              </motion.div>
+                            )}
+                          </AnimatePresence>
+                        </motion.div>
+                      );
+                    })}
+                  </div>
+                </motion.div>
+              )}
             </motion.div>
           )}
         </AnimatePresence>

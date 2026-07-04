@@ -121,11 +121,11 @@ export default function Problems() {
         };
       case "codechef":
         return {
-          badge: "text-[#8B4513] border-[#8B4513]/30 bg-[#8B4513]/15 shadow-[0_0_20px_rgba(139,69,19,0.2)]",
-          text: "text-[#8B4513]",
-          bg: "from-[#8B4513]/10 to-[#8B4513]/0",
-          border: "border-[#8B4513]/20 hover:border-[#8B4513]/40",
-          icon: <Code2 className="h-4 w-4 mr-1 text-[#8B4513]" />,
+          badge: "text-[#B45309] border-[#B45309]/30 bg-[#B45309]/15 shadow-[0_0_20px_rgba(180,83,9,0.2)]",
+          text: "text-[#B45309]",
+          bg: "from-[#B45309]/10 to-[#B45309]/0",
+          border: "border-[#B45309]/20 hover:border-[#B45309]/40",
+          icon: <Code2 className="h-4 w-4 mr-1 text-[#B45309]" />,
         };
       default:
         return {
@@ -257,7 +257,7 @@ export default function Problems() {
                         placeholder="Search contests..."
                         value={contestSearch}
                         onChange={(e) => setContestSearch(e.target.value)}
-                        className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-white/5 bg-background/50 text-sm focus:outline-none focus:ring-1 focus:ring-primary font-mono text-xs placeholder:text-muted-foreground"
+                        className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-slate-200 dark:border-white/5 bg-card text-sm focus:outline-none focus:ring-1 focus:ring-primary font-mono text-xs placeholder:text-muted-foreground"
                       />
                     </div>
 
