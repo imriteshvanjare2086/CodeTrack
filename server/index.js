@@ -70,13 +70,17 @@ app.post("/api/auth/google", async (req, res) => {
       await user.save();
     }
 
+    const secretKey = process.env.JWT_SECRET || "codecraft_secure_jwt_secret_key_default";
     const token = jwt.sign(
       { userId: user._id },
-      process.env.JWT_SECRET,
+      secretKey,
       { expiresIn: "7d" }
     );
 
-    res.json({ message: "Google login successful", token, user });
+    const userObj = user.toObject ? user.toObject() : { ...user };
+    delete userObj.password;
+
+    res.json({ message: "Google login successful", token, user: userObj });
   } catch (err) {
     console.error("Google Auth Error:", err);
     res.status(500).json({ message: "Google authentication failed" });
@@ -108,16 +112,20 @@ app.post("/api/auth/register", async (req, res) => {
 
     await newUser.save();
 
+    const secretKey = process.env.JWT_SECRET || "codecraft_secure_jwt_secret_key_default";
     const token = jwt.sign(
       { userId: newUser._id },
-      process.env.JWT_SECRET,
+      secretKey,
       { expiresIn: "7d" }
     );
+
+    const userObj = newUser.toObject ? newUser.toObject() : { ...newUser };
+    delete userObj.password;
 
     res.status(201).json({
       message: "User registered successfully",
       token,
-      user: newUser,
+      user: userObj,
     });
   } catch (err) {
     res.status(500).json({ message: err.message });
@@ -140,13 +148,17 @@ app.post("/api/auth/login", async (req, res) => {
       return res.status(400).json({ message: "Invalid password" });
     }
 
+    const secretKey = process.env.JWT_SECRET || "codecraft_secure_jwt_secret_key_default";
     const token = jwt.sign(
       { userId: user._id },
-      process.env.JWT_SECRET,
+      secretKey,
       { expiresIn: "7d" }
     );
 
-    res.json({ message: "Login successful", token, user });
+    const userObj = user.toObject ? user.toObject() : { ...user };
+    delete userObj.password;
+
+    res.json({ message: "Login successful", token, user: userObj });
   } catch (err) {
     res.status(500).json({ message: err.message });
   }

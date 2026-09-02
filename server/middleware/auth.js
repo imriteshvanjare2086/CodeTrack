@@ -8,7 +8,7 @@ const auth = (req, res, next) => {
       return res.status(401).json({ message: "No token, authorization denied" });
     }
 
-    const decoded = jwt.verify(token, process.env.JWT_SECRET || "ritesh_secret");
+    const decoded = jwt.verify(token, process.env.JWT_SECRET || "codecraft_secure_jwt_secret_key_default");
     req.user = decoded;
     next();
   } catch (err) {
